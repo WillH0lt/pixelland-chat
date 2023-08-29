@@ -19,7 +19,7 @@ Docs (coming soon)
 
 ### Getting Started
 
-Install [Node](https://nodejs.org/en/download)
+Install [Node](https://nodejs.org/en/download) (version 18+)
 
 Install [Go](https://go.dev/doc/install) (minimum version = 1.19)
 
