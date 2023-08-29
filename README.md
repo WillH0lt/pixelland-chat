@@ -26,6 +26,7 @@ Install [Go](https://go.dev/doc/install) (version 1.19+)
 Install [pgAdmin 4](https://www.pgadmin.org/download/)
 
 Open pgAdmin and create a new database. The owner and database name can be whatever you want.
+
 <img src="https://storage.googleapis.com/pixelland-public/pixelland-chat-readme/create_db.png" width="400" />
 
 ### Set Environment Variables
