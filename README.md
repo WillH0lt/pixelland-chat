@@ -20,14 +20,17 @@ Docs (coming soon)
 ### Getting Started
 
 Install [Node](https://nodejs.org/en/download)
+
 Install [Go](https://go.dev/doc/install) (minimum version = 1.19)
+
 Install [pgAdmin 4](https://www.pgadmin.org/download/)
+
 Open pgAdmin and create a new database. The owner and database name can be whatever you want.
 ![create database](https://storage.googleapis.com/pixelland-public/pixelland-chat-readme/create_db.png)
 
 ### Set Environment Variables
 
-Pixelland-chat will read the following environment variables to figure out how to connect to the database. If you're using the default value then you don't need to set the environment variable.
+Set the following environment variables with your database connection parameters. If you're already using the default value then you don't need to set the environment variable.
 
     export CHAT_SQL_DB_NAME=<your db name, default=pixellandchat>
     export CHAT_SQL_PORT=<your db port, default=5432>
@@ -48,7 +51,7 @@ Clone this repo: `git clone https://github.com/wwwillw/pixelland-chat.git`
 
 ## UI
 
-Once the backed is running, open a new shell and run:
+Once the backend is running, open a new shell and run:
 
     cd ui
     npm install
