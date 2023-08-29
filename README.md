@@ -2,7 +2,7 @@
 
 # PixelLand Chat
 
-#### A Discord-style embedded chat used in PixelLand.
+#### Discord-style embedded chat used in PixelLand.
 
 PixelLand is an online community where people create and share pixel-art. The chat is an integral part that allows people to collaborate on art or just hang out.
 
