@@ -25,7 +25,7 @@ global:
     ## @param global.postgresql.auth.secretKeys.replicationPasswordKey Name of key in existing secret to use for PostgreSQL credentials (overrides `auth.secretKeys.replicationPasswordKey`). Only used when `global.postgresql.auth.existingSecret` is set.
     ##
     auth:
-      postgresPassword: "KittenMittens"
+      postgresPassword: "zeno_robot"
       username: ""
       password: ""
       database: ""
@@ -334,7 +334,7 @@ primary:
     ##
     scripts:
       my_init_script.sql: |
-        CREATE DATABASE pixelland-chat;
+        CREATE DATABASE pixellandchat;
     ## @param primary.initdb.scriptsConfigMap ConfigMap with scripts to be run at first boot
     ## NOTE: This will override `primary.initdb.scripts`
     ##
@@ -348,7 +348,7 @@ primary:
     user: "postgres"
     ## @param primary.initdb.password Specify the PostgreSQL password to execute the initdb scripts
     ##
-    password: "KittenMittens"
+    password: "zeno_robot"
   ## Configure current cluster's primary server to be the standby server in other cluster.
   ## This will allow cross cluster replication and provide cross cluster high availability.
   ## You will need to configure pgHbaConfiguration if you want to enable this feature with local cluster replication enabled.
