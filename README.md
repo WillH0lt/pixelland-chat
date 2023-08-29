@@ -1,14 +1,14 @@
-<img src="https://storage.googleapis.com/pixelland-public/pixelland-chat-readme/logo.png" alt="drawing" width="100" />
+<img src="https://storage.googleapis.com/pixelland-public/pixelland-chat-readme/logo.png" width="100" />
 
 # PixelLand Chat
 
 #### Discord-style embedded chat used in PixelLand.
 
-PixelLand is an online community where people create and share pixel-art. The chat is an integral part that allows people to collaborate on art or just hang out.
+PixelLand is an online community where people create and share pixel-art. The chat is an integral part that allows people to collaborate or just hang out.
 
 <p float="left" >
-<img src="https://storage.googleapis.com/pixelland-public/pixelland-chat-readme/chat_view.png" alt="drawing" width="300" />
-<img src="https://storage.googleapis.com/pixelland-public/pixelland-chat-readme/chat_general_view.png" alt="drawing" width="300" />
+<img src="https://storage.googleapis.com/pixelland-public/pixelland-chat-readme/chat_view.png" width="300" />
+<img src="https://storage.googleapis.com/pixelland-public/pixelland-chat-readme/chat_general_view.png" width="300" />
 </p>
 
 [Pixel.Land](https://pixel.land) &mdash;
@@ -26,11 +26,11 @@ Install [Go](https://go.dev/doc/install) (minimum version = 1.19)
 Install [pgAdmin 4](https://www.pgadmin.org/download/)
 
 Open pgAdmin and create a new database. The owner and database name can be whatever you want.
-![create database](https://storage.googleapis.com/pixelland-public/pixelland-chat-readme/create_db.png)
+<img src="https://storage.googleapis.com/pixelland-public/pixelland-chat-readme/create_db.png" width="400" />
 
 ### Set Environment Variables
 
-Set the following environment variables with your database connection parameters. If you're already using the default value then you don't need to set the environment variable.
+Set the following environment variables with your database connection parameters. NOTE If you're already using the default value then you don't need to set the environment variable.
 
     export CHAT_SQL_DB_NAME=<your db name, default=pixellandchat>
     export CHAT_SQL_PORT=<your db port, default=5432>
