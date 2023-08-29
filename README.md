@@ -19,7 +19,7 @@ Docs (coming soon)
 
 ### Getting Started
 
-Install [Node and npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) (I'm using Node v18)
+Install [Node](https://nodejs.org/en/download)
 Install [Go](https://go.dev/doc/install) (minimum version = 1.19)
 Install [pgAdmin 4](https://www.pgadmin.org/download/)
 Open pgAdmin and create a new database. The owner and database name can be whatever you want.
