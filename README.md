@@ -21,7 +21,7 @@ Docs (coming soon)
 
 Install [Node](https://nodejs.org/en/download) (version 18+)
 
-Install [Go](https://go.dev/doc/install) (minimum version = 1.19)
+Install [Go](https://go.dev/doc/install) (version 1.19+)
 
 Install [pgAdmin 4](https://www.pgadmin.org/download/)
 
