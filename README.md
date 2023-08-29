@@ -37,7 +37,6 @@ Set the following environment variables with your database connection parameters
     export CHAT_SQL_PORT=<your db port, default=5432>
     export CHAT_SQL_USER=<your db user, default=postgres>
     export CHAT_SQL_PASSWORD=<your db password, default=123>
-    export CHAT_SQL_HOST=<where the db is hosted, default=localhost>
 
 If you're setting up the database for the first time, then set seed_db = true
 
