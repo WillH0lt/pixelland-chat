@@ -1,0 +1,131 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pixel-cluster-service-account
+  annotations:
+    iam.gke.io/gcp-service-account: pixel-cluster-service-account@pixelland-282102.iam.gserviceaccount.com
+
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: backendconfig-websocket-timeout
+spec:
+  timeoutSec: 7200
+
+---
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: managed-cert
+spec:
+  domains:
+    - api.pixel.land
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pixelland-ws-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: pixelland-address
+    networking.gke.io/managed-certificates: managed-cert
+spec:
+  rules:
+    - host: api.pixel.land
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: pixelland-ws
+                port:
+                  number: 80
+---
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: chat-managed-cert
+spec:
+  domains:
+    - chat.pixel.land
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pixelland-chat-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: pixelchat-address
+    networking.gke.io/managed-certificates: chat-managed-cert
+spec:
+  rules:
+    - host: chat.pixel.land
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pixelland-chat
+                port:
+                  number: 80
+---
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: worlds-managed-cert
+spec:
+  domains:
+    - worlds.pixel.land
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pixelland-worlds-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: worlds-address
+    networking.gke.io/managed-certificates: worlds-managed-cert
+spec:
+  rules:
+    - host: worlds.pixel.land
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pixelland-worlds
+                port:
+                  number: 80
+---
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: images-managed-cert
+spec:
+  domains:
+    - images.pixel.land
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pixelland-images-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: images-address
+    networking.gke.io/managed-certificates: images-managed-cert
+spec:
+  rules:
+    - host: images.pixel.land
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: pixelland-images
+                port:
+                  number: 80

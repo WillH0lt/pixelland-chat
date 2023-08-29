@@ -1,0 +1,67 @@
+apiVersion: skaffold/v3
+kind: Config
+metadata:
+  name: pixelland-chat
+build:
+  artifacts:
+    - image: wwwillw/pixelland-chat
+      docker:
+        dockerfile: ./Dockerfile
+manifests:
+  kustomize:
+    paths:
+      - k8s/base
+deploy:
+  kubeContext: minikube
+  kubectl:
+    defaultNamespace: default
+  helm:
+    releases:
+      - name: postgresql
+        repo: https://charts.bitnami.com/bitnami
+        remoteChart: postgresql
+        valuesFiles: [k8s/sql-values.yaml]
+# profiles:
+#   - name: prod
+#     deploy:
+#       kubeContext: gke_pixelland-282102_us-central1_pixel-cluster
+#     build:
+#       local:
+#         push: true
+#     manifests:
+#       kustomize:
+#         paths:
+#           - k8s/overlays/prod
+#     patches:
+#       - op: remove
+#         path: /deploy/helm/releases/0
+
+# use dev context
+# kubectl config use-context minikube
+
+# use prod context
+# kubectl config use-context gke_pixelland-282102_us-central1_pixel-cluster
+
+# if getting: Error: INSTALLATION FAILED: failed to download "https://charts.bitnami.com/bitnami/redis-17.3.14.tgz"
+# then run `helm repo update`
+
+# Create db secret
+# kubectl create secret generic db-secret --from-literal=username=postgres --from-literal=password=robot_zeno
+
+# Create pixelChat address
+# gcloud compute addresses create pixelchat-address --global
+
+# Create worlds address
+# gcloud compute addresses create worlds-address --global
+
+# Minikube GCP auth
+# minikube addons enable gcp-auth --refresh
+
+# Minikube create service account secret
+# kubectl create secret generic gcp-service-account --from-file=./pixelland-admin-service-account.json
+
+# deploy
+# skaffold run -p prod
+
+# Run cron job manually
+# kubectl create job --from=cronjob/pixelland-cleaner pixelland-cleaner-000

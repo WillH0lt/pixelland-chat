@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Pixelar';
+  src: url('/fonts/pixelar.woff2') format('woff2'), url('/fonts/pixelar.woff') format('woff');
+}
+
+:root {
+  /* --chat-app-height: 100%; */
+  font-family: 'Pixelar';
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+
+  background-color: white;
+  color: white;
+
+  font-synthesis: none;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+
+  max-width: 100vw;
+  overflow: hidden;
+}
+
+body {
+  position: relative;
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  height: var(--app-height);
+
+  max-width: 100vw;
+  overflow: hidden;
+}
+
+/* unvisited link */
+a:link {
+  color: white;
+  text-decoration: underline;
+}
+
+/* visited link */
+a:visited {
+  color: #bbb;
+}
+
+/* mouse over link */
+a:hover {
+  color: #f29f52;
+}
+
+/* selected link */
+a:active {
+  color: white;
+}
+
+::selection {
+  background: #f29f52;
+}
+
+@layer components {
+  .pixelated {
+    image-rendering: pixelated;
+  }
+}
+
+/* perfect-scroll overrides */
+.ps__thumb-y {
+  border-radius: 0;
+  background-color: #000000;
+}
+.ps__scrolling-y {
+  background-color: #000000;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

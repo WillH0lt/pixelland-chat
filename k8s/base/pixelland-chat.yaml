@@ -1,0 +1,278 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pixelland-ws
+spec:
+  selector:
+    matchLabels:
+      app: pixelland-ws
+  template:
+    metadata:
+      labels:
+        app: pixelland-ws
+    spec:
+      containers:
+        - name: pixelland-ws
+          image: gcr.io/pixelland-282102/pixelland-ws
+          ports:
+            - containerPort: 8080
+          env:
+            - name: WS_PORT
+              value: "8080"
+            - name: WS_DEBUG
+              value: "true"
+            - name: WS_REDIS_HOST
+              value: "redis-master.default.svc.cluster.local"
+            - name: WS_REDIS_PORT
+              value: "6379"
+            - name: WS_CHAT_API_URL
+              value: "http://pixelland-chat.default.svc.cluster.local:8081/graphql"
+            - name: WS_WORLDS_API_URL
+              value: "http://pixelland-worlds.default.svc.cluster.local:8082/graphql"
+          volumeMounts:
+            - name: credentials
+              mountPath: "/etc/credentials"
+              readOnly: true
+      volumes:
+        - name: credentials
+          secret:
+            secretName: gcp-service-account
+            optional: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pixelland-ws
+spec:
+  type: LoadBalancer
+  selector:
+    app: pixelland-ws
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: pixelland-cleaner
+spec:
+  schedule: "*/1 * * * *"
+  # schedule: "5 * * * *"
+  concurrencyPolicy: "Forbid"
+  failedJobsHistoryLimit: 3
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: pixelland-cleaner
+              image: gcr.io/pixelland-282102/pixelland-cleaner
+              env:
+                - name: CLEANER_DEBUG
+                  value: "true"
+                - name: CLEANER_TILE_BUCKET
+                  value: "pixelland_dev_tiles"
+                - name: CLEANER_REDIS_HOST
+                  value: "redis-master.default.svc.cluster.local"
+                - name: CLEANER_REDIS_PORT
+                  value: "6379"
+                - name: CLEANER_WORLDS_API_URL
+                  value: "http://pixelland-worlds.default.svc.cluster.local:8082/graphql"
+          restartPolicy: OnFailure
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pixelland-chat
+spec:
+  selector:
+    matchLabels:
+      app: pixelland-chat
+  template:
+    metadata:
+      labels:
+        app: pixelland-chat
+    spec:
+      containers:
+        - name: pixelland-chat
+          image: gcr.io/pixelland-282102/pixelland-chat
+          ports:
+            - containerPort: 8081
+          env:
+            - name: CHAT_PORT
+              value: "8081"
+            - name: CHAT_DEBUG
+              value: "true"
+            - name: CHAT_ENFORCE_AUTH
+              value: "false"
+            - name: CHAT_SQL_HOST
+              value: "postgresql.default.svc.cluster.local"
+            - name: CHAT_SQL_PORT
+              value: "5433"
+            - name: CHAT_SQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: username
+            - name: CHAT_SQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: password
+            - name: CHAT_SQL_DB_NAME
+              value: "pixelchat"
+            - name: CHAT_SQL_SSL_MODE
+              value: "disable"
+            - name: CHAT_SEED_DB
+              value: "true"
+          volumeMounts:
+            - name: credentials
+              mountPath: "/etc/credentials"
+              readOnly: true
+      volumes:
+        - name: credentials
+          secret:
+            secretName: gcp-service-account
+            optional: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pixelland-chat
+spec:
+  type: LoadBalancer
+  selector:
+    app: pixelland-chat
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pixelland-worlds
+spec:
+  selector:
+    matchLabels:
+      app: pixelland-worlds
+  template:
+    metadata:
+      labels:
+        app: pixelland-worlds
+    spec:
+      containers:
+        - name: pixelland-worlds
+          image: gcr.io/pixelland-282102/pixelland-worlds
+          ports:
+            - containerPort: 8081
+          env:
+            - name: WORLDS_PORT
+              value: "8082"
+            - name: WORLDS_DEBUG
+              value: "true"
+            - name: WORLDS_ENFORCE_AUTH
+              value: "true"
+            - name: WORLDS_TILE_BUCKET
+              value: "pixelland_dev_tiles"
+            - name: WORLDS_CHAT_API_URL
+              value: "http://pixelland-chat.default.svc.cluster.local:8081/graphql"
+            - name: WORLDS_SQL_HOST
+              value: "postgresql.default.svc.cluster.local"
+            - name: WORLDS_SQL_PORT
+              value: "5433"
+            - name: WORLDS_SQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: username
+            - name: WORLDS_SQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: password
+            - name: WORLDS_SQL_DB_NAME
+              value: "worlds"
+            - name: WORLDS_SQL_SSL_MODE
+              value: "disable"
+            - name: WORLDS_SEED_DB
+              value: "true"
+          volumeMounts:
+            - name: credentials
+              mountPath: "/etc/credentials"
+              readOnly: true
+      volumes:
+        - name: credentials
+          secret:
+            secretName: gcp-service-account
+            optional: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pixelland-worlds
+spec:
+  type: LoadBalancer
+  selector:
+    app: pixelland-worlds
+  ports:
+    - protocol: TCP
+      port: 8082
+      targetPort: 8082
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pixelland-images
+spec:
+  selector:
+    matchLabels:
+      app: pixelland-images
+  template:
+    metadata:
+      labels:
+        app: pixelland-images
+    spec:
+      containers:
+        - name: pixelland-images
+          image: gcr.io/pixelland-282102/pixelland-images
+          ports:
+            - containerPort: 8083
+          env:
+            - name: IMAGES_PORT
+              value: "8083"
+            - name: IMAGES_DEBUG
+              value: "true"
+            - name: IMAGES_TILE_BUCKET
+              value: "pixelland_dev_tiles"
+            - name: IMAGES_REDIS_HOST
+              value: "redis-master.default.svc.cluster.local"
+            - name: IMAGES_REDIS_PORT
+              value: "6379"
+            - name: IMAGES_WORLDS_API_URL
+              value: "http://pixelland-worlds.default.svc.cluster.local:8082/graphql"
+          volumeMounts:
+            - name: credentials
+              mountPath: "/etc/credentials"
+              readOnly: true
+      volumes:
+        - name: credentials
+          secret:
+            secretName: gcp-service-account
+            optional: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pixelland-images
+spec:
+  type: LoadBalancer
+  selector:
+    app: pixelland-images
+  ports:
+    - protocol: TCP
+      port: 8083
+      targetPort: 8083

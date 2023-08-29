@@ -1,0 +1,295 @@
+# ==============================================
+# base types
+type User {
+  id: Uuid!
+  name: String!
+  avatar: String!
+  bio: String!
+  instancesConnection(
+    first: Int = 50 @constraint(max: 50)
+    after: String = ""
+  ): UserInstancesConnection!
+  # groupsConnection(
+  #   first: Int = 50 @constraint(max: 50)
+  #   after: String = ""
+  # ): UserGroupsConnection!
+}
+
+type Instance {
+  id: Uuid!
+  name: String!
+  readAccess: Access!
+  icon: String!
+  createdAt: Time!
+  description: String!
+  channelsConnection(
+    first: Int = 50 @constraint(max: 50)
+    after: String = ""
+  ): InstanceChannelsConnection!
+}
+
+type Invite {
+  id: Uuid!
+  instanceId: Uuid!
+  instance: Instance
+  author: Author!
+  code: String!
+  createdAt: Time!
+  expiresAt: Time
+  redemptions: Int
+}
+
+type Channel {
+  id: Uuid!
+  rank: String!
+  name: String!
+  createdAt: Time!
+  instanceId: Uuid!
+  updatedAt: Time!
+  lastMessageAddedAt: Time
+  isCategory: Boolean!
+  messagesConnection(
+    last: Int = 50 @constraint(max: 50)
+    before: String = ""
+  ): ChannelMessagesConnection!
+  publishers: [Role!]!
+  readers: [Role!]!
+}
+
+type Group {
+  id: Uuid!
+  channelId: Uuid!
+  createdAt: Time!
+  members: [Author!]!
+  messagesConnection(
+    last: Int = 50 @constraint(max: 50)
+    before: String = ""
+  ): ChannelMessagesConnection!
+}
+
+type Message {
+  id: Uuid!
+  text: String!
+  author: Author!
+  createdAt: Time!
+  channelId: Uuid!
+}
+
+type Author {
+  id: Uuid!
+  userId: Uuid!
+  instanceId: Uuid!
+  roles: [Role!]!
+  name: String!
+  avatar: String!
+  bio: String!
+}
+
+# ==============================================
+# connections
+type UserInstancesConnection {
+  pageInfo: PageInfo!
+  edges: [UserInstancesEdge!]!
+}
+
+type UserGroupsConnection {
+  pageInfo: PageInfo!
+  edges: [UserGroupsEdge!]!
+}
+
+type InstanceChannelsConnection {
+  pageInfo: PageInfo!
+  edges: [InstanceChannelsEdge!]!
+}
+
+type ChannelMessagesConnection {
+  pageInfo: PageInfo!
+  edges: [ChannelMessagesEdge!]!
+}
+
+# ==============================================
+# edges
+type UserInstancesEdge {
+  cursor: String!
+  node: Instance!
+  instanceUser: Author!
+  rank: String!
+  pinned: Boolean!
+}
+
+type UserGroupsEdge {
+  cursor: String!
+  node: Group!
+}
+
+type InstanceChannelsEdge {
+  cursor: String!
+  node: Channel!
+}
+
+type ChannelMessagesEdge {
+  cursor: String!
+  node: Message!
+}
+
+# ==============================================
+# notifications
+type InstanceStreamNotification {
+  mutation: MutationType!
+  channelMessagesEdge: ChannelMessagesEdge
+  userInstancesEdge: UserInstancesEdge
+  instanceChannelsEdge: InstanceChannelsEdge
+  instance: Instance
+  user: User
+  author: Author
+}
+
+# ==============================================
+# misc
+type PageInfo {
+  hasPreviousPage: Boolean!
+  hasNextPage: Boolean!
+}
+
+# ==============================================
+# API
+type Query {
+  user(uid: String!): User! @auth(required: true)
+  instance(id: Uuid!): UserInstancesEdge! @auth(required: false)
+  channel(id: Uuid!): Channel! @auth(required: false)
+  invite(instanceId: Uuid!): Invite! @auth(required: false)
+  checkInvite(code: String!): Invite! @auth(required: false)
+}
+
+type Mutation {
+  # user
+  updateUser(input: UserInput!): User! @auth(required: true)
+  # instance
+  addInstance(input: InstanceInput!): UserInstancesEdge! @auth(required: true)
+  updateInstance(instanceId: Uuid!, input: InstanceInput!): UserInstancesEdge!
+    @auth(required: true)
+  removeInstance(instanceId: Uuid!): UserInstancesEdge! @auth(required: true)
+  reorderInstance(
+    instanceId: Uuid!
+    input: InstanceReorderInput!
+  ): UserInstancesEdge! @auth(required: true)
+  pinInstance(instanceId: Uuid!, input: InstancePinInput!): UserInstancesEdge!
+    @auth(required: true)
+  # private instance
+  addGroup(input: GroupInput!): Instance! @auth(required: true)
+  # channel
+  addChannel(input: ChannelInput!): InstanceChannelsEdge! @auth(required: true)
+  updateChannel(channelId: Uuid!, input: ChannelInput!): InstanceChannelsEdge!
+    @auth(required: true)
+  reorderChannel(
+    channelId: Uuid!
+    input: ChannelReorderInput!
+  ): InstanceChannelsEdge! @auth(required: true)
+  removeChannel(channelId: Uuid!): InstanceChannelsEdge! @auth(required: true)
+  # message
+  addMessage(input: MessageInput!): ChannelMessagesEdge! @auth(required: true)
+  removeMessage(messageId: Uuid!): ChannelMessagesEdge! @auth(required: true)
+  # author
+  addRole(authorId: Uuid!, role: Role!): Author! @auth(required: true)
+  removeRole(authorId: Uuid!, role: Role!): Author! @auth(required: true)
+  # invite
+  addInvite(input: InviteInput!): Invite! @auth(required: true)
+  removeInvite(inviteId: Uuid!): Invite! @auth(required: true)
+  redeemInvite(code: String!): Invite! @auth(required: true)
+}
+
+type Subscription {
+  instanceStream(instanceId: Uuid!): InstanceStreamNotification!
+    @auth(required: false)
+}
+
+# ==============================================
+# input
+input InstanceInput {
+  id: Uuid # used to create instance with custom ID
+  name: String! @constraint(min: 0, max: 32)
+  readAccess: Access!
+  icon: String! @constraint(min: 0, max: 1024)
+  description: String! @constraint(min: 0, max: 1024)
+}
+
+input GroupInput {
+  invitees: [Uuid!]!
+}
+
+input InstanceReorderInput {
+  prevInstanceId: Uuid
+}
+
+input InstancePinInput {
+  pinned: Boolean!
+}
+
+input ChannelInput {
+  name: String! @constraint(min: 0, max: 32)
+  instanceId: Uuid!
+  publishers: [Role!]!
+  readers: [Role!]!
+  isCategory: Boolean!
+}
+
+input ChannelReorderInput {
+  prevChannelId: Uuid
+}
+
+input MessageInput {
+  text: String! @constraint(min: 1, max: 1024)
+  channelId: Uuid!
+}
+
+input UserInput {
+  name: String! @constraint(min: 0, max: 32)
+  avatar: String!
+  bio: String! @constraint(min: 0, max: 1024)
+}
+
+input InviteInput {
+  instanceId: Uuid!
+  expiresAt: Time
+  redemptions: Int
+}
+
+# ==============================================
+# enum
+enum Access {
+  PUBLIC
+  PRIVATE
+}
+
+enum Role {
+  ADMIN
+  MODERATOR
+  MEMBER
+  BANNED
+  ALL_USERS
+}
+
+enum MutationType {
+  MESSAGE_ADDED
+  MESSAGE_REMOVED
+  CHANNEL_ADDED
+  CHANNEL_UPDATED
+  CHANNEL_REMOVED
+  AUTHOR_UPDATED
+  USER_UPDATED # TODO, this gets broadcast to everybody, need to limit to instanceUser update
+  INSTANCE_UPDATED
+  INSTANCE_REMOVED
+}
+
+# ==============================================
+# scalars
+scalar Time
+scalar Uuid
+
+# ==============================================
+# directives
+directive @constraint(
+  min: Float = 0
+  max: Float = 50
+) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+directive @auth(required: Boolean) on FIELD_DEFINITION

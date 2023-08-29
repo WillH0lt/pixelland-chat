@@ -1,0 +1,40 @@
+overwrite: true
+schema:
+  - ../../../pixel-cluster/chat/graph/schema.graphqls
+documents:
+  - ./src/graphql/mutations/**/!(*.gen).ts
+  - ./src/graphql/queries/**/!(*.gen).ts
+  - ./src/graphql/subscriptions/**/!(*.gen).ts
+  - ./src/graphql/fragments/**/!(*.gen).ts
+generates:
+  ./src/graphql/types.gen.ts:
+    plugins:
+      - typescript
+    config:
+      constEnums: true
+      enumsAsConst: true
+      enumsAsTypes: false
+      immutableTypes: true
+      useImplementingTypes: true
+      scalars:
+        Uuid: string
+        Time: string # should be Date but it won't automatically cast
+  ./src/graphql:
+    preset: near-operation-file
+    presetConfig:
+      baseTypesPath: types.gen.ts
+      extension: .gen.ts
+    config:
+      addDocBlocks: false
+      pureMagicComment: true
+      documentMode: external
+      importDocumentNodeExternallyFrom: near-operation-file
+      addOperationExport: true
+      vueCompositionApiImportFrom: vue
+      experimentalFragmentVariables: true
+    plugins:
+      - typescript-operations
+      - typescript-vue-apollo
+  ./src/graphql/generated/graphql.schema.json:
+    plugins:
+      - 'introspection'
