@@ -98,7 +98,7 @@ func (db *Database) Seed() error {
 
 	adminUser := model.User{
 		ID:  uuid.MustParse("3f6f51e4-aa2c-452c-a1b2-140bd7198ad1"),
-		UID: "JenRxFv73kScEjTx4t0iH6l0ZdB3", // "z0I0BFGD9LVWBjP6WQPOtpaeZvh2", //"ip6JPadmlqVwRVx7g4iJ2gfJAok1",
+		UID: "JenRxFv73kScEjTx4t0iH6l0ZdB3",
 	}
 	if err := db.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "id"}},
@@ -213,7 +213,7 @@ func (db *Database) Seed() error {
 	}).Create(&adminChannel).Error; err != nil {
 		return err
 	}
-	for i = 0; i < 500; i++ {
+	for i = 0; i < 10; i++ {
 		b := make([]byte, 16)
 		binary.LittleEndian.PutUint16(b, i)
 		id, _ := uuid.FromBytes(b)
