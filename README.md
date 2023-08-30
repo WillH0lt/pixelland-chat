@@ -42,7 +42,7 @@ If you're setting up the database for the first time, then set seed_db = true
 
     export CHAT_SEED_DB=true
 
-### Run it🤞
+### Run the Backend 🤞
 
 Clone this repo: `git clone https://github.com/wwwillw/pixelland-chat.git`
 
