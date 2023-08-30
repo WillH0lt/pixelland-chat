@@ -21,6 +21,7 @@ type PubsubConfig struct {
 	ServiceAccountPath  string
 	AuthorEventsTopic   string
 	InstanceEventsTopic string
+	Active              bool
 }
 
 type PubsubClient struct {
@@ -29,6 +30,16 @@ type PubsubClient struct {
 }
 
 func InitPubSubClient(ctx context.Context, config PubsubConfig) error {
+
+	pubsubClient = &PubsubClient{
+		client: nil,
+		config: config,
+	}
+
+	if !config.Active {
+		log.Info().Msg("Pubsub client is not active")
+		return nil
+	}
 
 	var credentials *google.Credentials
 	if _, err := os.Stat(config.ServiceAccountPath); err == nil {
@@ -54,10 +65,7 @@ func InitPubSubClient(ctx context.Context, config PubsubConfig) error {
 	if err != nil {
 		return err
 	}
-	pubsubClient = &PubsubClient{
-		client: client,
-		config: config,
-	}
+	pubsubClient.client = client
 
 	return nil
 }
@@ -81,6 +89,12 @@ func createTopicIfNotExists(ctx context.Context, client *pubsub.Client, name str
 }
 
 func (c *PubsubClient) PublishAuthorEvent(ctx context.Context, mutationType model.MutationType, author model.Author) error {
+
+	if !c.config.Active {
+		log.Info().Msg("Not publishing author event because pubsub client is not active")
+		return nil
+	}
+
 	mutationTypeStr := string(mutationType)
 	if !strings.Contains(mutationTypeStr, "AUTHOR") {
 		return errors.New("Invalid mutation type, must be author mutation")
@@ -90,6 +104,12 @@ func (c *PubsubClient) PublishAuthorEvent(ctx context.Context, mutationType mode
 }
 
 func (c *PubsubClient) PublishInstanceEvent(ctx context.Context, mutationType model.MutationType, instance model.Instance) error {
+
+	if !c.config.Active {
+		log.Info().Msg("Not publishing instance event because pubsub client is not active")
+		return nil
+	}
+
 	mutationTypeStr := string(mutationType)
 	if !strings.Contains(mutationTypeStr, "INSTANCE") {
 		return errors.New("Invalid mutation type, must be instance mutation")

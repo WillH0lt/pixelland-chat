@@ -4,7 +4,7 @@
     class="flex items-center group p-1 mx-2 hover:bg-gray-darker"
   >
     <Markdown
-      class="w-5/6 text-xl text-white bg-gray-dark group-hover:bg-gray-darker"
+      class="w-5/6 text-xl text-white bg-gray-dark group-hover:bg-gray-darker markdown"
       @click="handleLinkClicks($event, dialogStore)"
       :linkify="true"
       :breaks="true"
@@ -32,7 +32,7 @@
   >
     add description
   </div>
-  <hr v-if="instance.description !== ''" class="border-gray-medium mx-2">
+  <hr v-if="instance.description !== ''" class="border-gray-medium mx-2" />
 </template>
 
 <script setup lang="ts">
@@ -68,45 +68,3 @@ watchEffect(() => {
   }
 })
 </script>
-
-<style>
-#world-description h1 {
-  @apply text-6xl;
-}
-
-#world-description h2 {
-  @apply text-5xl;
-}
-
-#world-description h3 {
-  @apply text-4xl;
-}
-
-#world-description h4 {
-  @apply text-3xl;
-}
-
-#world-description h5 {
-  @apply text-2xl;
-}
-
-#world-description h6 {
-  @apply text-xl;
-}
-
-#world-description strong {
-  text-shadow: 1px 0 0 currentColor;
-}
-
-#world-description em {
-  @apply -skew-x-[10deg] inline-block;
-}
-
-#world-description ul {
-  @apply list-[square] list-inside;
-}
-
-#world-description ol {
-  @apply list-decimal list-inside;
-}
-</style>

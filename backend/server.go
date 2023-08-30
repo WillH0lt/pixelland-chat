@@ -33,6 +33,7 @@ type Specification struct {
 	SqlDbName           string `default:"pixellandchat" split_words:"true"`
 	SqlSslMode          string `default:"disable" split_words:"true"`
 	SeedDb              bool   `default:"false" split_words:"true"`
+	PubsubActive        bool   `default:"false" split_words:"true"`
 	ServiceAccountPath  string `default:"/etc/credentials/pixelland-admin-service-account.json" split_words:"true"`
 	EnforceAuth         bool   `default:"false" split_words:"true"`
 	AuthorEventsTopic   string `default:"author_events" split_words:"true"`
@@ -99,15 +100,14 @@ func run(args *cli.Context) error {
 		}
 	}
 
-	if !s.Debug {
-		pubsubConfig := interfaces.PubsubConfig{
-			ServiceAccountPath:  s.ServiceAccountPath,
-			AuthorEventsTopic:   s.AuthorEventsTopic,
-			InstanceEventsTopic: s.InstanceEventsTopic,
-		}
-		if err := interfaces.InitPubSubClient(ctx, pubsubConfig); err != nil {
-			log.Fatal().Err(err).Msg("Failed to initialize pubsub client")
-		}
+	pubsubConfig := interfaces.PubsubConfig{
+		ServiceAccountPath:  s.ServiceAccountPath,
+		AuthorEventsTopic:   s.AuthorEventsTopic,
+		InstanceEventsTopic: s.InstanceEventsTopic,
+		Active:              s.PubsubActive,
+	}
+	if err := interfaces.InitPubSubClient(ctx, pubsubConfig); err != nil {
+		log.Fatal().Err(err).Msg("Failed to initialize pubsub client")
 	}
 
 	router := chi.NewRouter()

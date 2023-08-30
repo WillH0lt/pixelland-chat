@@ -31,7 +31,7 @@
     </div>
     <div class="w-full border-b-2 border-black my-1" />
     <Markdown
-      class="text-xl max-h-48 mx-2 pr-6 overflow-y-auto break-words"
+      class="text-xl max-h-48 mx-2 pr-6 overflow-y-auto break-words markdown"
       @click="handleLinkClicks($event, dialogStore)"
       :linkify="true"
       :breaks="true"

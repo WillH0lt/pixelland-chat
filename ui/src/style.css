@@ -94,3 +94,43 @@ a:active {
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+.markdown h1 {
+  @apply text-6xl;
+}
+
+.markdown h2 {
+  @apply text-5xl;
+}
+
+.markdown h3 {
+  @apply text-4xl;
+}
+
+.markdown h4 {
+  @apply text-3xl;
+}
+
+.markdown h5 {
+  @apply text-2xl;
+}
+
+.markdown h6 {
+  @apply text-xl;
+}
+
+.markdown strong {
+  text-shadow: 1px 0 0 currentColor;
+}
+
+.markdown em {
+  @apply -skew-x-[10deg] inline-block;
+}
+
+.markdown ul {
+  @apply list-[square] list-inside;
+}
+
+.markdown ol {
+  @apply list-decimal list-inside;
+}

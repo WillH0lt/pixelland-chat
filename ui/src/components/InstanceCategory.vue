@@ -1,7 +1,7 @@
 <template>
   <div class="flex items-center p-1 mx-2 group mt-4">
     <Markdown
-      class="text-xl text-white bg-gray-dark mt-2 ml-2"
+      class="text-xl text-white bg-gray-dark mt-2 ml-2 markdown"
       @click="handleLinkClicks($event, dialogStore)"
       :linkify="true"
       :breaks="true"
