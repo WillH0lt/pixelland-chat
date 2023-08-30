@@ -46,14 +46,14 @@ If you're setting up the database for the first time, then set seed_db = true
 
 Clone this repo: `git clone https://github.com/wwwillw/pixelland-chat.git`
 
-    cd pixelland-chat
+    cd pixelland-chat/backend
     go run .
 
 ### Run the UI 🤞
 
 Once the backend is running, open a new shell and run:
 
-    cd ui
+    cd pixelland-chat/ui
     npm install
     npm run dev
 

@@ -1,9 +1,10 @@
 {
-  "name": "pixelland-chat",
+  "name": "pixelland-chat-ui",
   "version": "0.0.0",
   "description": "Discord-style embedded chat used in PixelLand",
   "files": [
-    "dist/**/*"
+    "LICENSE",
+    "lib/**/*"
   ],
   "repository": {
     "type": "git",
@@ -13,7 +14,8 @@
   "scripts": {
     "dev": "vite",
     "stage": "vite --host --mode staging",
-    "build": "vue-tsc --noEmit && vite build --base=/src/chat/dist/",
+    "build": "vue-tsc --noEmit && vite build",
+    "deploy": "npm run build && firebase deploy --only hosting",
     "codegen": "graphql-codegen --config codegen.yml",
     "preview": "vite preview"
   },

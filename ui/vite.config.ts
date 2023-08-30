@@ -7,7 +7,7 @@ import { defineConfig } from 'vitest/config'
 // https://vitejs.dev/config/
 export default defineConfig({
   server: {
-    port: 3000,
+    port: 3001,
   },
   plugins: [vue(), codegen(), cssInjectedByJsPlugin()],
   resolve: {
@@ -23,12 +23,5 @@ export default defineConfig({
   },
   define: {
     'import.meta.vitest': 'undefined',
-  },
-  build: {
-    rollupOptions: {
-      output: {
-        format: 'iife',
-      },
-    },
   },
 })

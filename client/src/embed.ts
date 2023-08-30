@@ -40,7 +40,7 @@ export class EmbedClient<T> {
     this._host = this._hostBuilder
       // tslint:disable-next-line:deprecation
       .frameBorder('0')
-      .withTargetOrigin(window.location.origin)
+      .withTargetOrigin('*')
       .appendTo(this._builder.el)
       .build()
 

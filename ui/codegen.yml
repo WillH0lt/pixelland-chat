@@ -1,6 +1,6 @@
 overwrite: true
 schema:
-  - ../graph/schema.graphqls
+  - ../backend/graph/schema.graphqls
 documents:
   - ./src/graphql/mutations/**/!(*.gen).ts
   - ./src/graphql/queries/**/!(*.gen).ts
@@ -37,4 +37,4 @@ generates:
       - typescript-vue-apollo
   ./src/graphql/generated/graphql.schema.json:
     plugins:
-      - "introspection"
+      - 'introspection'

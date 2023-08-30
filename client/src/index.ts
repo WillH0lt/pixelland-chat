@@ -7,11 +7,9 @@ export type { EmbedClient } from "./embed";
 export * from "./types";
 
 export class PixellandChat {
-  static embedChat(apiHost: string) {
+  static embedChat(apiHost: string, uiHost: string) {
     PixellandChat.apiHost = apiHost;
-    return new EmbedBuilder<ChatClient>(this, ChatClient).withUrl(
-      "/src/chat/dist/index.html"
-    );
+    return new EmbedBuilder<ChatClient>(this, ChatClient).withUrl(uiHost);
   }
 
   static apiHost: string;

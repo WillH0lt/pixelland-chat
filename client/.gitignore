@@ -1,8 +1,6 @@
 node_modules
-dist
 lib
 .env.local
 *.log
 .vscode/*
 !.vscode/extensions.json
-.firebase

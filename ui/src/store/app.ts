@@ -6,10 +6,6 @@ import { DEFAULT_API_HOST, NULL_UUID } from '@/constants'
 import { apolloClient, createLink } from '@/graphql/client'
 import { useAuthorStore } from '@/store/author'
 
-function _isMobile() {
-  return parent.document.body.clientWidth < 768
-}
-
 export const useAppStore = defineStore('app', () => {
   provideApolloClient(apolloClient)
   const authorStore = useAuthorStore()
@@ -21,7 +17,7 @@ export const useAppStore = defineStore('app', () => {
   const externalizeSettings = ref(false)
   const externalizeInvites = ref(false)
   const inviteBasePath = ref('example.com/invite/')
-  const isMobile = ref(_isMobile())
+  const isMobile = ref(false)
   const noun = ref('instance')
   const _token = ref('')
   const verified = ref(true)
@@ -49,8 +45,9 @@ export const useAppStore = defineStore('app', () => {
     },
   })
 
-  window.addEventListener('resize', () => {
-    isMobile.value = _isMobile()
+  window.addEventListener('touch', () => {
+    // checking if mobile based on touch event
+    isMobile.value = true
   })
 
   return {
