@@ -60,3 +60,7 @@ Once the backend is running, open a new shell and run:
 🏃It should now be running at http://localhost:3000/
 
 NOTE I've probably forgotten a step! If something's not working then create a Github issue or send me a message on the PixelLand Discord (@will).
+
+### License
+
+PixelLand Chat is free software licensed under GNU GPLv3.
