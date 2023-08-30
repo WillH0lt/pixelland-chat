@@ -1,7 +1,14 @@
 {
   "name": "pixelland-chat",
-  "private": true,
   "version": "0.0.0",
+  "description": "Discord-style embedded chat used in PixelLand",
+  "files": [
+    "dist/**/*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wwwillw/pixelland-chat"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
