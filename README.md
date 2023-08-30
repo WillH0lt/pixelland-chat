@@ -49,7 +49,7 @@ Clone this repo: `git clone https://github.com/wwwillw/pixelland-chat.git`
     cd pixelland-chat
     go run .
 
-## UI
+### Run the UI
 
 Once the backend is running, open a new shell and run:
 
