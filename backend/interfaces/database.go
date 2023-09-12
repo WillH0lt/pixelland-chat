@@ -109,12 +109,16 @@ func (db *Database) Seed() error {
 
 	overworldInstanceUserId := uuid.MustParse("3f6f51e4-aa2c-452c-a1b2-140bd7198ad5")
 	overworldInstance := model.Instance{
-		ID:          uuid.MustParse("db9238ed-8377-4600-9b17-c0ecd06c3f23"),
-		Name:        "Overworld",
-		ReadAccess:  model.AccessPublic.String(),
-		IsGroup:     false,
-		Icon:        "https://storage.googleapis.com/pixelland_dev_tiles/db9238ed-8377-4600-9b17-c0ecd06c3f23/0.png",
-		Description: loremIpsumGenerator.Sentence(),
+		ID:           uuid.MustParse("db9238ed-8377-4600-9b17-c0ecd06c3f23"),
+		Name:         "Overworld",
+		ReadAccess:   model.AccessPublic.String(),
+		ShowAuthor:   true,
+		ShowChat:     true,
+		ShowLikes:    true,
+		ShowComments: true,
+		IsGroup:      false,
+		Icon:         "https://storage.googleapis.com/pixelland_dev_tiles/db9238ed-8377-4600-9b17-c0ecd06c3f23/0.png",
+		Description:  loremIpsumGenerator.Sentence(),
 	}
 	if err := db.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "id"}},
@@ -141,37 +145,26 @@ func (db *Database) Seed() error {
 		return err
 	}
 
-	netherInstanceUserId := uuid.MustParse("3f6f51e4-aa2c-452c-a1b2-140bd7198a11")
-	netherInstance := model.Instance{
-		ID:          uuid.MustParse("db9238ed-8377-4600-9b17-c0ecd06c1111"),
-		Name:        "Nether",
-		ReadAccess:  model.AccessPublic.String(),
-		IsGroup:     false,
-		Icon:        "https://storage.googleapis.com/pixelland_dev_tiles/db9238ed-8377-4600-9b17-c0ecd06c1111/0.png",
-		Description: loremIpsumGenerator.Sentence(),
+	overworldCommentschannel := model.Channel{
+		ID:         uuid.MustParse("3f6f51e4-aa2c-452c-abdf-140bd7198a23"),
+		InstanceID: overworldInstance.ID,
+		Name:       "Comments",
+		Readers:    []string{model.RoleAllUsers.String()},
+		Publishers: []string{model.RoleAllUsers.String()},
+		Rank:       "a",
+		AuthorID:   overworldInstanceUser.ID,
+		IsComments: true,
 	}
 	if err := db.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "id"}},
 		UpdateAll: true,
-	}).Create(&netherInstance).Error; err != nil {
+	}).Create(&overworldCommentschannel).Error; err != nil {
 		return err
 	}
 
-	netherInstanceUser := model.InstanceUser{
-		ID:         netherInstanceUserId,
-		InstanceID: netherInstance.ID,
-		UserID:     adminUser.ID,
-		Roles:      []string{model.RoleMember.String(), model.RoleModerator.String(), model.RoleAdmin.String()},
-		Rank:       "t",
-		Avatar:     "https://avatars.dicebear.com/api/human/abcdef.svg",
-		Name:       "Will",
-		Bio:        "I am a human",
-	}
-
-	if err := db.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "id"}},
-		UpdateAll: true,
-	}).Create(&netherInstanceUser).Error; err != nil {
+	overworldInstance.AuthorID = overworldInstanceUser.ID
+	overworldInstance.Author = &overworldInstanceUser
+	if err := db.Save(&overworldInstance).Error; err != nil {
 		return err
 	}
 

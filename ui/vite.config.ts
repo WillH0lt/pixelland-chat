@@ -24,4 +24,11 @@ export default defineConfig({
   define: {
     'import.meta.vitest': 'undefined',
   },
+  build: {
+    rollupOptions: {
+      output: {
+        format: 'iife',
+      },
+    },
+  },
 })

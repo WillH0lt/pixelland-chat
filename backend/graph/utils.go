@@ -416,6 +416,10 @@ func populateInstanceFromInput(instance *model.Instance, input model.InstanceInp
 	instance.ReadAccess = string(input.ReadAccess)
 	instance.Icon = input.Icon
 	instance.Description = input.Description
+	instance.ShowAuthor = input.ShowAuthor
+	instance.ShowChat = input.ShowChat
+	instance.ShowComments = input.ShowComments
+	instance.ShowLikes = input.ShowLikes
 
 	return nil
 }

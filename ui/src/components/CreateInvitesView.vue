@@ -1,6 +1,6 @@
 <template>
-  <div class="w-full flex flex-col items-center">
-    <ElementHeader @close="$emit('close')"></ElementHeader>
+  <div class="w-full flex flex-col items-center overflow-y-auto">
+    <ElementHeader class="flex-shrink-0" @close="$emit('close')"></ElementHeader>
 
     <div class="mx-4 text-xl flex flex-col max-w-full w-80 flex-1">
       <div class="text-3xl mt-4">Edit Invite</div>

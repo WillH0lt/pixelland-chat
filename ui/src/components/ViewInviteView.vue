@@ -1,6 +1,6 @@
 <template>
-  <div class="absolute inset-0 bg-gray-dark z-50">
-    <ElementHeader @close="$emit('close')"></ElementHeader>
+  <div class="absolute inset-0 bg-gray-dark z-50 overflow-y-auto">
+    <ElementHeader class="flex-shrink-0" @close="$emit('close')"></ElementHeader>
     <div
       v-if="error"
       class="w-full h-full flex items-center justify-center text-error text-center text-2xl"

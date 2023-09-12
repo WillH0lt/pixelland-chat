@@ -77,6 +77,10 @@ const props = defineProps<{
   channelId: string
 }>()
 
+const emit = defineEmits<{
+  (event: 'send', message: string): void
+}>()
+
 const appStore = useAppStore()
 const channelStore = useChannelStore()
 const authorStore = useAuthorStore()
@@ -162,6 +166,8 @@ async function submit() {
     channelId: props.channelId,
   })
   editable.value = true
+
+  emit('send', publishableText)
 }
 
 function hasUnion(rolesA: Role[], rolesB: Role[]) {

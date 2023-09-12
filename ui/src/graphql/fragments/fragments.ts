@@ -68,7 +68,9 @@ export const ChannelFragment = gql`
     createdAt
     updatedAt
     lastMessageAddedAt
+    messageCount
     isCategory
+    isComments
     messagesConnection(last: $messagesLast, before: $messagesBefore) {
       edges {
         ...ChannelMessagesEdgeFragment
@@ -96,10 +98,17 @@ export const InstanceFragment = gql`
   fragment InstanceFragment on Instance {
     id
     name
+    author {
+      ...AuthorFragment
+    }
     readAccess
     icon
     createdAt
     description
+    showAuthor
+    showChat
+    showLikes
+    showComments
     channelsConnection(first: $channelsFirst, after: $channelsAfter) {
       edges {
         ...InstanceChannelsEdgeFragment
@@ -109,6 +118,8 @@ export const InstanceFragment = gql`
       }
     }
   }
+  ${AuthorFragment}
+  ${ChannelFragment}
   ${InstanceChannelsEdgeFragment}
   ${PageInfoFragment}
 `

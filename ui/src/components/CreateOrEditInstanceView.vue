@@ -1,9 +1,8 @@
 <template>
-  <div class="w-full flex flex-col items-center" @keydown.enter="createOrUpdateInstance">
-    <ElementHeader @close="$emit('close')"></ElementHeader>
+  <div class="w-full flex flex-col overflow-y-auto" @keydown.enter="createOrUpdateInstance">
+    <ElementHeader class="flex-shrink-0" @close="$emit('close')"></ElementHeader>
 
-    <div class="mx-4 text-xl flex flex-col max-w-full w-80 flex-1">
-      <!-- <div class="text-3xl mt-4">Let's get things set up</div> -->
+    <div class="mx-auto text-xl flex flex-col max-w-full w-80 flex-1 items-center">
       <div class="text-3xl mt-4">{{ editing ? 'Settings' : 'Create Instance' }}</div>
 
       <ElementDivider class="my-6" />
@@ -25,7 +24,29 @@
         @keydown.stop
       />
 
+      <div class="flex items-center mt-6 w-full px-16">
+        <div class="mr-auto">Show Author:</div>
+        <ElementCheckbox v-model="showAuthor" />
+      </div>
+
+      <!-- <div class="flex items-center mt-6 w-full px-16">
+        <div class="mr-auto">Show Likes:</div>
+        <ElementCheckbox v-model="showLikes" />
+      </div> -->
+
+      <div class="flex items-center mt-6 w-full px-16">
+        <div class="mr-auto">Show Chat:</div>
+        <ElementCheckbox v-model="showChat" />
+      </div>
+
+      <div class="flex items-center mt-6 w-full px-16">
+        <div class="mr-auto">Show Comments:</div>
+        <ElementCheckbox v-model="showComments" />
+      </div>
+
       <ElementDivider class="my-6" />
+
+      <!-- <ElementCheckbox class="my-4" :checked="showComments">Allow comments</ElementCheckbox> -->
       <!-- 
       <div class="w-80">
         <div class="flex items-center w-full mb-8 last:mb-0">
@@ -60,6 +81,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
 import ElementButton from '@/components/ElementButton.vue'
+import ElementCheckbox from '@/components/ElementCheckbox.vue'
 import ElementDivider from '@/components/ElementDivider.vue'
 import ElementHeader from '@/components/ElementHeader.vue'
 import ElementInput from '@/components/ElementInput.vue'
@@ -86,6 +108,10 @@ const saving = ref(false)
 const error = ref('')
 const instanceName = ref('')
 const instanceDescription = ref('')
+const showAuthor = ref(true)
+const showChat = ref(true)
+const showComments = ref(true)
+const showLikes = ref(true)
 
 // const access: SelectionItem[] = [
 //   {
@@ -114,6 +140,10 @@ onMounted(() => {
   if (!editing.value) return
   instanceName.value = instanceStore.instance.name
   instanceDescription.value = instanceStore.instance.description
+  showAuthor.value = instanceStore.instance.showAuthor
+  showChat.value = instanceStore.instance.showChat
+  showComments.value = instanceStore.instance.showComments
+  showLikes.value = instanceStore.instance.showLikes
   // accessOption.value.selection = instanceStore.instance.readAccess
 })
 
@@ -132,6 +162,10 @@ async function createOrUpdateInstance() {
       ...input,
       name: instanceName.value,
       description: instanceDescription.value,
+      showAuthor: showAuthor.value,
+      showChat: showChat.value,
+      showComments: showComments.value,
+      showLikes: showLikes.value,
     }
 
     if (!editing.value) {

@@ -23,10 +23,27 @@ export const useChannelStore = defineStore('channel', () => {
 
   // =========================================
   // getters
-  function getChannels(instanceId: string) {
+  function channel(channelId: string): ExtendedChannel | undefined {
+    return channels.value[channelId]
+  }
+
+  function getChannels(instanceId: string): ExtendedChannel[] {
     return Object.values(channels.value)
       .filter(channel => channel.instanceId === instanceId)
+      .filter(channel => channel.isComments === false)
       .sort((a, b) => a.mutableRank - b.mutableRank)
+  }
+
+  function getCommentsChannel(instanceId: string): ExtendedChannel | undefined {
+    const commentChannels = Object.values(channels.value)
+      .filter(channel => channel.instanceId === instanceId)
+      .filter(channel => channel.isComments === true)
+
+    if (commentChannels.length === 0) {
+      return undefined
+    } else {
+      return commentChannels[0]
+    }
   }
 
   // =========================================
@@ -126,7 +143,9 @@ export const useChannelStore = defineStore('channel', () => {
   return {
     channels,
 
+    channel,
     getChannels,
+    getCommentsChannel,
     addChannel,
     updateChannel,
     reorderChannel,
@@ -147,6 +166,7 @@ function extendChannel(edge: InstanceChannelsEdge): ExtendedChannel {
       ? new Date(edge.node.lastMessageAddedAt)
       : undefined,
     mutableRank: 0, //edge.node.rank,
+    mutableMessageCount: edge.node.messageCount,
   }
 }
 

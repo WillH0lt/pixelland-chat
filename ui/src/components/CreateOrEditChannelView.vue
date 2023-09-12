@@ -1,8 +1,8 @@
 <template>
-  <div class="w-full flex flex-col items-center" @keydown.enter="createOrUpdateChannel">
-    <ElementHeader @close="$emit('close')"></ElementHeader>
+  <div class="w-full flex flex-col overflow-y-auto" @keydown.enter="createOrUpdateChannel">
+    <ElementHeader class="flex-shrink-0" @close="$emit('close')"></ElementHeader>
 
-    <div class="mx-4 text-xl flex flex-col max-w-full w-80 flex-1">
+    <div class="mx-auto text-xl flex flex-col max-w-full w-80 flex-1 items-center">
       <div class="text-3xl mt-4">{{ editing ? 'Edit' : 'Create' }} Channel</div>
 
       <ElementDivider class="my-6" />

@@ -126,6 +126,10 @@ export function getInstanceInput(instance: ExtendedInstance): InstanceInput {
     readAccess: instance.readAccess,
     icon: instance.icon,
     description: instance.description,
+    showAuthor: instance.showAuthor,
+    showChat: instance.showChat,
+    showComments: instance.showComments,
+    showLikes: instance.showLikes,
   }
 }
 
@@ -135,5 +139,9 @@ export function createInstanceInput(): InstanceInput {
     readAccess: Access.Public,
     icon: generateAvatar(),
     description: '',
+    showAuthor: true,
+    showChat: true,
+    showComments: true,
+    showLikes: true,
   }
 }

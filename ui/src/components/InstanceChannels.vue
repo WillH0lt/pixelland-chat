@@ -1,6 +1,6 @@
 <template>
   <draggable
-    class="overflow-y-auto mb-2"
+    class="overflow-y-auto mb-2 border-t border-gray-medium mx-2"
     v-model="channels"
     item-key="id"
     :disabled="!authorStore.isModerator || appStore.isMobile"

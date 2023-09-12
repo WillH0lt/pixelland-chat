@@ -75,6 +75,7 @@ export const useInstanceStore = defineStore('instance', () => {
     channelStore.handleChannelsAdded(userInstancesEdge.node.channelsConnection.edges)
 
     const instance = userInstancesEdge.node
+    authorStore.handleAuthorsAdded([instance.author])
 
     stopInstanceStream()
 
@@ -222,7 +223,7 @@ export const useInstanceStore = defineStore('instance', () => {
   function handleInstancesAdded(edges: UserInstancesEdge[]) {
     for (const edge of edges) {
       instances.value[edge.node.id] = extendInstance(edge)
-      authorStore.handleAuthorsAdded([edge.instanceUser])
+      authorStore.handleAuthorsAdded([edge.instanceUser, edge.node.author])
     }
     computeRank(getInstances())
   }

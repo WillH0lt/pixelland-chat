@@ -5,6 +5,7 @@ import { useAddMessageMutation, useRemoveMessageMutation } from '@/graphql/mutat
 import { useChannelQuery } from '@/graphql/queries/channel.gen'
 import { Author, ChannelMessagesEdge, Message, MessageInput } from '@/graphql/types.gen'
 import { useAuthorStore } from '@/store/author'
+import { useChannelStore } from '@/store/channel'
 import { useUserStore } from '@/store/user'
 import { ExtendedMessage } from '@/types/ExtendedMessage'
 import { timeSince } from '@/utils'
@@ -13,6 +14,7 @@ const UNSAVED_ID = 'UNSAVED_ID'
 
 export const useMessageStore = defineStore('message', () => {
   const authorStore = useAuthorStore()
+  const channelStore = useChannelStore()
   const userStore = useUserStore()
 
   // these variables store all channel state, keyed by channelId
@@ -84,6 +86,9 @@ export const useMessageStore = defineStore('message', () => {
 
     try {
       await mutate()
+
+      const channel = channelStore.channel(message.channelId)
+      if (channel) channel.mutableMessageCount++
     } catch (error: any) {
       const msg = "Couldn't send message. " + error.message
       const unsaved = getUnsaved(allMessages, message)
@@ -105,6 +110,9 @@ export const useMessageStore = defineStore('message', () => {
     const fakeEdge = { node: { ...message, author: {} as Author }, cursor: '' }
     removeEdge(allMessages, fakeEdge)
     await mutate()
+
+    const channel = channelStore.channel(message.channelId)
+    if (channel) channel.mutableMessageCount--
   }
 
   function refreshTimeSince(channelId: string) {

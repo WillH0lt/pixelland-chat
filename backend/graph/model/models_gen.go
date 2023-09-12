@@ -66,11 +66,15 @@ type InstanceChannelsEdge struct {
 }
 
 type InstanceInput struct {
-	ID          *uuid.UUID `json:"id"`
-	Name        string     `json:"name"`
-	ReadAccess  Access     `json:"readAccess"`
-	Icon        string     `json:"icon"`
-	Description string     `json:"description"`
+	ID           *uuid.UUID `json:"id"`
+	Name         string     `json:"name"`
+	ReadAccess   Access     `json:"readAccess"`
+	Icon         string     `json:"icon"`
+	Description  string     `json:"description"`
+	ShowAuthor   bool       `json:"showAuthor"`
+	ShowChat     bool       `json:"showChat"`
+	ShowComments bool       `json:"showComments"`
+	ShowLikes    bool       `json:"showLikes"`
 }
 
 type InstancePinInput struct {

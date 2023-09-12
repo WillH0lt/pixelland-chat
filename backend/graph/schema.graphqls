@@ -18,10 +18,15 @@ type User {
 type Instance {
   id: Uuid!
   name: String!
+  author: Author!
   readAccess: Access!
   icon: String!
   createdAt: Time!
   description: String!
+  showAuthor: Boolean!
+  showChat: Boolean!
+  showComments: Boolean!
+  showLikes: Boolean!
   channelsConnection(
     first: Int = 50 @constraint(max: 50)
     after: String = ""
@@ -48,6 +53,8 @@ type Channel {
   updatedAt: Time!
   lastMessageAddedAt: Time
   isCategory: Boolean!
+  isComments: Boolean!
+  messageCount: Int!
   messagesConnection(
     last: Int = 50 @constraint(max: 50)
     before: String = ""
@@ -166,25 +173,18 @@ type Mutation {
   updateUser(input: UserInput!): User! @auth(required: true)
   # instance
   addInstance(input: InstanceInput!): UserInstancesEdge! @auth(required: true)
-  updateInstance(instanceId: Uuid!, input: InstanceInput!): UserInstancesEdge!
-    @auth(required: true)
+  updateInstance(instanceId: Uuid!, input: InstanceInput!): UserInstancesEdge! @auth(required: true)
   removeInstance(instanceId: Uuid!): UserInstancesEdge! @auth(required: true)
-  reorderInstance(
-    instanceId: Uuid!
-    input: InstanceReorderInput!
-  ): UserInstancesEdge! @auth(required: true)
-  pinInstance(instanceId: Uuid!, input: InstancePinInput!): UserInstancesEdge!
+  reorderInstance(instanceId: Uuid!, input: InstanceReorderInput!): UserInstancesEdge!
     @auth(required: true)
+  pinInstance(instanceId: Uuid!, input: InstancePinInput!): UserInstancesEdge! @auth(required: true)
   # private instance
   addGroup(input: GroupInput!): Instance! @auth(required: true)
   # channel
   addChannel(input: ChannelInput!): InstanceChannelsEdge! @auth(required: true)
-  updateChannel(channelId: Uuid!, input: ChannelInput!): InstanceChannelsEdge!
+  updateChannel(channelId: Uuid!, input: ChannelInput!): InstanceChannelsEdge! @auth(required: true)
+  reorderChannel(channelId: Uuid!, input: ChannelReorderInput!): InstanceChannelsEdge!
     @auth(required: true)
-  reorderChannel(
-    channelId: Uuid!
-    input: ChannelReorderInput!
-  ): InstanceChannelsEdge! @auth(required: true)
   removeChannel(channelId: Uuid!): InstanceChannelsEdge! @auth(required: true)
   # message
   addMessage(input: MessageInput!): ChannelMessagesEdge! @auth(required: true)
@@ -199,8 +199,7 @@ type Mutation {
 }
 
 type Subscription {
-  instanceStream(instanceId: Uuid!): InstanceStreamNotification!
-    @auth(required: false)
+  instanceStream(instanceId: Uuid!): InstanceStreamNotification! @auth(required: false)
 }
 
 # ==============================================
@@ -211,6 +210,10 @@ input InstanceInput {
   readAccess: Access!
   icon: String! @constraint(min: 0, max: 1024)
   description: String! @constraint(min: 0, max: 1024)
+  showAuthor: Boolean!
+  showChat: Boolean!
+  showComments: Boolean!
+  showLikes: Boolean!
 }
 
 input GroupInput {

@@ -4,7 +4,7 @@
       <slot></slot>
     </div>
     <img
-      class="absolute top-0 left-0 pixelated cursor-pointer h-full p-3 pb-2 invert hover:scale-105"
+      class="absolute top-0 left-0 h-full pixelated cursor-pointer p-3 pb-2 invert hover:scale-105"
       @click="$emit('close')"
       src="/img/left-caret.png"
     />

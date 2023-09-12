@@ -70,6 +70,18 @@ func (r *channelResolver) Readers(ctx context.Context, obj *model.Channel) ([]mo
 	return stringsToRoles(obj.Readers), nil
 }
 
+// Author is the resolver for the author field.
+func (r *instanceResolver) Author(ctx context.Context, obj *model.Instance) (*model.Author, error) {
+	db := interfaces.GetDatabase()
+	instanceUser := model.InstanceUser{}
+	if err := db.Model(&obj).Association("Author").Find(&instanceUser); err != nil {
+		log.Error().Err(err).Msg("failed to get instance author")
+		return nil, err
+	}
+
+	return instanceUserToAuthor(&instanceUser), nil
+}
+
 // ReadAccess is the resolver for the readAccess field.
 func (r *instanceResolver) ReadAccess(ctx context.Context, obj *model.Instance) (model.Access, error) {
 	return model.Access(obj.ReadAccess), nil
@@ -228,10 +240,34 @@ func (r *mutationResolver) AddInstance(ctx context.Context, input model.Instance
 		return nil, err
 	}
 
-	// instance.Author = instanceUser
-	// if err := db.Save(&instance).Error; err != nil {
-	// 	return nil, err
-	// }
+	instance.Author = instanceUser
+	instance.AuthorID = instanceUser.ID
+	if err := db.Save(&instance).Error; err != nil {
+		return nil, err
+	}
+
+	// create comments channel
+	commentsChannel := model.Channel{}
+	commentsChannel.AuthorID = instanceUser.ID
+	commentsChannel.Author = instanceUser
+	commentsChannel.IsComments = true
+	commentsChannel.Rank = "a"
+	commentsChannelInput := model.ChannelInput{
+		Name:       "Comments",
+		InstanceID: instance.ID,
+		Publishers: []model.Role{
+			model.RoleAllUsers,
+		},
+		Readers: []model.Role{
+			model.RoleAllUsers,
+		},
+	}
+	if err := populateChannelFromInput(&commentsChannel, commentsChannelInput); err != nil {
+		return nil, err
+	}
+	if err := db.Create(&commentsChannel).Error; err != nil {
+		return nil, err
+	}
 
 	edge, err := createUserInstancesEdge(instanceUser, instanceUser.Instance)
 	if err != nil {
@@ -709,6 +745,7 @@ func (r *mutationResolver) AddMessage(ctx context.Context, input model.MessageIn
 	}
 
 	channel.LastMessageAddedAt = &message.CreatedAt
+	channel.MessageCount++
 	if err := db.Save(&channel).Error; err != nil {
 		return nil, err
 	}
@@ -746,6 +783,11 @@ func (r *mutationResolver) RemoveMessage(ctx context.Context, messageID uuid.UUI
 	}
 
 	db.Delete(&message)
+
+	channel.MessageCount--
+	if err := db.Save(&channel).Error; err != nil {
+		return nil, err
+	}
 
 	sendMessageNotification(r.InstanceStreamObservers, &message, &channel, model.MutationTypeMessageRemoved)
 

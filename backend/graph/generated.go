@@ -17,10 +17,10 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/google/uuid"
-	"github.com/wwwillw/pixelland-chat/graph/model"
-	"github.com/wwwillw/pixelland-chat/graph/scalars"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+	"github.com/wwwillw/pixelland-chat/graph/model"
+	"github.com/wwwillw/pixelland-chat/graph/scalars"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -72,7 +72,9 @@ type ComplexityRoot struct {
 		ID                 func(childComplexity int) int
 		InstanceID         func(childComplexity int) int
 		IsCategory         func(childComplexity int) int
+		IsComments         func(childComplexity int) int
 		LastMessageAddedAt func(childComplexity int) int
+		MessageCount       func(childComplexity int) int
 		MessagesConnection func(childComplexity int, last *int, before *string) int
 		Name               func(childComplexity int) int
 		Publishers         func(childComplexity int) int
@@ -100,6 +102,7 @@ type ComplexityRoot struct {
 	}
 
 	Instance struct {
+		Author             func(childComplexity int) int
 		ChannelsConnection func(childComplexity int, first *int, after *string) int
 		CreatedAt          func(childComplexity int) int
 		Description        func(childComplexity int) int
@@ -107,6 +110,10 @@ type ComplexityRoot struct {
 		Icon               func(childComplexity int) int
 		Name               func(childComplexity int) int
 		ReadAccess         func(childComplexity int) int
+		ShowAuthor         func(childComplexity int) int
+		ShowChat           func(childComplexity int) int
+		ShowComments       func(childComplexity int) int
+		ShowLikes          func(childComplexity int) int
 	}
 
 	InstanceChannelsConnection struct {
@@ -224,6 +231,7 @@ type ChannelResolver interface {
 	Readers(ctx context.Context, obj *model.Channel) ([]model.Role, error)
 }
 type InstanceResolver interface {
+	Author(ctx context.Context, obj *model.Instance) (*model.Author, error)
 	ReadAccess(ctx context.Context, obj *model.Instance) (model.Access, error)
 
 	ChannelsConnection(ctx context.Context, obj *model.Instance, first *int, after *string) (*model.InstanceChannelsConnection, error)
@@ -360,12 +368,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Channel.IsCategory(childComplexity), true
 
+	case "Channel.isComments":
+		if e.complexity.Channel.IsComments == nil {
+			break
+		}
+
+		return e.complexity.Channel.IsComments(childComplexity), true
+
 	case "Channel.lastMessageAddedAt":
 		if e.complexity.Channel.LastMessageAddedAt == nil {
 			break
 		}
 
 		return e.complexity.Channel.LastMessageAddedAt(childComplexity), true
+
+	case "Channel.messageCount":
+		if e.complexity.Channel.MessageCount == nil {
+			break
+		}
+
+		return e.complexity.Channel.MessageCount(childComplexity), true
 
 	case "Channel.messagesConnection":
 		if e.complexity.Channel.MessagesConnection == nil {
@@ -482,6 +504,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Group.MessagesConnection(childComplexity, args["last"].(*int), args["before"].(*string)), true
 
+	case "Instance.author":
+		if e.complexity.Instance.Author == nil {
+			break
+		}
+
+		return e.complexity.Instance.Author(childComplexity), true
+
 	case "Instance.channelsConnection":
 		if e.complexity.Instance.ChannelsConnection == nil {
 			break
@@ -535,6 +564,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Instance.ReadAccess(childComplexity), true
+
+	case "Instance.showAuthor":
+		if e.complexity.Instance.ShowAuthor == nil {
+			break
+		}
+
+		return e.complexity.Instance.ShowAuthor(childComplexity), true
+
+	case "Instance.showChat":
+		if e.complexity.Instance.ShowChat == nil {
+			break
+		}
+
+		return e.complexity.Instance.ShowChat(childComplexity), true
+
+	case "Instance.showComments":
+		if e.complexity.Instance.ShowComments == nil {
+			break
+		}
+
+		return e.complexity.Instance.ShowComments(childComplexity), true
+
+	case "Instance.showLikes":
+		if e.complexity.Instance.ShowLikes == nil {
+			break
+		}
+
+		return e.complexity.Instance.ShowLikes(childComplexity), true
 
 	case "InstanceChannelsConnection.edges":
 		if e.complexity.InstanceChannelsConnection.Edges == nil {
@@ -1422,7 +1479,7 @@ func (ec *executionContext) field_Mutation_addChannel_args(ctx context.Context, 
 	var arg0 model.ChannelInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNChannelInput2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐChannelInput(ctx, tmp)
+		arg0, err = ec.unmarshalNChannelInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannelInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1437,7 +1494,7 @@ func (ec *executionContext) field_Mutation_addGroup_args(ctx context.Context, ra
 	var arg0 model.GroupInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNGroupInput2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐGroupInput(ctx, tmp)
+		arg0, err = ec.unmarshalNGroupInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐGroupInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1452,7 +1509,7 @@ func (ec *executionContext) field_Mutation_addInstance_args(ctx context.Context,
 	var arg0 model.InstanceInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNInstanceInput2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstanceInput(ctx, tmp)
+		arg0, err = ec.unmarshalNInstanceInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1467,7 +1524,7 @@ func (ec *executionContext) field_Mutation_addInvite_args(ctx context.Context, r
 	var arg0 model.InviteInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNInviteInput2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInviteInput(ctx, tmp)
+		arg0, err = ec.unmarshalNInviteInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInviteInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1482,7 +1539,7 @@ func (ec *executionContext) field_Mutation_addMessage_args(ctx context.Context, 
 	var arg0 model.MessageInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNMessageInput2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐMessageInput(ctx, tmp)
+		arg0, err = ec.unmarshalNMessageInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐMessageInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1506,7 +1563,7 @@ func (ec *executionContext) field_Mutation_addRole_args(ctx context.Context, raw
 	var arg1 model.Role
 	if tmp, ok := rawArgs["role"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("role"))
-		arg1, err = ec.unmarshalNRole2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐRole(ctx, tmp)
+		arg1, err = ec.unmarshalNRole2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐRole(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1530,7 +1587,7 @@ func (ec *executionContext) field_Mutation_pinInstance_args(ctx context.Context,
 	var arg1 model.InstancePinInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg1, err = ec.unmarshalNInstancePinInput2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstancePinInput(ctx, tmp)
+		arg1, err = ec.unmarshalNInstancePinInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstancePinInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1629,7 +1686,7 @@ func (ec *executionContext) field_Mutation_removeRole_args(ctx context.Context, 
 	var arg1 model.Role
 	if tmp, ok := rawArgs["role"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("role"))
-		arg1, err = ec.unmarshalNRole2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐRole(ctx, tmp)
+		arg1, err = ec.unmarshalNRole2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐRole(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1653,7 +1710,7 @@ func (ec *executionContext) field_Mutation_reorderChannel_args(ctx context.Conte
 	var arg1 model.ChannelReorderInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg1, err = ec.unmarshalNChannelReorderInput2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐChannelReorderInput(ctx, tmp)
+		arg1, err = ec.unmarshalNChannelReorderInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannelReorderInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1677,7 +1734,7 @@ func (ec *executionContext) field_Mutation_reorderInstance_args(ctx context.Cont
 	var arg1 model.InstanceReorderInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg1, err = ec.unmarshalNInstanceReorderInput2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstanceReorderInput(ctx, tmp)
+		arg1, err = ec.unmarshalNInstanceReorderInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceReorderInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1701,7 +1758,7 @@ func (ec *executionContext) field_Mutation_updateChannel_args(ctx context.Contex
 	var arg1 model.ChannelInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg1, err = ec.unmarshalNChannelInput2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐChannelInput(ctx, tmp)
+		arg1, err = ec.unmarshalNChannelInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannelInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1725,7 +1782,7 @@ func (ec *executionContext) field_Mutation_updateInstance_args(ctx context.Conte
 	var arg1 model.InstanceInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg1, err = ec.unmarshalNInstanceInput2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstanceInput(ctx, tmp)
+		arg1, err = ec.unmarshalNInstanceInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1740,7 +1797,7 @@ func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, 
 	var arg0 model.UserInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNUserInput2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUserInput(ctx, tmp)
+		arg0, err = ec.unmarshalNUserInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2099,7 +2156,7 @@ func (ec *executionContext) _Author_roles(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.([]model.Role)
 	fc.Result = res
-	return ec.marshalNRole2ᚕgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐRoleᚄ(ctx, field.Selections, res)
+	return ec.marshalNRole2ᚕgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐRoleᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Author_roles(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2596,6 +2653,94 @@ func (ec *executionContext) fieldContext_Channel_isCategory(ctx context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _Channel_isComments(ctx context.Context, field graphql.CollectedField, obj *model.Channel) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Channel_isComments(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsComments, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Channel_isComments(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Channel",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Channel_messageCount(ctx context.Context, field graphql.CollectedField, obj *model.Channel) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Channel_messageCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MessageCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Channel_messageCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Channel",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Channel_messagesConnection(ctx context.Context, field graphql.CollectedField, obj *model.Channel) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Channel_messagesConnection(ctx, field)
 	if err != nil {
@@ -2624,7 +2769,7 @@ func (ec *executionContext) _Channel_messagesConnection(ctx context.Context, fie
 	}
 	res := resTmp.(*model.ChannelMessagesConnection)
 	fc.Result = res
-	return ec.marshalNChannelMessagesConnection2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐChannelMessagesConnection(ctx, field.Selections, res)
+	return ec.marshalNChannelMessagesConnection2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannelMessagesConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Channel_messagesConnection(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2685,7 +2830,7 @@ func (ec *executionContext) _Channel_publishers(ctx context.Context, field graph
 	}
 	res := resTmp.([]model.Role)
 	fc.Result = res
-	return ec.marshalNRole2ᚕgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐRoleᚄ(ctx, field.Selections, res)
+	return ec.marshalNRole2ᚕgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐRoleᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Channel_publishers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2729,7 +2874,7 @@ func (ec *executionContext) _Channel_readers(ctx context.Context, field graphql.
 	}
 	res := resTmp.([]model.Role)
 	fc.Result = res
-	return ec.marshalNRole2ᚕgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐRoleᚄ(ctx, field.Selections, res)
+	return ec.marshalNRole2ᚕgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐRoleᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Channel_readers(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2773,7 +2918,7 @@ func (ec *executionContext) _ChannelMessagesConnection_pageInfo(ctx context.Cont
 	}
 	res := resTmp.(*model.PageInfo)
 	fc.Result = res
-	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_ChannelMessagesConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2823,7 +2968,7 @@ func (ec *executionContext) _ChannelMessagesConnection_edges(ctx context.Context
 	}
 	res := resTmp.([]*model.ChannelMessagesEdge)
 	fc.Result = res
-	return ec.marshalNChannelMessagesEdge2ᚕᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐChannelMessagesEdgeᚄ(ctx, field.Selections, res)
+	return ec.marshalNChannelMessagesEdge2ᚕᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannelMessagesEdgeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_ChannelMessagesConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2917,7 +3062,7 @@ func (ec *executionContext) _ChannelMessagesEdge_node(ctx context.Context, field
 	}
 	res := resTmp.(*model.Message)
 	fc.Result = res
-	return ec.marshalNMessage2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐMessage(ctx, field.Selections, res)
+	return ec.marshalNMessage2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐMessage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_ChannelMessagesEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3105,7 +3250,7 @@ func (ec *executionContext) _Group_members(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.([]*model.Author)
 	fc.Result = res
-	return ec.marshalNAuthor2ᚕᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐAuthorᚄ(ctx, field.Selections, res)
+	return ec.marshalNAuthor2ᚕᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAuthorᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Group_members(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3165,7 +3310,7 @@ func (ec *executionContext) _Group_messagesConnection(ctx context.Context, field
 	}
 	res := resTmp.(*model.ChannelMessagesConnection)
 	fc.Result = res
-	return ec.marshalNChannelMessagesConnection2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐChannelMessagesConnection(ctx, field.Selections, res)
+	return ec.marshalNChannelMessagesConnection2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannelMessagesConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Group_messagesConnection(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3286,6 +3431,66 @@ func (ec *executionContext) fieldContext_Instance_name(ctx context.Context, fiel
 	return fc, nil
 }
 
+func (ec *executionContext) _Instance_author(ctx context.Context, field graphql.CollectedField, obj *model.Instance) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Instance_author(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Instance().Author(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Author)
+	fc.Result = res
+	return ec.marshalNAuthor2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAuthor(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Instance_author(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Instance",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Author_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Author_userId(ctx, field)
+			case "instanceId":
+				return ec.fieldContext_Author_instanceId(ctx, field)
+			case "roles":
+				return ec.fieldContext_Author_roles(ctx, field)
+			case "name":
+				return ec.fieldContext_Author_name(ctx, field)
+			case "avatar":
+				return ec.fieldContext_Author_avatar(ctx, field)
+			case "bio":
+				return ec.fieldContext_Author_bio(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Instance_readAccess(ctx context.Context, field graphql.CollectedField, obj *model.Instance) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Instance_readAccess(ctx, field)
 	if err != nil {
@@ -3314,7 +3519,7 @@ func (ec *executionContext) _Instance_readAccess(ctx context.Context, field grap
 	}
 	res := resTmp.(model.Access)
 	fc.Result = res
-	return ec.marshalNAccess2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐAccess(ctx, field.Selections, res)
+	return ec.marshalNAccess2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAccess(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Instance_readAccess(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3462,6 +3667,182 @@ func (ec *executionContext) fieldContext_Instance_description(ctx context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _Instance_showAuthor(ctx context.Context, field graphql.CollectedField, obj *model.Instance) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Instance_showAuthor(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ShowAuthor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Instance_showAuthor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Instance",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Instance_showChat(ctx context.Context, field graphql.CollectedField, obj *model.Instance) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Instance_showChat(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ShowChat, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Instance_showChat(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Instance",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Instance_showComments(ctx context.Context, field graphql.CollectedField, obj *model.Instance) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Instance_showComments(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ShowComments, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Instance_showComments(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Instance",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Instance_showLikes(ctx context.Context, field graphql.CollectedField, obj *model.Instance) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Instance_showLikes(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ShowLikes, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Instance_showLikes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Instance",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Instance_channelsConnection(ctx context.Context, field graphql.CollectedField, obj *model.Instance) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Instance_channelsConnection(ctx, field)
 	if err != nil {
@@ -3490,7 +3871,7 @@ func (ec *executionContext) _Instance_channelsConnection(ctx context.Context, fi
 	}
 	res := resTmp.(*model.InstanceChannelsConnection)
 	fc.Result = res
-	return ec.marshalNInstanceChannelsConnection2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstanceChannelsConnection(ctx, field.Selections, res)
+	return ec.marshalNInstanceChannelsConnection2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceChannelsConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Instance_channelsConnection(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3551,7 +3932,7 @@ func (ec *executionContext) _InstanceChannelsConnection_pageInfo(ctx context.Con
 	}
 	res := resTmp.(*model.PageInfo)
 	fc.Result = res
-	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_InstanceChannelsConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3601,7 +3982,7 @@ func (ec *executionContext) _InstanceChannelsConnection_edges(ctx context.Contex
 	}
 	res := resTmp.([]*model.InstanceChannelsEdge)
 	fc.Result = res
-	return ec.marshalNInstanceChannelsEdge2ᚕᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdgeᚄ(ctx, field.Selections, res)
+	return ec.marshalNInstanceChannelsEdge2ᚕᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdgeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_InstanceChannelsConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3695,7 +4076,7 @@ func (ec *executionContext) _InstanceChannelsEdge_node(ctx context.Context, fiel
 	}
 	res := resTmp.(*model.Channel)
 	fc.Result = res
-	return ec.marshalNChannel2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐChannel(ctx, field.Selections, res)
+	return ec.marshalNChannel2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannel(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_InstanceChannelsEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3722,6 +4103,10 @@ func (ec *executionContext) fieldContext_InstanceChannelsEdge_node(ctx context.C
 				return ec.fieldContext_Channel_lastMessageAddedAt(ctx, field)
 			case "isCategory":
 				return ec.fieldContext_Channel_isCategory(ctx, field)
+			case "isComments":
+				return ec.fieldContext_Channel_isComments(ctx, field)
+			case "messageCount":
+				return ec.fieldContext_Channel_messageCount(ctx, field)
 			case "messagesConnection":
 				return ec.fieldContext_Channel_messagesConnection(ctx, field)
 			case "publishers":
@@ -3763,7 +4148,7 @@ func (ec *executionContext) _InstanceStreamNotification_mutation(ctx context.Con
 	}
 	res := resTmp.(model.MutationType)
 	fc.Result = res
-	return ec.marshalNMutationType2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐMutationType(ctx, field.Selections, res)
+	return ec.marshalNMutationType2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐMutationType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_InstanceStreamNotification_mutation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3804,7 +4189,7 @@ func (ec *executionContext) _InstanceStreamNotification_channelMessagesEdge(ctx 
 	}
 	res := resTmp.(*model.ChannelMessagesEdge)
 	fc.Result = res
-	return ec.marshalOChannelMessagesEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐChannelMessagesEdge(ctx, field.Selections, res)
+	return ec.marshalOChannelMessagesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannelMessagesEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_InstanceStreamNotification_channelMessagesEdge(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3851,7 +4236,7 @@ func (ec *executionContext) _InstanceStreamNotification_userInstancesEdge(ctx co
 	}
 	res := resTmp.(*model.UserInstancesEdge)
 	fc.Result = res
-	return ec.marshalOUserInstancesEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx, field.Selections, res)
+	return ec.marshalOUserInstancesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_InstanceStreamNotification_userInstancesEdge(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3904,7 +4289,7 @@ func (ec *executionContext) _InstanceStreamNotification_instanceChannelsEdge(ctx
 	}
 	res := resTmp.(*model.InstanceChannelsEdge)
 	fc.Result = res
-	return ec.marshalOInstanceChannelsEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdge(ctx, field.Selections, res)
+	return ec.marshalOInstanceChannelsEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_InstanceStreamNotification_instanceChannelsEdge(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3951,7 +4336,7 @@ func (ec *executionContext) _InstanceStreamNotification_instance(ctx context.Con
 	}
 	res := resTmp.(*model.Instance)
 	fc.Result = res
-	return ec.marshalOInstance2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstance(ctx, field.Selections, res)
+	return ec.marshalOInstance2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstance(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_InstanceStreamNotification_instance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3966,6 +4351,8 @@ func (ec *executionContext) fieldContext_InstanceStreamNotification_instance(ctx
 				return ec.fieldContext_Instance_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Instance_name(ctx, field)
+			case "author":
+				return ec.fieldContext_Instance_author(ctx, field)
 			case "readAccess":
 				return ec.fieldContext_Instance_readAccess(ctx, field)
 			case "icon":
@@ -3974,6 +4361,14 @@ func (ec *executionContext) fieldContext_InstanceStreamNotification_instance(ctx
 				return ec.fieldContext_Instance_createdAt(ctx, field)
 			case "description":
 				return ec.fieldContext_Instance_description(ctx, field)
+			case "showAuthor":
+				return ec.fieldContext_Instance_showAuthor(ctx, field)
+			case "showChat":
+				return ec.fieldContext_Instance_showChat(ctx, field)
+			case "showComments":
+				return ec.fieldContext_Instance_showComments(ctx, field)
+			case "showLikes":
+				return ec.fieldContext_Instance_showLikes(ctx, field)
 			case "channelsConnection":
 				return ec.fieldContext_Instance_channelsConnection(ctx, field)
 			}
@@ -4008,7 +4403,7 @@ func (ec *executionContext) _InstanceStreamNotification_user(ctx context.Context
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_InstanceStreamNotification_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4061,7 +4456,7 @@ func (ec *executionContext) _InstanceStreamNotification_author(ctx context.Conte
 	}
 	res := resTmp.(*model.Author)
 	fc.Result = res
-	return ec.marshalOAuthor2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐAuthor(ctx, field.Selections, res)
+	return ec.marshalOAuthor2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAuthor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_InstanceStreamNotification_author(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4206,7 +4601,7 @@ func (ec *executionContext) _Invite_instance(ctx context.Context, field graphql.
 	}
 	res := resTmp.(*model.Instance)
 	fc.Result = res
-	return ec.marshalOInstance2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstance(ctx, field.Selections, res)
+	return ec.marshalOInstance2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstance(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Invite_instance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4221,6 +4616,8 @@ func (ec *executionContext) fieldContext_Invite_instance(ctx context.Context, fi
 				return ec.fieldContext_Instance_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Instance_name(ctx, field)
+			case "author":
+				return ec.fieldContext_Instance_author(ctx, field)
 			case "readAccess":
 				return ec.fieldContext_Instance_readAccess(ctx, field)
 			case "icon":
@@ -4229,6 +4626,14 @@ func (ec *executionContext) fieldContext_Invite_instance(ctx context.Context, fi
 				return ec.fieldContext_Instance_createdAt(ctx, field)
 			case "description":
 				return ec.fieldContext_Instance_description(ctx, field)
+			case "showAuthor":
+				return ec.fieldContext_Instance_showAuthor(ctx, field)
+			case "showChat":
+				return ec.fieldContext_Instance_showChat(ctx, field)
+			case "showComments":
+				return ec.fieldContext_Instance_showComments(ctx, field)
+			case "showLikes":
+				return ec.fieldContext_Instance_showLikes(ctx, field)
 			case "channelsConnection":
 				return ec.fieldContext_Instance_channelsConnection(ctx, field)
 			}
@@ -4266,7 +4671,7 @@ func (ec *executionContext) _Invite_author(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(*model.Author)
 	fc.Result = res
-	return ec.marshalNAuthor2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐAuthor(ctx, field.Selections, res)
+	return ec.marshalNAuthor2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAuthor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Invite_author(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4584,7 +4989,7 @@ func (ec *executionContext) _Message_author(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*model.Author)
 	fc.Result = res
-	return ec.marshalNAuthor2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐAuthor(ctx, field.Selections, res)
+	return ec.marshalNAuthor2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAuthor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Message_author(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4756,7 +5161,7 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4847,7 +5252,7 @@ func (ec *executionContext) _Mutation_addInstance(ctx context.Context, field gra
 	}
 	res := resTmp.(*model.UserInstancesEdge)
 	fc.Result = res
-	return ec.marshalNUserInstancesEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx, field.Selections, res)
+	return ec.marshalNUserInstancesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_addInstance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4938,7 +5343,7 @@ func (ec *executionContext) _Mutation_updateInstance(ctx context.Context, field 
 	}
 	res := resTmp.(*model.UserInstancesEdge)
 	fc.Result = res
-	return ec.marshalNUserInstancesEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx, field.Selections, res)
+	return ec.marshalNUserInstancesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateInstance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5029,7 +5434,7 @@ func (ec *executionContext) _Mutation_removeInstance(ctx context.Context, field 
 	}
 	res := resTmp.(*model.UserInstancesEdge)
 	fc.Result = res
-	return ec.marshalNUserInstancesEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx, field.Selections, res)
+	return ec.marshalNUserInstancesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_removeInstance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5120,7 +5525,7 @@ func (ec *executionContext) _Mutation_reorderInstance(ctx context.Context, field
 	}
 	res := resTmp.(*model.UserInstancesEdge)
 	fc.Result = res
-	return ec.marshalNUserInstancesEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx, field.Selections, res)
+	return ec.marshalNUserInstancesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_reorderInstance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5211,7 +5616,7 @@ func (ec *executionContext) _Mutation_pinInstance(ctx context.Context, field gra
 	}
 	res := resTmp.(*model.UserInstancesEdge)
 	fc.Result = res
-	return ec.marshalNUserInstancesEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx, field.Selections, res)
+	return ec.marshalNUserInstancesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_pinInstance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5302,7 +5707,7 @@ func (ec *executionContext) _Mutation_addGroup(ctx context.Context, field graphq
 	}
 	res := resTmp.(*model.Instance)
 	fc.Result = res
-	return ec.marshalNInstance2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstance(ctx, field.Selections, res)
+	return ec.marshalNInstance2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstance(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_addGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5317,6 +5722,8 @@ func (ec *executionContext) fieldContext_Mutation_addGroup(ctx context.Context, 
 				return ec.fieldContext_Instance_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Instance_name(ctx, field)
+			case "author":
+				return ec.fieldContext_Instance_author(ctx, field)
 			case "readAccess":
 				return ec.fieldContext_Instance_readAccess(ctx, field)
 			case "icon":
@@ -5325,6 +5732,14 @@ func (ec *executionContext) fieldContext_Mutation_addGroup(ctx context.Context, 
 				return ec.fieldContext_Instance_createdAt(ctx, field)
 			case "description":
 				return ec.fieldContext_Instance_description(ctx, field)
+			case "showAuthor":
+				return ec.fieldContext_Instance_showAuthor(ctx, field)
+			case "showChat":
+				return ec.fieldContext_Instance_showChat(ctx, field)
+			case "showComments":
+				return ec.fieldContext_Instance_showComments(ctx, field)
+			case "showLikes":
+				return ec.fieldContext_Instance_showLikes(ctx, field)
 			case "channelsConnection":
 				return ec.fieldContext_Instance_channelsConnection(ctx, field)
 			}
@@ -5397,7 +5812,7 @@ func (ec *executionContext) _Mutation_addChannel(ctx context.Context, field grap
 	}
 	res := resTmp.(*model.InstanceChannelsEdge)
 	fc.Result = res
-	return ec.marshalNInstanceChannelsEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdge(ctx, field.Selections, res)
+	return ec.marshalNInstanceChannelsEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_addChannel(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5482,7 +5897,7 @@ func (ec *executionContext) _Mutation_updateChannel(ctx context.Context, field g
 	}
 	res := resTmp.(*model.InstanceChannelsEdge)
 	fc.Result = res
-	return ec.marshalNInstanceChannelsEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdge(ctx, field.Selections, res)
+	return ec.marshalNInstanceChannelsEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_updateChannel(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5567,7 +5982,7 @@ func (ec *executionContext) _Mutation_reorderChannel(ctx context.Context, field 
 	}
 	res := resTmp.(*model.InstanceChannelsEdge)
 	fc.Result = res
-	return ec.marshalNInstanceChannelsEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdge(ctx, field.Selections, res)
+	return ec.marshalNInstanceChannelsEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_reorderChannel(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5652,7 +6067,7 @@ func (ec *executionContext) _Mutation_removeChannel(ctx context.Context, field g
 	}
 	res := resTmp.(*model.InstanceChannelsEdge)
 	fc.Result = res
-	return ec.marshalNInstanceChannelsEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdge(ctx, field.Selections, res)
+	return ec.marshalNInstanceChannelsEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_removeChannel(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5737,7 +6152,7 @@ func (ec *executionContext) _Mutation_addMessage(ctx context.Context, field grap
 	}
 	res := resTmp.(*model.ChannelMessagesEdge)
 	fc.Result = res
-	return ec.marshalNChannelMessagesEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐChannelMessagesEdge(ctx, field.Selections, res)
+	return ec.marshalNChannelMessagesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannelMessagesEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_addMessage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5822,7 +6237,7 @@ func (ec *executionContext) _Mutation_removeMessage(ctx context.Context, field g
 	}
 	res := resTmp.(*model.ChannelMessagesEdge)
 	fc.Result = res
-	return ec.marshalNChannelMessagesEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐChannelMessagesEdge(ctx, field.Selections, res)
+	return ec.marshalNChannelMessagesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannelMessagesEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_removeMessage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5907,7 +6322,7 @@ func (ec *executionContext) _Mutation_addRole(ctx context.Context, field graphql
 	}
 	res := resTmp.(*model.Author)
 	fc.Result = res
-	return ec.marshalNAuthor2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐAuthor(ctx, field.Selections, res)
+	return ec.marshalNAuthor2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAuthor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_addRole(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6002,7 +6417,7 @@ func (ec *executionContext) _Mutation_removeRole(ctx context.Context, field grap
 	}
 	res := resTmp.(*model.Author)
 	fc.Result = res
-	return ec.marshalNAuthor2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐAuthor(ctx, field.Selections, res)
+	return ec.marshalNAuthor2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAuthor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_removeRole(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6097,7 +6512,7 @@ func (ec *executionContext) _Mutation_addInvite(ctx context.Context, field graph
 	}
 	res := resTmp.(*model.Invite)
 	fc.Result = res
-	return ec.marshalNInvite2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInvite(ctx, field.Selections, res)
+	return ec.marshalNInvite2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInvite(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_addInvite(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6194,7 +6609,7 @@ func (ec *executionContext) _Mutation_removeInvite(ctx context.Context, field gr
 	}
 	res := resTmp.(*model.Invite)
 	fc.Result = res
-	return ec.marshalNInvite2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInvite(ctx, field.Selections, res)
+	return ec.marshalNInvite2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInvite(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_removeInvite(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6291,7 +6706,7 @@ func (ec *executionContext) _Mutation_redeemInvite(ctx context.Context, field gr
 	}
 	res := resTmp.(*model.Invite)
 	fc.Result = res
-	return ec.marshalNInvite2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInvite(ctx, field.Selections, res)
+	return ec.marshalNInvite2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInvite(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_redeemInvite(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6476,7 +6891,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6567,7 +6982,7 @@ func (ec *executionContext) _Query_instance(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*model.UserInstancesEdge)
 	fc.Result = res
-	return ec.marshalNUserInstancesEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx, field.Selections, res)
+	return ec.marshalNUserInstancesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_instance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6658,7 +7073,7 @@ func (ec *executionContext) _Query_channel(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(*model.Channel)
 	fc.Result = res
-	return ec.marshalNChannel2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐChannel(ctx, field.Selections, res)
+	return ec.marshalNChannel2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannel(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_channel(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6685,6 +7100,10 @@ func (ec *executionContext) fieldContext_Query_channel(ctx context.Context, fiel
 				return ec.fieldContext_Channel_lastMessageAddedAt(ctx, field)
 			case "isCategory":
 				return ec.fieldContext_Channel_isCategory(ctx, field)
+			case "isComments":
+				return ec.fieldContext_Channel_isComments(ctx, field)
+			case "messageCount":
+				return ec.fieldContext_Channel_messageCount(ctx, field)
 			case "messagesConnection":
 				return ec.fieldContext_Channel_messagesConnection(ctx, field)
 			case "publishers":
@@ -6761,7 +7180,7 @@ func (ec *executionContext) _Query_invite(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(*model.Invite)
 	fc.Result = res
-	return ec.marshalNInvite2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInvite(ctx, field.Selections, res)
+	return ec.marshalNInvite2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInvite(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_invite(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6858,7 +7277,7 @@ func (ec *executionContext) _Query_checkInvite(ctx context.Context, field graphq
 	}
 	res := resTmp.(*model.Invite)
 	fc.Result = res
-	return ec.marshalNInvite2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInvite(ctx, field.Selections, res)
+	return ec.marshalNInvite2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInvite(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_checkInvite(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -7092,7 +7511,7 @@ func (ec *executionContext) _Subscription_instanceStream(ctx context.Context, fi
 				w.Write([]byte{'{'})
 				graphql.MarshalString(field.Alias).MarshalGQL(w)
 				w.Write([]byte{':'})
-				ec.marshalNInstanceStreamNotification2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstanceStreamNotification(ctx, field.Selections, res).MarshalGQL(w)
+				ec.marshalNInstanceStreamNotification2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceStreamNotification(ctx, field.Selections, res).MarshalGQL(w)
 				w.Write([]byte{'}'})
 			})
 		case <-ctx.Done():
@@ -7345,7 +7764,7 @@ func (ec *executionContext) _User_instancesConnection(ctx context.Context, field
 	}
 	res := resTmp.(*model.UserInstancesConnection)
 	fc.Result = res
-	return ec.marshalNUserInstancesConnection2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUserInstancesConnection(ctx, field.Selections, res)
+	return ec.marshalNUserInstancesConnection2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserInstancesConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_instancesConnection(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -7406,7 +7825,7 @@ func (ec *executionContext) _UserGroupsConnection_pageInfo(ctx context.Context, 
 	}
 	res := resTmp.(*model.PageInfo)
 	fc.Result = res
-	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserGroupsConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -7456,7 +7875,7 @@ func (ec *executionContext) _UserGroupsConnection_edges(ctx context.Context, fie
 	}
 	res := resTmp.([]*model.UserGroupsEdge)
 	fc.Result = res
-	return ec.marshalNUserGroupsEdge2ᚕᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUserGroupsEdgeᚄ(ctx, field.Selections, res)
+	return ec.marshalNUserGroupsEdge2ᚕᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserGroupsEdgeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserGroupsConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -7550,7 +7969,7 @@ func (ec *executionContext) _UserGroupsEdge_node(ctx context.Context, field grap
 	}
 	res := resTmp.(*model.Group)
 	fc.Result = res
-	return ec.marshalNGroup2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐGroup(ctx, field.Selections, res)
+	return ec.marshalNGroup2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐGroup(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserGroupsEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -7606,7 +8025,7 @@ func (ec *executionContext) _UserInstancesConnection_pageInfo(ctx context.Contex
 	}
 	res := resTmp.(*model.PageInfo)
 	fc.Result = res
-	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserInstancesConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -7656,7 +8075,7 @@ func (ec *executionContext) _UserInstancesConnection_edges(ctx context.Context, 
 	}
 	res := resTmp.([]*model.UserInstancesEdge)
 	fc.Result = res
-	return ec.marshalNUserInstancesEdge2ᚕᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUserInstancesEdgeᚄ(ctx, field.Selections, res)
+	return ec.marshalNUserInstancesEdge2ᚕᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserInstancesEdgeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserInstancesConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -7756,7 +8175,7 @@ func (ec *executionContext) _UserInstancesEdge_node(ctx context.Context, field g
 	}
 	res := resTmp.(*model.Instance)
 	fc.Result = res
-	return ec.marshalNInstance2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstance(ctx, field.Selections, res)
+	return ec.marshalNInstance2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstance(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserInstancesEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -7771,6 +8190,8 @@ func (ec *executionContext) fieldContext_UserInstancesEdge_node(ctx context.Cont
 				return ec.fieldContext_Instance_id(ctx, field)
 			case "name":
 				return ec.fieldContext_Instance_name(ctx, field)
+			case "author":
+				return ec.fieldContext_Instance_author(ctx, field)
 			case "readAccess":
 				return ec.fieldContext_Instance_readAccess(ctx, field)
 			case "icon":
@@ -7779,6 +8200,14 @@ func (ec *executionContext) fieldContext_UserInstancesEdge_node(ctx context.Cont
 				return ec.fieldContext_Instance_createdAt(ctx, field)
 			case "description":
 				return ec.fieldContext_Instance_description(ctx, field)
+			case "showAuthor":
+				return ec.fieldContext_Instance_showAuthor(ctx, field)
+			case "showChat":
+				return ec.fieldContext_Instance_showChat(ctx, field)
+			case "showComments":
+				return ec.fieldContext_Instance_showComments(ctx, field)
+			case "showLikes":
+				return ec.fieldContext_Instance_showLikes(ctx, field)
 			case "channelsConnection":
 				return ec.fieldContext_Instance_channelsConnection(ctx, field)
 			}
@@ -7816,7 +8245,7 @@ func (ec *executionContext) _UserInstancesEdge_instanceUser(ctx context.Context,
 	}
 	res := resTmp.(*model.Author)
 	fc.Result = res
-	return ec.marshalNAuthor2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐAuthor(ctx, field.Selections, res)
+	return ec.marshalNAuthor2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAuthor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_UserInstancesEdge_instanceUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -9765,7 +10194,7 @@ func (ec *executionContext) unmarshalInputChannelInput(ctx context.Context, obj 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("publishers"))
-			it.Publishers, err = ec.unmarshalNRole2ᚕgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐRoleᚄ(ctx, v)
+			it.Publishers, err = ec.unmarshalNRole2ᚕgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐRoleᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9773,7 +10202,7 @@ func (ec *executionContext) unmarshalInputChannelInput(ctx context.Context, obj 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("readers"))
-			it.Readers, err = ec.unmarshalNRole2ᚕgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐRoleᚄ(ctx, v)
+			it.Readers, err = ec.unmarshalNRole2ᚕgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐRoleᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9854,7 +10283,7 @@ func (ec *executionContext) unmarshalInputInstanceInput(ctx context.Context, obj
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "name", "readAccess", "icon", "description"}
+	fieldsInOrder := [...]string{"id", "name", "readAccess", "icon", "description", "showAuthor", "showChat", "showComments", "showLikes"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -9903,7 +10332,7 @@ func (ec *executionContext) unmarshalInputInstanceInput(ctx context.Context, obj
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("readAccess"))
-			it.ReadAccess, err = ec.unmarshalNAccess2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐAccess(ctx, v)
+			it.ReadAccess, err = ec.unmarshalNAccess2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAccess(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -9966,6 +10395,38 @@ func (ec *executionContext) unmarshalInputInstanceInput(ctx context.Context, obj
 			} else {
 				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
 				return it, graphql.ErrorOnPath(ctx, err)
+			}
+		case "showAuthor":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("showAuthor"))
+			it.ShowAuthor, err = ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "showChat":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("showChat"))
+			it.ShowChat, err = ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "showComments":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("showComments"))
+			it.ShowComments, err = ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "showLikes":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("showLikes"))
+			it.ShowLikes, err = ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
 			}
 		}
 	}
@@ -10360,6 +10821,20 @@ func (ec *executionContext) _Channel(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "isComments":
+
+			out.Values[i] = ec._Channel_isComments(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "messageCount":
+
+			out.Values[i] = ec._Channel_messageCount(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "messagesConnection":
 			field := field
 
@@ -10581,6 +11056,26 @@ func (ec *executionContext) _Instance(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "author":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Instance_author(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		case "readAccess":
 			field := field
 
@@ -10618,6 +11113,34 @@ func (ec *executionContext) _Instance(ctx context.Context, sel ast.SelectionSet,
 		case "description":
 
 			out.Values[i] = ec._Instance_description(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "showAuthor":
+
+			out.Values[i] = ec._Instance_showAuthor(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "showChat":
+
+			out.Values[i] = ec._Instance_showChat(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "showComments":
+
+			out.Values[i] = ec._Instance_showComments(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "showLikes":
+
+			out.Values[i] = ec._Instance_showLikes(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
@@ -11877,21 +12400,21 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNAccess2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐAccess(ctx context.Context, v interface{}) (model.Access, error) {
+func (ec *executionContext) unmarshalNAccess2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAccess(ctx context.Context, v interface{}) (model.Access, error) {
 	var res model.Access
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNAccess2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐAccess(ctx context.Context, sel ast.SelectionSet, v model.Access) graphql.Marshaler {
+func (ec *executionContext) marshalNAccess2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAccess(ctx context.Context, sel ast.SelectionSet, v model.Access) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNAuthor2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐAuthor(ctx context.Context, sel ast.SelectionSet, v model.Author) graphql.Marshaler {
+func (ec *executionContext) marshalNAuthor2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAuthor(ctx context.Context, sel ast.SelectionSet, v model.Author) graphql.Marshaler {
 	return ec._Author(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNAuthor2ᚕᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐAuthorᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Author) graphql.Marshaler {
+func (ec *executionContext) marshalNAuthor2ᚕᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAuthorᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Author) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -11915,7 +12438,7 @@ func (ec *executionContext) marshalNAuthor2ᚕᚖgithubᚗcomᚋpixellandᚋpixe
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNAuthor2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐAuthor(ctx, sel, v[i])
+			ret[i] = ec.marshalNAuthor2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAuthor(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -11935,7 +12458,7 @@ func (ec *executionContext) marshalNAuthor2ᚕᚖgithubᚗcomᚋpixellandᚋpixe
 	return ret
 }
 
-func (ec *executionContext) marshalNAuthor2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐAuthor(ctx context.Context, sel ast.SelectionSet, v *model.Author) graphql.Marshaler {
+func (ec *executionContext) marshalNAuthor2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAuthor(ctx context.Context, sel ast.SelectionSet, v *model.Author) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -11960,11 +12483,11 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNChannel2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐChannel(ctx context.Context, sel ast.SelectionSet, v model.Channel) graphql.Marshaler {
+func (ec *executionContext) marshalNChannel2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannel(ctx context.Context, sel ast.SelectionSet, v model.Channel) graphql.Marshaler {
 	return ec._Channel(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNChannel2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐChannel(ctx context.Context, sel ast.SelectionSet, v *model.Channel) graphql.Marshaler {
+func (ec *executionContext) marshalNChannel2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannel(ctx context.Context, sel ast.SelectionSet, v *model.Channel) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -11974,16 +12497,16 @@ func (ec *executionContext) marshalNChannel2ᚖgithubᚗcomᚋpixellandᚋpixel�
 	return ec._Channel(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNChannelInput2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐChannelInput(ctx context.Context, v interface{}) (model.ChannelInput, error) {
+func (ec *executionContext) unmarshalNChannelInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannelInput(ctx context.Context, v interface{}) (model.ChannelInput, error) {
 	res, err := ec.unmarshalInputChannelInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNChannelMessagesConnection2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐChannelMessagesConnection(ctx context.Context, sel ast.SelectionSet, v model.ChannelMessagesConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNChannelMessagesConnection2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannelMessagesConnection(ctx context.Context, sel ast.SelectionSet, v model.ChannelMessagesConnection) graphql.Marshaler {
 	return ec._ChannelMessagesConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNChannelMessagesConnection2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐChannelMessagesConnection(ctx context.Context, sel ast.SelectionSet, v *model.ChannelMessagesConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNChannelMessagesConnection2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannelMessagesConnection(ctx context.Context, sel ast.SelectionSet, v *model.ChannelMessagesConnection) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -11993,11 +12516,11 @@ func (ec *executionContext) marshalNChannelMessagesConnection2ᚖgithubᚗcomᚋ
 	return ec._ChannelMessagesConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNChannelMessagesEdge2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐChannelMessagesEdge(ctx context.Context, sel ast.SelectionSet, v model.ChannelMessagesEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNChannelMessagesEdge2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannelMessagesEdge(ctx context.Context, sel ast.SelectionSet, v model.ChannelMessagesEdge) graphql.Marshaler {
 	return ec._ChannelMessagesEdge(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNChannelMessagesEdge2ᚕᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐChannelMessagesEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ChannelMessagesEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNChannelMessagesEdge2ᚕᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannelMessagesEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.ChannelMessagesEdge) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -12021,7 +12544,7 @@ func (ec *executionContext) marshalNChannelMessagesEdge2ᚕᚖgithubᚗcomᚋpix
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNChannelMessagesEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐChannelMessagesEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalNChannelMessagesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannelMessagesEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -12041,7 +12564,7 @@ func (ec *executionContext) marshalNChannelMessagesEdge2ᚕᚖgithubᚗcomᚋpix
 	return ret
 }
 
-func (ec *executionContext) marshalNChannelMessagesEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐChannelMessagesEdge(ctx context.Context, sel ast.SelectionSet, v *model.ChannelMessagesEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNChannelMessagesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannelMessagesEdge(ctx context.Context, sel ast.SelectionSet, v *model.ChannelMessagesEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12051,12 +12574,12 @@ func (ec *executionContext) marshalNChannelMessagesEdge2ᚖgithubᚗcomᚋpixell
 	return ec._ChannelMessagesEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNChannelReorderInput2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐChannelReorderInput(ctx context.Context, v interface{}) (model.ChannelReorderInput, error) {
+func (ec *executionContext) unmarshalNChannelReorderInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannelReorderInput(ctx context.Context, v interface{}) (model.ChannelReorderInput, error) {
 	res, err := ec.unmarshalInputChannelReorderInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNGroup2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐGroup(ctx context.Context, sel ast.SelectionSet, v *model.Group) graphql.Marshaler {
+func (ec *executionContext) marshalNGroup2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐGroup(ctx context.Context, sel ast.SelectionSet, v *model.Group) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12066,16 +12589,16 @@ func (ec *executionContext) marshalNGroup2ᚖgithubᚗcomᚋpixellandᚋpixelᚑ
 	return ec._Group(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNGroupInput2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐGroupInput(ctx context.Context, v interface{}) (model.GroupInput, error) {
+func (ec *executionContext) unmarshalNGroupInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐGroupInput(ctx context.Context, v interface{}) (model.GroupInput, error) {
 	res, err := ec.unmarshalInputGroupInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNInstance2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstance(ctx context.Context, sel ast.SelectionSet, v model.Instance) graphql.Marshaler {
+func (ec *executionContext) marshalNInstance2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstance(ctx context.Context, sel ast.SelectionSet, v model.Instance) graphql.Marshaler {
 	return ec._Instance(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNInstance2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstance(ctx context.Context, sel ast.SelectionSet, v *model.Instance) graphql.Marshaler {
+func (ec *executionContext) marshalNInstance2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstance(ctx context.Context, sel ast.SelectionSet, v *model.Instance) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12085,11 +12608,11 @@ func (ec *executionContext) marshalNInstance2ᚖgithubᚗcomᚋpixellandᚋpixel
 	return ec._Instance(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNInstanceChannelsConnection2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstanceChannelsConnection(ctx context.Context, sel ast.SelectionSet, v model.InstanceChannelsConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNInstanceChannelsConnection2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceChannelsConnection(ctx context.Context, sel ast.SelectionSet, v model.InstanceChannelsConnection) graphql.Marshaler {
 	return ec._InstanceChannelsConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNInstanceChannelsConnection2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstanceChannelsConnection(ctx context.Context, sel ast.SelectionSet, v *model.InstanceChannelsConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNInstanceChannelsConnection2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceChannelsConnection(ctx context.Context, sel ast.SelectionSet, v *model.InstanceChannelsConnection) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12099,11 +12622,11 @@ func (ec *executionContext) marshalNInstanceChannelsConnection2ᚖgithubᚗcom�
 	return ec._InstanceChannelsConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNInstanceChannelsEdge2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdge(ctx context.Context, sel ast.SelectionSet, v model.InstanceChannelsEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNInstanceChannelsEdge2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdge(ctx context.Context, sel ast.SelectionSet, v model.InstanceChannelsEdge) graphql.Marshaler {
 	return ec._InstanceChannelsEdge(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNInstanceChannelsEdge2ᚕᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.InstanceChannelsEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNInstanceChannelsEdge2ᚕᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.InstanceChannelsEdge) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -12127,7 +12650,7 @@ func (ec *executionContext) marshalNInstanceChannelsEdge2ᚕᚖgithubᚗcomᚋpi
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNInstanceChannelsEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalNInstanceChannelsEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -12147,7 +12670,7 @@ func (ec *executionContext) marshalNInstanceChannelsEdge2ᚕᚖgithubᚗcomᚋpi
 	return ret
 }
 
-func (ec *executionContext) marshalNInstanceChannelsEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdge(ctx context.Context, sel ast.SelectionSet, v *model.InstanceChannelsEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNInstanceChannelsEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdge(ctx context.Context, sel ast.SelectionSet, v *model.InstanceChannelsEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12157,26 +12680,26 @@ func (ec *executionContext) marshalNInstanceChannelsEdge2ᚖgithubᚗcomᚋpixel
 	return ec._InstanceChannelsEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNInstanceInput2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstanceInput(ctx context.Context, v interface{}) (model.InstanceInput, error) {
+func (ec *executionContext) unmarshalNInstanceInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceInput(ctx context.Context, v interface{}) (model.InstanceInput, error) {
 	res, err := ec.unmarshalInputInstanceInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNInstancePinInput2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstancePinInput(ctx context.Context, v interface{}) (model.InstancePinInput, error) {
+func (ec *executionContext) unmarshalNInstancePinInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstancePinInput(ctx context.Context, v interface{}) (model.InstancePinInput, error) {
 	res, err := ec.unmarshalInputInstancePinInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNInstanceReorderInput2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstanceReorderInput(ctx context.Context, v interface{}) (model.InstanceReorderInput, error) {
+func (ec *executionContext) unmarshalNInstanceReorderInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceReorderInput(ctx context.Context, v interface{}) (model.InstanceReorderInput, error) {
 	res, err := ec.unmarshalInputInstanceReorderInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNInstanceStreamNotification2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstanceStreamNotification(ctx context.Context, sel ast.SelectionSet, v model.InstanceStreamNotification) graphql.Marshaler {
+func (ec *executionContext) marshalNInstanceStreamNotification2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceStreamNotification(ctx context.Context, sel ast.SelectionSet, v model.InstanceStreamNotification) graphql.Marshaler {
 	return ec._InstanceStreamNotification(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNInstanceStreamNotification2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstanceStreamNotification(ctx context.Context, sel ast.SelectionSet, v *model.InstanceStreamNotification) graphql.Marshaler {
+func (ec *executionContext) marshalNInstanceStreamNotification2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceStreamNotification(ctx context.Context, sel ast.SelectionSet, v *model.InstanceStreamNotification) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12186,11 +12709,26 @@ func (ec *executionContext) marshalNInstanceStreamNotification2ᚖgithubᚗcom�
 	return ec._InstanceStreamNotification(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNInvite2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInvite(ctx context.Context, sel ast.SelectionSet, v model.Invite) graphql.Marshaler {
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
+	res, err := graphql.UnmarshalInt(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	res := graphql.MarshalInt(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) marshalNInvite2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInvite(ctx context.Context, sel ast.SelectionSet, v model.Invite) graphql.Marshaler {
 	return ec._Invite(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNInvite2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInvite(ctx context.Context, sel ast.SelectionSet, v *model.Invite) graphql.Marshaler {
+func (ec *executionContext) marshalNInvite2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInvite(ctx context.Context, sel ast.SelectionSet, v *model.Invite) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12200,12 +12738,12 @@ func (ec *executionContext) marshalNInvite2ᚖgithubᚗcomᚋpixellandᚋpixel�
 	return ec._Invite(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNInviteInput2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInviteInput(ctx context.Context, v interface{}) (model.InviteInput, error) {
+func (ec *executionContext) unmarshalNInviteInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInviteInput(ctx context.Context, v interface{}) (model.InviteInput, error) {
 	res, err := ec.unmarshalInputInviteInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNMessage2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐMessage(ctx context.Context, sel ast.SelectionSet, v *model.Message) graphql.Marshaler {
+func (ec *executionContext) marshalNMessage2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐMessage(ctx context.Context, sel ast.SelectionSet, v *model.Message) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12215,22 +12753,22 @@ func (ec *executionContext) marshalNMessage2ᚖgithubᚗcomᚋpixellandᚋpixel�
 	return ec._Message(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNMessageInput2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐMessageInput(ctx context.Context, v interface{}) (model.MessageInput, error) {
+func (ec *executionContext) unmarshalNMessageInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐMessageInput(ctx context.Context, v interface{}) (model.MessageInput, error) {
 	res, err := ec.unmarshalInputMessageInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNMutationType2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐMutationType(ctx context.Context, v interface{}) (model.MutationType, error) {
+func (ec *executionContext) unmarshalNMutationType2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐMutationType(ctx context.Context, v interface{}) (model.MutationType, error) {
 	var res model.MutationType
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNMutationType2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐMutationType(ctx context.Context, sel ast.SelectionSet, v model.MutationType) graphql.Marshaler {
+func (ec *executionContext) marshalNMutationType2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐMutationType(ctx context.Context, sel ast.SelectionSet, v model.MutationType) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNPageInfo2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v *model.PageInfo) graphql.Marshaler {
+func (ec *executionContext) marshalNPageInfo2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v *model.PageInfo) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12240,17 +12778,17 @@ func (ec *executionContext) marshalNPageInfo2ᚖgithubᚗcomᚋpixellandᚋpixel
 	return ec._PageInfo(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNRole2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐRole(ctx context.Context, v interface{}) (model.Role, error) {
+func (ec *executionContext) unmarshalNRole2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐRole(ctx context.Context, v interface{}) (model.Role, error) {
 	var res model.Role
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNRole2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐRole(ctx context.Context, sel ast.SelectionSet, v model.Role) graphql.Marshaler {
+func (ec *executionContext) marshalNRole2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐRole(ctx context.Context, sel ast.SelectionSet, v model.Role) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) unmarshalNRole2ᚕgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐRoleᚄ(ctx context.Context, v interface{}) ([]model.Role, error) {
+func (ec *executionContext) unmarshalNRole2ᚕgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐRoleᚄ(ctx context.Context, v interface{}) ([]model.Role, error) {
 	var vSlice []interface{}
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
@@ -12259,7 +12797,7 @@ func (ec *executionContext) unmarshalNRole2ᚕgithubᚗcomᚋpixellandᚋpixel�
 	res := make([]model.Role, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNRole2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐRole(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNRole2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐRole(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -12267,7 +12805,7 @@ func (ec *executionContext) unmarshalNRole2ᚕgithubᚗcomᚋpixellandᚋpixel�
 	return res, nil
 }
 
-func (ec *executionContext) marshalNRole2ᚕgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐRoleᚄ(ctx context.Context, sel ast.SelectionSet, v []model.Role) graphql.Marshaler {
+func (ec *executionContext) marshalNRole2ᚕgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐRoleᚄ(ctx context.Context, sel ast.SelectionSet, v []model.Role) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -12291,7 +12829,7 @@ func (ec *executionContext) marshalNRole2ᚕgithubᚗcomᚋpixellandᚋpixelᚑc
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNRole2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐRole(ctx, sel, v[i])
+			ret[i] = ec.marshalNRole2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐRole(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -12341,11 +12879,11 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalNUser2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12355,7 +12893,7 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋpixellandᚋpixelᚑc
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNUserGroupsEdge2ᚕᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUserGroupsEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.UserGroupsEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNUserGroupsEdge2ᚕᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserGroupsEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.UserGroupsEdge) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -12379,7 +12917,7 @@ func (ec *executionContext) marshalNUserGroupsEdge2ᚕᚖgithubᚗcomᚋpixellan
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNUserGroupsEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUserGroupsEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalNUserGroupsEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserGroupsEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -12399,7 +12937,7 @@ func (ec *executionContext) marshalNUserGroupsEdge2ᚕᚖgithubᚗcomᚋpixellan
 	return ret
 }
 
-func (ec *executionContext) marshalNUserGroupsEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUserGroupsEdge(ctx context.Context, sel ast.SelectionSet, v *model.UserGroupsEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNUserGroupsEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserGroupsEdge(ctx context.Context, sel ast.SelectionSet, v *model.UserGroupsEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12409,16 +12947,16 @@ func (ec *executionContext) marshalNUserGroupsEdge2ᚖgithubᚗcomᚋpixelland�
 	return ec._UserGroupsEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNUserInput2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUserInput(ctx context.Context, v interface{}) (model.UserInput, error) {
+func (ec *executionContext) unmarshalNUserInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserInput(ctx context.Context, v interface{}) (model.UserInput, error) {
 	res, err := ec.unmarshalInputUserInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUserInstancesConnection2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUserInstancesConnection(ctx context.Context, sel ast.SelectionSet, v model.UserInstancesConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNUserInstancesConnection2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserInstancesConnection(ctx context.Context, sel ast.SelectionSet, v model.UserInstancesConnection) graphql.Marshaler {
 	return ec._UserInstancesConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUserInstancesConnection2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUserInstancesConnection(ctx context.Context, sel ast.SelectionSet, v *model.UserInstancesConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNUserInstancesConnection2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserInstancesConnection(ctx context.Context, sel ast.SelectionSet, v *model.UserInstancesConnection) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12428,11 +12966,11 @@ func (ec *executionContext) marshalNUserInstancesConnection2ᚖgithubᚗcomᚋpi
 	return ec._UserInstancesConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNUserInstancesEdge2githubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx context.Context, sel ast.SelectionSet, v model.UserInstancesEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNUserInstancesEdge2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx context.Context, sel ast.SelectionSet, v model.UserInstancesEdge) graphql.Marshaler {
 	return ec._UserInstancesEdge(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUserInstancesEdge2ᚕᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUserInstancesEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.UserInstancesEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNUserInstancesEdge2ᚕᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserInstancesEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.UserInstancesEdge) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -12456,7 +12994,7 @@ func (ec *executionContext) marshalNUserInstancesEdge2ᚕᚖgithubᚗcomᚋpixel
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNUserInstancesEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalNUserInstancesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -12476,7 +13014,7 @@ func (ec *executionContext) marshalNUserInstancesEdge2ᚕᚖgithubᚗcomᚋpixel
 	return ret
 }
 
-func (ec *executionContext) marshalNUserInstancesEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx context.Context, sel ast.SelectionSet, v *model.UserInstancesEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNUserInstancesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx context.Context, sel ast.SelectionSet, v *model.UserInstancesEdge) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -12786,7 +13324,7 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) marshalOAuthor2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐAuthor(ctx context.Context, sel ast.SelectionSet, v *model.Author) graphql.Marshaler {
+func (ec *executionContext) marshalOAuthor2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAuthor(ctx context.Context, sel ast.SelectionSet, v *model.Author) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -12819,7 +13357,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) marshalOChannelMessagesEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐChannelMessagesEdge(ctx context.Context, sel ast.SelectionSet, v *model.ChannelMessagesEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOChannelMessagesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannelMessagesEdge(ctx context.Context, sel ast.SelectionSet, v *model.ChannelMessagesEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -12842,14 +13380,14 @@ func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel as
 	return graphql.WrapContextMarshaler(ctx, res)
 }
 
-func (ec *executionContext) marshalOInstance2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstance(ctx context.Context, sel ast.SelectionSet, v *model.Instance) graphql.Marshaler {
+func (ec *executionContext) marshalOInstance2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstance(ctx context.Context, sel ast.SelectionSet, v *model.Instance) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Instance(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOInstanceChannelsEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdge(ctx context.Context, sel ast.SelectionSet, v *model.InstanceChannelsEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOInstanceChannelsEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdge(ctx context.Context, sel ast.SelectionSet, v *model.InstanceChannelsEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -12904,14 +13442,14 @@ func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel
 	return res
 }
 
-func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOUserInstancesEdge2ᚖgithubᚗcomᚋpixellandᚋpixelᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx context.Context, sel ast.SelectionSet, v *model.UserInstancesEdge) graphql.Marshaler {
+func (ec *executionContext) marshalOUserInstancesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx context.Context, sel ast.SelectionSet, v *model.UserInstancesEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

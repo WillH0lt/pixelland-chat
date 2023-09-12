@@ -23,9 +23,15 @@ type Instance struct {
 	ID               uuid.UUID       `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
 	Name             string          `json:"name"`
 	Description      string          `json:"description"`
+	AuthorID         uuid.UUID       `json:"authorId" gorm:"type:uuid"`
+	Author           *InstanceUser   ``
 	ReadAccess       string          `json:"readAccess"`
 	Icon             string          `json:"icon"`
 	IsGroup          bool            ``
+	ShowAuthor       bool            `json:"showAuthor"`
+	ShowChat         bool            `json:"showChat"`
+	ShowComments     bool            `json:"showComments"`
+	ShowLikes        bool            `json:"showLikes"`
 	Channels         []*Channel      ``
 	Users            []*InstanceUser ``
 	Invites          []*Invite       ``
@@ -46,7 +52,9 @@ type Channel struct {
 	Publishers         pq.StringArray `json:"publishers" gorm:"type:text[]"`
 	Readers            pq.StringArray `json:"readers" gorm:"type:text[]"`
 	LastMessageAddedAt *time.Time     `json:"lastMessagedAddedAt"`
+	MessageCount       int            `json:"messageCount"`
 	IsCategory         bool           `json:"isCategory"`
+	IsComments         bool           `json:"isComments"`
 }
 
 type Message struct {

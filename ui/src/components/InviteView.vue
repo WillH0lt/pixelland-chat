@@ -1,6 +1,6 @@
 <template>
-  <div class="w-full flex flex-col items-center">
-    <ElementHeader @close="$emit('close')"></ElementHeader>
+  <div class="w-full flex flex-col items-center overflow-y-auto">
+    <ElementHeader class="flex-shrink-0" @close="$emit('close')"></ElementHeader>
 
     <div v-if="error">{{ error }}</div>
     <div v-else-if="loading">loading...</div>

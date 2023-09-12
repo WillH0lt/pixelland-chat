@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full flex flex-col items-center">
+  <div class="w-full flex flex-col items-center overflow-y-auto">
     <ElementHeader @close="$emit('close')"></ElementHeader>
 
     <div class="mx-4 text-xl flex flex-col max-w-full w-80 flex-1">

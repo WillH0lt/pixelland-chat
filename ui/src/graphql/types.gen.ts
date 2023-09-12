@@ -37,7 +37,9 @@ export type Channel = {
   readonly id: Scalars['Uuid'];
   readonly instanceId: Scalars['Uuid'];
   readonly isCategory: Scalars['Boolean'];
+  readonly isComments: Scalars['Boolean'];
   readonly lastMessageAddedAt?: Maybe<Scalars['Time']>;
+  readonly messageCount: Scalars['Int'];
   readonly messagesConnection: ChannelMessagesConnection;
   readonly name: Scalars['String'];
   readonly publishers: ReadonlyArray<Role>;
@@ -97,6 +99,7 @@ export type GroupInput = {
 
 export type Instance = {
   readonly __typename?: 'Instance';
+  readonly author: Author;
   readonly channelsConnection: InstanceChannelsConnection;
   readonly createdAt: Scalars['Time'];
   readonly description: Scalars['String'];
@@ -104,6 +107,10 @@ export type Instance = {
   readonly id: Scalars['Uuid'];
   readonly name: Scalars['String'];
   readonly readAccess: Access;
+  readonly showAuthor: Scalars['Boolean'];
+  readonly showChat: Scalars['Boolean'];
+  readonly showComments: Scalars['Boolean'];
+  readonly showLikes: Scalars['Boolean'];
 };
 
 
@@ -130,6 +137,10 @@ export type InstanceInput = {
   readonly id?: InputMaybe<Scalars['Uuid']>;
   readonly name: Scalars['String'];
   readonly readAccess: Access;
+  readonly showAuthor: Scalars['Boolean'];
+  readonly showChat: Scalars['Boolean'];
+  readonly showComments: Scalars['Boolean'];
+  readonly showLikes: Scalars['Boolean'];
 };
 
 export type InstancePinInput = {

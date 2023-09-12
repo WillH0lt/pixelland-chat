@@ -32,7 +32,6 @@
   >
     add description
   </div>
-  <hr v-if="instance.description !== ''" class="border-gray-medium mx-2" />
 </template>
 
 <script setup lang="ts">
