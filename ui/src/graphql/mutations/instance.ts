@@ -7,6 +7,8 @@ export const addInstance = gql`
     $input: InstanceInput!
     $channelsFirst: Int = 0
     $channelsAfter: String = ""
+    $likesFirst: Int = 0
+    $likesAfter: String = ""
     $messagesLast: Int = 0
     $messagesBefore: String = ""
   ) {
@@ -23,6 +25,8 @@ export const updateInstance = gql`
     $input: InstanceInput!
     $channelsFirst: Int = 0
     $channelsAfter: String = ""
+    $likesFirst: Int = 0
+    $likesAfter: String = ""
     $messagesLast: Int = 0
     $messagesBefore: String = ""
   ) {
@@ -38,6 +42,8 @@ export const removeInstance = gql`
     $instanceId: Uuid!
     $channelsFirst: Int = 0
     $channelsAfter: String = ""
+    $likesFirst: Int = 0
+    $likesAfter: String = ""
     $messagesLast: Int = 0
     $messagesBefore: String = ""
   ) {
@@ -54,6 +60,8 @@ export const reorderInstance = gql`
     $instanceId: Uuid!
     $channelsFirst: Int = 0
     $channelsAfter: String = ""
+    $likesFirst: Int = 0
+    $likesAfter: String = ""
     $messagesLast: Int = 0
     $messagesBefore: String = ""
   ) {
@@ -70,6 +78,8 @@ export const pinInstance = gql`
     $instanceId: Uuid!
     $channelsFirst: Int = 0
     $channelsAfter: String = ""
+    $likesFirst: Int = 0
+    $likesAfter: String = ""
     $messagesLast: Int = 0
     $messagesBefore: String = ""
   ) {

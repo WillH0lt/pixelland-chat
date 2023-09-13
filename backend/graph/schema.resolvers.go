@@ -147,6 +147,49 @@ func (r *instanceResolver) ChannelsConnection(ctx context.Context, obj *model.In
 	}, nil
 }
 
+// LikesConnection is the resolver for the likesConnection field.
+func (r *instanceResolver) LikesConnection(ctx context.Context, obj *model.Instance, first *int, after *string) (*model.InstanceLikesConnection, error) {
+	db := interfaces.GetDatabase()
+	instanceUsers := []model.InstanceUser{}
+
+	tx := db.Model(&obj).Limit(*first + 1).Order("created_at asc")
+	tx = tx.Where("liked_by_me = ?", true)
+
+	if *after != "" {
+		likedAt, err := fromCursorHash(*after)
+		if err != nil {
+			return nil, err
+		}
+		tx = tx.Where("liked_at > ?", likedAt)
+	}
+
+	if err := tx.Association("Users").Find(&instanceUsers); err != nil {
+		return nil, err
+	}
+
+	hasNextPage := (len(instanceUsers) == *first+1)
+	if len(instanceUsers) > 0 && hasNextPage {
+		instanceUsers = instanceUsers[:len(instanceUsers)-1]
+	}
+
+	edges := []*model.InstanceLikesEdge{}
+	for i := 0; i < len(instanceUsers); i++ {
+		edge, err := createInstanceLikesEdge(&instanceUsers[i])
+		if err != nil {
+			return nil, err
+		}
+		edges = append(edges, edge)
+	}
+
+	return &model.InstanceLikesConnection{
+		Edges: edges,
+		PageInfo: &model.PageInfo{
+			HasNextPage:     hasNextPage,
+			HasPreviousPage: false, // TODO
+		},
+	}, nil
+}
+
 // Author is the resolver for the author field.
 func (r *inviteResolver) Author(ctx context.Context, obj *model.Invite) (*model.Author, error) {
 	return instanceUserToAuthor(obj.Author), nil
@@ -735,8 +778,6 @@ func (r *mutationResolver) AddMessage(ctx context.Context, input model.MessageIn
 
 	db.Model(&channel).Association("Messages").Append(&message)
 
-	log.Info().Msgf("Message added: %s", message.Author)
-
 	sendMessageNotification(r.InstanceStreamObservers, &message, &channel, model.MutationTypeMessageAdded)
 
 	edge, err := createChannelMessagesEdge(&message)
@@ -1033,6 +1074,84 @@ func (r *mutationResolver) RedeemInvite(ctx context.Context, code string) (*mode
 	return &invite, nil
 }
 
+// AddLike is the resolver for the addLike field.
+func (r *mutationResolver) AddLike(ctx context.Context, instanceID uuid.UUID) (*model.InstanceLikesEdge, error) {
+	// TODO consider using transaction here
+	db := interfaces.GetDatabase()
+
+	callerInstanceUser, err := getCallerInstanceUser(ctx, instanceID)
+	if err != nil {
+		return nil, err
+	}
+
+	if callerInstanceUser.LikedByMe {
+		return nil, errors.New("user already likes instance")
+	}
+
+	callerInstanceUser.LikedByMe = true
+	now := time.Now()
+	callerInstanceUser.LikedAt = &now
+	if err := db.Save(&callerInstanceUser).Error; err != nil {
+		return nil, err
+	}
+
+	instance := model.Instance{}
+	if err := db.First(&instance, instanceID).Error; err != nil {
+		return nil, err
+	}
+	instance.LikesCount += 1
+	if err := db.Save(&instance).Error; err != nil {
+		return nil, err
+	}
+
+	edge, err := createInstanceLikesEdge(callerInstanceUser)
+	if err != nil {
+		return nil, err
+	}
+
+	sendLikeNotification(r.InstanceStreamObservers, edge, model.MutationTypeLikeAdded)
+
+	return edge, nil
+}
+
+// RemoveLike is the resolver for the removeLike field.
+func (r *mutationResolver) RemoveLike(ctx context.Context, instanceID uuid.UUID) (*model.InstanceLikesEdge, error) {
+	// TODO consider using transaction here
+	db := interfaces.GetDatabase()
+
+	callerInstanceUser, err := getCallerInstanceUser(ctx, instanceID)
+	if err != nil {
+		return nil, err
+	}
+
+	if !callerInstanceUser.LikedByMe {
+		return nil, errors.New("user doesn't already like instance")
+	}
+
+	callerInstanceUser.LikedByMe = false
+	if err := db.Save(&callerInstanceUser).Error; err != nil {
+		return nil, err
+	}
+
+	instance := model.Instance{}
+	if err := db.First(&instance, instanceID).Error; err != nil {
+		return nil, err
+	}
+	instance.LikesCount -= 1
+	if err := db.Save(&instance).Error; err != nil {
+		return nil, err
+	}
+
+	edge, err := createInstanceLikesEdge(callerInstanceUser)
+	if err != nil {
+		return nil, err
+	}
+
+	sendLikeNotification(r.InstanceStreamObservers, edge, model.MutationTypeLikeRemoved)
+
+	return edge, nil
+}
+
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, uid string) (*model.User, error) {
 	db := interfaces.GetDatabase()
@@ -1168,7 +1287,7 @@ func (r *subscriptionResolver) InstanceStream(ctx context.Context, instanceID uu
 	}
 
 	stream := make(chan *model.InstanceStreamNotification, 1)
-	listenerId := callerInstanceUser.ID
+	listenerId := uuid.New().String()
 	go func() {
 		<-ctx.Done()
 		r.InstanceStreamObservers.Delete(listenerId)

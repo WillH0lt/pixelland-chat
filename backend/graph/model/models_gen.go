@@ -77,6 +77,17 @@ type InstanceInput struct {
 	ShowLikes    bool       `json:"showLikes"`
 }
 
+type InstanceLikesConnection struct {
+	PageInfo *PageInfo            `json:"pageInfo"`
+	Edges    []*InstanceLikesEdge `json:"edges"`
+}
+
+type InstanceLikesEdge struct {
+	Cursor  string    `json:"cursor"`
+	LikedAt time.Time `json:"likedAt"`
+	Node    *Author   `json:"node"`
+}
+
 type InstancePinInput struct {
 	Pinned bool `json:"pinned"`
 }
@@ -90,6 +101,7 @@ type InstanceStreamNotification struct {
 	ChannelMessagesEdge  *ChannelMessagesEdge  `json:"channelMessagesEdge"`
 	UserInstancesEdge    *UserInstancesEdge    `json:"userInstancesEdge"`
 	InstanceChannelsEdge *InstanceChannelsEdge `json:"instanceChannelsEdge"`
+	InstanceLikesEdge    *InstanceLikesEdge    `json:"instanceLikesEdge"`
 	Instance             *Instance             `json:"instance"`
 	User                 *User                 `json:"user"`
 	Author               *Author               `json:"author"`
@@ -136,6 +148,7 @@ type UserInstancesEdge struct {
 	Cursor       string    `json:"cursor"`
 	Node         *Instance `json:"node"`
 	InstanceUser *Author   `json:"instanceUser"`
+	LikedByMe    bool      `json:"likedByMe"`
 	Rank         string    `json:"rank"`
 	Pinned       bool      `json:"pinned"`
 }
@@ -193,6 +206,8 @@ const (
 	MutationTypeUserUpdated     MutationType = "USER_UPDATED"
 	MutationTypeInstanceUpdated MutationType = "INSTANCE_UPDATED"
 	MutationTypeInstanceRemoved MutationType = "INSTANCE_REMOVED"
+	MutationTypeLikeAdded       MutationType = "LIKE_ADDED"
+	MutationTypeLikeRemoved     MutationType = "LIKE_REMOVED"
 )
 
 var AllMutationType = []MutationType{
@@ -205,11 +220,13 @@ var AllMutationType = []MutationType{
 	MutationTypeUserUpdated,
 	MutationTypeInstanceUpdated,
 	MutationTypeInstanceRemoved,
+	MutationTypeLikeAdded,
+	MutationTypeLikeRemoved,
 }
 
 func (e MutationType) IsValid() bool {
 	switch e {
-	case MutationTypeMessageAdded, MutationTypeMessageRemoved, MutationTypeChannelAdded, MutationTypeChannelUpdated, MutationTypeChannelRemoved, MutationTypeAuthorUpdated, MutationTypeUserUpdated, MutationTypeInstanceUpdated, MutationTypeInstanceRemoved:
+	case MutationTypeMessageAdded, MutationTypeMessageRemoved, MutationTypeChannelAdded, MutationTypeChannelUpdated, MutationTypeChannelRemoved, MutationTypeAuthorUpdated, MutationTypeUserUpdated, MutationTypeInstanceUpdated, MutationTypeInstanceRemoved, MutationTypeLikeAdded, MutationTypeLikeRemoved:
 		return true
 	}
 	return false

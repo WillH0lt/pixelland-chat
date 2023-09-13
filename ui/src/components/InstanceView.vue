@@ -5,22 +5,23 @@
       <InstanceGutter class="w-20 h-full" />
       <div class="flex-1 flex flex-col">
         <InstanceAuthor
-          v-if="instanceStore.instance.showAuthor"
-          :author="instanceStore.instance.author"
-          :time-since="instanceStore.instance.timeSince"
+          v-if="instance.showAuthor"
+          :author="instance.author"
+          :time-since="instance.timeSince"
         />
-        <InstanceDescription :instance="instanceStore.instance" />
+        <InstanceDescription :instance="instance" />
+        <InstanceLikes v-if="instance.showLikes" :instance-id="instance.id" />
         <InstanceBanned v-if="authorStore.isBanned" />
         <!-- <InstanceEmpty v-else-if="channels.length === 0" /> -->
         <InstanceChannels
           class="overflow-y-auto overflow-x-hidden flex-1"
-          v-else-if="instanceStore.instance.showChat"
+          v-else-if="instance.showChat"
         />
         <InstanceComments
           class="overflow-y-auto overflow-x-hidden"
-          v-if="instanceStore.instance.showComments && comments"
-          :channel="comments"
-          :class="instanceStore.instance.showChat ? 'max-h-[25vh]' : 'flex-1'"
+          v-if="instance.showComments && commentsChannel"
+          :channel="commentsChannel"
+          :class="instance.showChat ? 'max-h-[25vh]' : 'flex-1'"
         />
       </div>
     </div>
@@ -37,6 +38,7 @@ import InstanceDescription from '@/components/InstanceDescription.vue'
 import InstanceEmpty from '@/components/InstanceEmpty.vue'
 import InstanceGutter from '@/components/InstanceGutter.vue'
 import InstanceHeader from '@/components/InstanceHeader.vue'
+import InstanceLikes from '@/components/InstanceLikes.vue'
 import { useAuthorStore } from '@/store/author'
 import { useChannelStore } from '@/store/channel'
 import { useInstanceStore } from '@/store/instance'
@@ -45,6 +47,6 @@ const authorStore = useAuthorStore()
 const channelStore = useChannelStore()
 const instanceStore = useInstanceStore()
 
-const channels = computed(() => channelStore.getChannels(instanceStore.instance.id))
-const comments = computed(() => channelStore.getCommentsChannel(instanceStore.instance.id))
+const commentsChannel = computed(() => channelStore.getCommentsChannel(instanceStore.instance.id))
+const instance = computed(() => instanceStore.instance)
 </script>

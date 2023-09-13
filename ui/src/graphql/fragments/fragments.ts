@@ -94,6 +94,17 @@ export const InstanceChannelsEdgeFragment = gql`
   ${ChannelFragment}
 `
 
+export const InstanceLikesEdgeFragment = gql`
+  fragment InstanceLikesEdgeFragment on InstanceLikesEdge {
+    cursor
+    likedAt
+    node {
+      ...AuthorFragment
+    }
+  }
+  ${AuthorFragment}
+`
+
 export const InstanceFragment = gql`
   fragment InstanceFragment on Instance {
     id
@@ -109,6 +120,15 @@ export const InstanceFragment = gql`
     showChat
     showLikes
     showComments
+    likesCount
+    likesConnection(first: $likesFirst, after: $likesAfter) {
+      edges {
+        ...InstanceLikesEdgeFragment
+      }
+      pageInfo {
+        ...PageInfoFragment
+      }
+    }
     channelsConnection(first: $channelsFirst, after: $channelsAfter) {
       edges {
         ...InstanceChannelsEdgeFragment
@@ -120,6 +140,7 @@ export const InstanceFragment = gql`
   }
   ${AuthorFragment}
   ${ChannelFragment}
+  ${InstanceLikesEdgeFragment}
   ${InstanceChannelsEdgeFragment}
   ${PageInfoFragment}
 `
@@ -135,6 +156,7 @@ export const UserInstancesEdgeFragment = gql`
     }
     rank
     pinned
+    likedByMe
   }
   ${AuthorFragment}
   ${InstanceFragment}

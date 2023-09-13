@@ -27,10 +27,15 @@ type Instance {
   showChat: Boolean!
   showComments: Boolean!
   showLikes: Boolean!
+  likesCount: Int!
   channelsConnection(
     first: Int = 50 @constraint(max: 50)
     after: String = ""
   ): InstanceChannelsConnection!
+  likesConnection(
+    first: Int = 50 @constraint(max: 50)
+    after: String = ""
+  ): InstanceLikesConnection!
 }
 
 type Invite {
@@ -109,6 +114,11 @@ type InstanceChannelsConnection {
   edges: [InstanceChannelsEdge!]!
 }
 
+type InstanceLikesConnection {
+  pageInfo: PageInfo!
+  edges: [InstanceLikesEdge!]!
+}
+
 type ChannelMessagesConnection {
   pageInfo: PageInfo!
   edges: [ChannelMessagesEdge!]!
@@ -120,6 +130,7 @@ type UserInstancesEdge {
   cursor: String!
   node: Instance!
   instanceUser: Author!
+  likedByMe: Boolean!
   rank: String!
   pinned: Boolean!
 }
@@ -134,6 +145,12 @@ type InstanceChannelsEdge {
   node: Channel!
 }
 
+type InstanceLikesEdge {
+  cursor: String!
+  likedAt: Time!
+  node: Author!
+}
+
 type ChannelMessagesEdge {
   cursor: String!
   node: Message!
@@ -146,6 +163,7 @@ type InstanceStreamNotification {
   channelMessagesEdge: ChannelMessagesEdge
   userInstancesEdge: UserInstancesEdge
   instanceChannelsEdge: InstanceChannelsEdge
+  instanceLikesEdge: InstanceLikesEdge
   instance: Instance
   user: User
   author: Author
@@ -196,6 +214,9 @@ type Mutation {
   addInvite(input: InviteInput!): Invite! @auth(required: true)
   removeInvite(inviteId: Uuid!): Invite! @auth(required: true)
   redeemInvite(code: String!): Invite! @auth(required: true)
+  # like
+  addLike(instanceId: Uuid!): InstanceLikesEdge! @auth(required: true)
+  removeLike(instanceId: Uuid!): InstanceLikesEdge! @auth(required: true)
 }
 
 type Subscription {
@@ -282,6 +303,8 @@ enum MutationType {
   USER_UPDATED # TODO, this gets broadcast to everybody, need to limit to instanceUser update
   INSTANCE_UPDATED
   INSTANCE_REMOVED
+  LIKE_ADDED
+  LIKE_REMOVED
 }
 
 # ==============================================

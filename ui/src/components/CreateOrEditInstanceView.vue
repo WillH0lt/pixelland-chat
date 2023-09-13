@@ -29,10 +29,10 @@
         <ElementCheckbox v-model="showAuthor" />
       </div>
 
-      <!-- <div class="flex items-center mt-6 w-full px-16">
+      <div class="flex items-center mt-6 w-full px-16">
         <div class="mr-auto">Show Likes:</div>
         <ElementCheckbox v-model="showLikes" />
-      </div> -->
+      </div>
 
       <div class="flex items-center mt-6 w-full px-16">
         <div class="mr-auto">Show Chat:</div>

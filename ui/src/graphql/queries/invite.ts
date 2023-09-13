@@ -16,6 +16,8 @@ export const checkInvite = gql`
     $code: String!
     $channelsFirst: Int = 0
     $channelsAfter: String = ""
+    $likesFirst: Int = 0
+    $likesAfter: String = ""
     $messagesLast: Int = 0
     $messagesBefore: String = ""
   ) {

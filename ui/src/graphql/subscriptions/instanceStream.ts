@@ -5,6 +5,7 @@ import {
   ChannelMessagesEdgeFragment,
   InstanceChannelsEdgeFragment,
   InstanceFragment,
+  InstanceLikesEdgeFragment,
   UserFragment,
 } from '@/graphql/fragments/fragments'
 
@@ -15,6 +16,8 @@ export const instanceStream = gql`
     $instancesAfter: String = ""
     $channelsFirst: Int = 0
     $channelsAfter: String = ""
+    $likesFirst: Int = 0
+    $likesAfter: String = ""
     $messagesLast: Int = 0
     $messagesBefore: String = ""
   ) {
@@ -25,6 +28,9 @@ export const instanceStream = gql`
       }
       instanceChannelsEdge {
         ...InstanceChannelsEdgeFragment
+      }
+      instanceLikesEdge {
+        ...InstanceLikesEdgeFragment
       }
       user {
         ...UserFragment
@@ -41,5 +47,6 @@ export const instanceStream = gql`
   ${AuthorFragment}
   ${InstanceFragment}
   ${InstanceChannelsEdgeFragment}
+  ${InstanceLikesEdgeFragment}
   ${UserFragment}
 `

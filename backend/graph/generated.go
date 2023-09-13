@@ -108,6 +108,8 @@ type ComplexityRoot struct {
 		Description        func(childComplexity int) int
 		ID                 func(childComplexity int) int
 		Icon               func(childComplexity int) int
+		LikesConnection    func(childComplexity int, first *int, after *string) int
+		LikesCount         func(childComplexity int) int
 		Name               func(childComplexity int) int
 		ReadAccess         func(childComplexity int) int
 		ShowAuthor         func(childComplexity int) int
@@ -126,11 +128,23 @@ type ComplexityRoot struct {
 		Node   func(childComplexity int) int
 	}
 
+	InstanceLikesConnection struct {
+		Edges    func(childComplexity int) int
+		PageInfo func(childComplexity int) int
+	}
+
+	InstanceLikesEdge struct {
+		Cursor  func(childComplexity int) int
+		LikedAt func(childComplexity int) int
+		Node    func(childComplexity int) int
+	}
+
 	InstanceStreamNotification struct {
 		Author               func(childComplexity int) int
 		ChannelMessagesEdge  func(childComplexity int) int
 		Instance             func(childComplexity int) int
 		InstanceChannelsEdge func(childComplexity int) int
+		InstanceLikesEdge    func(childComplexity int) int
 		Mutation             func(childComplexity int) int
 		User                 func(childComplexity int) int
 		UserInstancesEdge    func(childComplexity int) int
@@ -160,6 +174,7 @@ type ComplexityRoot struct {
 		AddGroup        func(childComplexity int, input model.GroupInput) int
 		AddInstance     func(childComplexity int, input model.InstanceInput) int
 		AddInvite       func(childComplexity int, input model.InviteInput) int
+		AddLike         func(childComplexity int, instanceID uuid.UUID) int
 		AddMessage      func(childComplexity int, input model.MessageInput) int
 		AddRole         func(childComplexity int, authorID uuid.UUID, role model.Role) int
 		PinInstance     func(childComplexity int, instanceID uuid.UUID, input model.InstancePinInput) int
@@ -167,6 +182,7 @@ type ComplexityRoot struct {
 		RemoveChannel   func(childComplexity int, channelID uuid.UUID) int
 		RemoveInstance  func(childComplexity int, instanceID uuid.UUID) int
 		RemoveInvite    func(childComplexity int, inviteID uuid.UUID) int
+		RemoveLike      func(childComplexity int, instanceID uuid.UUID) int
 		RemoveMessage   func(childComplexity int, messageID uuid.UUID) int
 		RemoveRole      func(childComplexity int, authorID uuid.UUID, role model.Role) int
 		ReorderChannel  func(childComplexity int, channelID uuid.UUID, input model.ChannelReorderInput) int
@@ -219,6 +235,7 @@ type ComplexityRoot struct {
 	UserInstancesEdge struct {
 		Cursor       func(childComplexity int) int
 		InstanceUser func(childComplexity int) int
+		LikedByMe    func(childComplexity int) int
 		Node         func(childComplexity int) int
 		Pinned       func(childComplexity int) int
 		Rank         func(childComplexity int) int
@@ -235,6 +252,7 @@ type InstanceResolver interface {
 	ReadAccess(ctx context.Context, obj *model.Instance) (model.Access, error)
 
 	ChannelsConnection(ctx context.Context, obj *model.Instance, first *int, after *string) (*model.InstanceChannelsConnection, error)
+	LikesConnection(ctx context.Context, obj *model.Instance, first *int, after *string) (*model.InstanceLikesConnection, error)
 }
 type InviteResolver interface {
 	Author(ctx context.Context, obj *model.Invite) (*model.Author, error)
@@ -261,6 +279,8 @@ type MutationResolver interface {
 	AddInvite(ctx context.Context, input model.InviteInput) (*model.Invite, error)
 	RemoveInvite(ctx context.Context, inviteID uuid.UUID) (*model.Invite, error)
 	RedeemInvite(ctx context.Context, code string) (*model.Invite, error)
+	AddLike(ctx context.Context, instanceID uuid.UUID) (*model.InstanceLikesEdge, error)
+	RemoveLike(ctx context.Context, instanceID uuid.UUID) (*model.InstanceLikesEdge, error)
 }
 type QueryResolver interface {
 	User(ctx context.Context, uid string) (*model.User, error)
@@ -551,6 +571,25 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Instance.Icon(childComplexity), true
 
+	case "Instance.likesConnection":
+		if e.complexity.Instance.LikesConnection == nil {
+			break
+		}
+
+		args, err := ec.field_Instance_likesConnection_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Instance.LikesConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
+
+	case "Instance.likesCount":
+		if e.complexity.Instance.LikesCount == nil {
+			break
+		}
+
+		return e.complexity.Instance.LikesCount(childComplexity), true
+
 	case "Instance.name":
 		if e.complexity.Instance.Name == nil {
 			break
@@ -621,6 +660,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.InstanceChannelsEdge.Node(childComplexity), true
 
+	case "InstanceLikesConnection.edges":
+		if e.complexity.InstanceLikesConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.InstanceLikesConnection.Edges(childComplexity), true
+
+	case "InstanceLikesConnection.pageInfo":
+		if e.complexity.InstanceLikesConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.InstanceLikesConnection.PageInfo(childComplexity), true
+
+	case "InstanceLikesEdge.cursor":
+		if e.complexity.InstanceLikesEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.InstanceLikesEdge.Cursor(childComplexity), true
+
+	case "InstanceLikesEdge.likedAt":
+		if e.complexity.InstanceLikesEdge.LikedAt == nil {
+			break
+		}
+
+		return e.complexity.InstanceLikesEdge.LikedAt(childComplexity), true
+
+	case "InstanceLikesEdge.node":
+		if e.complexity.InstanceLikesEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.InstanceLikesEdge.Node(childComplexity), true
+
 	case "InstanceStreamNotification.author":
 		if e.complexity.InstanceStreamNotification.Author == nil {
 			break
@@ -648,6 +722,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.InstanceStreamNotification.InstanceChannelsEdge(childComplexity), true
+
+	case "InstanceStreamNotification.instanceLikesEdge":
+		if e.complexity.InstanceStreamNotification.InstanceLikesEdge == nil {
+			break
+		}
+
+		return e.complexity.InstanceStreamNotification.InstanceLikesEdge(childComplexity), true
 
 	case "InstanceStreamNotification.mutation":
 		if e.complexity.InstanceStreamNotification.Mutation == nil {
@@ -809,6 +890,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.AddInvite(childComplexity, args["input"].(model.InviteInput)), true
 
+	case "Mutation.addLike":
+		if e.complexity.Mutation.AddLike == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addLike_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddLike(childComplexity, args["instanceId"].(uuid.UUID)), true
+
 	case "Mutation.addMessage":
 		if e.complexity.Mutation.AddMessage == nil {
 			break
@@ -892,6 +985,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.RemoveInvite(childComplexity, args["inviteId"].(uuid.UUID)), true
+
+	case "Mutation.removeLike":
+		if e.complexity.Mutation.RemoveLike == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_removeLike_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RemoveLike(childComplexity, args["instanceId"].(uuid.UUID)), true
 
 	case "Mutation.removeMessage":
 		if e.complexity.Mutation.RemoveMessage == nil {
@@ -1158,6 +1263,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.UserInstancesEdge.InstanceUser(childComplexity), true
+
+	case "UserInstancesEdge.likedByMe":
+		if e.complexity.UserInstancesEdge.LikedByMe == nil {
+			break
+		}
+
+		return e.complexity.UserInstancesEdge.LikedByMe(childComplexity), true
 
 	case "UserInstancesEdge.node":
 		if e.complexity.UserInstancesEdge.Node == nil {
@@ -1473,6 +1585,53 @@ func (ec *executionContext) field_Instance_channelsConnection_args(ctx context.C
 	return args, nil
 }
 
+func (ec *executionContext) field_Instance_likesConnection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOInt2ᚖint(ctx, tmp) }
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			min, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 0)
+			if err != nil {
+				return nil, err
+			}
+			max, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 50)
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.Constraint == nil {
+				return nil, errors.New("directive constraint is not implemented")
+			}
+			return ec.directives.Constraint(ctx, rawArgs, directive0, min, max)
+		}
+
+		tmp, err = directive1(ctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if data, ok := tmp.(*int); ok {
+			arg0 = data
+		} else if tmp == nil {
+			arg0 = nil
+		} else {
+			return nil, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be *int`, tmp))
+		}
+	}
+	args["first"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_addChannel_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1530,6 +1689,21 @@ func (ec *executionContext) field_Mutation_addInvite_args(ctx context.Context, r
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_addLike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 uuid.UUID
+	if tmp, ok := rawArgs["instanceId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("instanceId"))
+		arg0, err = ec.unmarshalNUuid2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["instanceId"] = arg0
 	return args, nil
 }
 
@@ -1653,6 +1827,21 @@ func (ec *executionContext) field_Mutation_removeInvite_args(ctx context.Context
 		}
 	}
 	args["inviteId"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_removeLike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 uuid.UUID
+	if tmp, ok := rawArgs["instanceId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("instanceId"))
+		arg0, err = ec.unmarshalNUuid2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["instanceId"] = arg0
 	return args, nil
 }
 
@@ -3843,6 +4032,50 @@ func (ec *executionContext) fieldContext_Instance_showLikes(ctx context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _Instance_likesCount(ctx context.Context, field graphql.CollectedField, obj *model.Instance) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Instance_likesCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LikesCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Instance_likesCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Instance",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Instance_channelsConnection(ctx context.Context, field graphql.CollectedField, obj *model.Instance) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Instance_channelsConnection(ctx, field)
 	if err != nil {
@@ -3898,6 +4131,67 @@ func (ec *executionContext) fieldContext_Instance_channelsConnection(ctx context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Instance_channelsConnection_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Instance_likesConnection(ctx context.Context, field graphql.CollectedField, obj *model.Instance) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Instance_likesConnection(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Instance().LikesConnection(rctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.InstanceLikesConnection)
+	fc.Result = res
+	return ec.marshalNInstanceLikesConnection2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceLikesConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Instance_likesConnection(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Instance",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "pageInfo":
+				return ec.fieldContext_InstanceLikesConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_InstanceLikesConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type InstanceLikesConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Instance_likesConnection_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -4120,6 +4414,256 @@ func (ec *executionContext) fieldContext_InstanceChannelsEdge_node(ctx context.C
 	return fc, nil
 }
 
+func (ec *executionContext) _InstanceLikesConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.InstanceLikesConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_InstanceLikesConnection_pageInfo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.PageInfo)
+	fc.Result = res
+	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_InstanceLikesConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "InstanceLikesConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "hasPreviousPage":
+				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
+			case "hasNextPage":
+				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _InstanceLikesConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.InstanceLikesConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_InstanceLikesConnection_edges(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Edges, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.InstanceLikesEdge)
+	fc.Result = res
+	return ec.marshalNInstanceLikesEdge2ᚕᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceLikesEdgeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_InstanceLikesConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "InstanceLikesConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cursor":
+				return ec.fieldContext_InstanceLikesEdge_cursor(ctx, field)
+			case "likedAt":
+				return ec.fieldContext_InstanceLikesEdge_likedAt(ctx, field)
+			case "node":
+				return ec.fieldContext_InstanceLikesEdge_node(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type InstanceLikesEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _InstanceLikesEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.InstanceLikesEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_InstanceLikesEdge_cursor(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cursor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_InstanceLikesEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "InstanceLikesEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _InstanceLikesEdge_likedAt(ctx context.Context, field graphql.CollectedField, obj *model.InstanceLikesEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_InstanceLikesEdge_likedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LikedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_InstanceLikesEdge_likedAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "InstanceLikesEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _InstanceLikesEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.InstanceLikesEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_InstanceLikesEdge_node(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Node, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Author)
+	fc.Result = res
+	return ec.marshalNAuthor2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAuthor(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_InstanceLikesEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "InstanceLikesEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Author_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Author_userId(ctx, field)
+			case "instanceId":
+				return ec.fieldContext_Author_instanceId(ctx, field)
+			case "roles":
+				return ec.fieldContext_Author_roles(ctx, field)
+			case "name":
+				return ec.fieldContext_Author_name(ctx, field)
+			case "avatar":
+				return ec.fieldContext_Author_avatar(ctx, field)
+			case "bio":
+				return ec.fieldContext_Author_bio(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _InstanceStreamNotification_mutation(ctx context.Context, field graphql.CollectedField, obj *model.InstanceStreamNotification) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_InstanceStreamNotification_mutation(ctx, field)
 	if err != nil {
@@ -4253,6 +4797,8 @@ func (ec *executionContext) fieldContext_InstanceStreamNotification_userInstance
 				return ec.fieldContext_UserInstancesEdge_node(ctx, field)
 			case "instanceUser":
 				return ec.fieldContext_UserInstancesEdge_instanceUser(ctx, field)
+			case "likedByMe":
+				return ec.fieldContext_UserInstancesEdge_likedByMe(ctx, field)
 			case "rank":
 				return ec.fieldContext_UserInstancesEdge_rank(ctx, field)
 			case "pinned":
@@ -4306,6 +4852,55 @@ func (ec *executionContext) fieldContext_InstanceStreamNotification_instanceChan
 				return ec.fieldContext_InstanceChannelsEdge_node(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type InstanceChannelsEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _InstanceStreamNotification_instanceLikesEdge(ctx context.Context, field graphql.CollectedField, obj *model.InstanceStreamNotification) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_InstanceStreamNotification_instanceLikesEdge(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.InstanceLikesEdge, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.InstanceLikesEdge)
+	fc.Result = res
+	return ec.marshalOInstanceLikesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceLikesEdge(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_InstanceStreamNotification_instanceLikesEdge(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "InstanceStreamNotification",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cursor":
+				return ec.fieldContext_InstanceLikesEdge_cursor(ctx, field)
+			case "likedAt":
+				return ec.fieldContext_InstanceLikesEdge_likedAt(ctx, field)
+			case "node":
+				return ec.fieldContext_InstanceLikesEdge_node(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type InstanceLikesEdge", field.Name)
 		},
 	}
 	return fc, nil
@@ -4369,8 +4964,12 @@ func (ec *executionContext) fieldContext_InstanceStreamNotification_instance(ctx
 				return ec.fieldContext_Instance_showComments(ctx, field)
 			case "showLikes":
 				return ec.fieldContext_Instance_showLikes(ctx, field)
+			case "likesCount":
+				return ec.fieldContext_Instance_likesCount(ctx, field)
 			case "channelsConnection":
 				return ec.fieldContext_Instance_channelsConnection(ctx, field)
+			case "likesConnection":
+				return ec.fieldContext_Instance_likesConnection(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Instance", field.Name)
 		},
@@ -4634,8 +5233,12 @@ func (ec *executionContext) fieldContext_Invite_instance(ctx context.Context, fi
 				return ec.fieldContext_Instance_showComments(ctx, field)
 			case "showLikes":
 				return ec.fieldContext_Instance_showLikes(ctx, field)
+			case "likesCount":
+				return ec.fieldContext_Instance_likesCount(ctx, field)
 			case "channelsConnection":
 				return ec.fieldContext_Instance_channelsConnection(ctx, field)
+			case "likesConnection":
+				return ec.fieldContext_Instance_likesConnection(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Instance", field.Name)
 		},
@@ -5269,6 +5872,8 @@ func (ec *executionContext) fieldContext_Mutation_addInstance(ctx context.Contex
 				return ec.fieldContext_UserInstancesEdge_node(ctx, field)
 			case "instanceUser":
 				return ec.fieldContext_UserInstancesEdge_instanceUser(ctx, field)
+			case "likedByMe":
+				return ec.fieldContext_UserInstancesEdge_likedByMe(ctx, field)
 			case "rank":
 				return ec.fieldContext_UserInstancesEdge_rank(ctx, field)
 			case "pinned":
@@ -5360,6 +5965,8 @@ func (ec *executionContext) fieldContext_Mutation_updateInstance(ctx context.Con
 				return ec.fieldContext_UserInstancesEdge_node(ctx, field)
 			case "instanceUser":
 				return ec.fieldContext_UserInstancesEdge_instanceUser(ctx, field)
+			case "likedByMe":
+				return ec.fieldContext_UserInstancesEdge_likedByMe(ctx, field)
 			case "rank":
 				return ec.fieldContext_UserInstancesEdge_rank(ctx, field)
 			case "pinned":
@@ -5451,6 +6058,8 @@ func (ec *executionContext) fieldContext_Mutation_removeInstance(ctx context.Con
 				return ec.fieldContext_UserInstancesEdge_node(ctx, field)
 			case "instanceUser":
 				return ec.fieldContext_UserInstancesEdge_instanceUser(ctx, field)
+			case "likedByMe":
+				return ec.fieldContext_UserInstancesEdge_likedByMe(ctx, field)
 			case "rank":
 				return ec.fieldContext_UserInstancesEdge_rank(ctx, field)
 			case "pinned":
@@ -5542,6 +6151,8 @@ func (ec *executionContext) fieldContext_Mutation_reorderInstance(ctx context.Co
 				return ec.fieldContext_UserInstancesEdge_node(ctx, field)
 			case "instanceUser":
 				return ec.fieldContext_UserInstancesEdge_instanceUser(ctx, field)
+			case "likedByMe":
+				return ec.fieldContext_UserInstancesEdge_likedByMe(ctx, field)
 			case "rank":
 				return ec.fieldContext_UserInstancesEdge_rank(ctx, field)
 			case "pinned":
@@ -5633,6 +6244,8 @@ func (ec *executionContext) fieldContext_Mutation_pinInstance(ctx context.Contex
 				return ec.fieldContext_UserInstancesEdge_node(ctx, field)
 			case "instanceUser":
 				return ec.fieldContext_UserInstancesEdge_instanceUser(ctx, field)
+			case "likedByMe":
+				return ec.fieldContext_UserInstancesEdge_likedByMe(ctx, field)
 			case "rank":
 				return ec.fieldContext_UserInstancesEdge_rank(ctx, field)
 			case "pinned":
@@ -5740,8 +6353,12 @@ func (ec *executionContext) fieldContext_Mutation_addGroup(ctx context.Context, 
 				return ec.fieldContext_Instance_showComments(ctx, field)
 			case "showLikes":
 				return ec.fieldContext_Instance_showLikes(ctx, field)
+			case "likesCount":
+				return ec.fieldContext_Instance_likesCount(ctx, field)
 			case "channelsConnection":
 				return ec.fieldContext_Instance_channelsConnection(ctx, field)
+			case "likesConnection":
+				return ec.fieldContext_Instance_likesConnection(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Instance", field.Name)
 		},
@@ -6751,6 +7368,180 @@ func (ec *executionContext) fieldContext_Mutation_redeemInvite(ctx context.Conte
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_addLike(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_addLike(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().AddLike(rctx, fc.Args["instanceId"].(uuid.UUID))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.Auth == nil {
+				return nil, errors.New("directive auth is not implemented")
+			}
+			return ec.directives.Auth(ctx, nil, directive0, required)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model.InstanceLikesEdge); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/wwwillw/pixelland-chat/graph/model.InstanceLikesEdge`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.InstanceLikesEdge)
+	fc.Result = res
+	return ec.marshalNInstanceLikesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceLikesEdge(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_addLike(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cursor":
+				return ec.fieldContext_InstanceLikesEdge_cursor(ctx, field)
+			case "likedAt":
+				return ec.fieldContext_InstanceLikesEdge_likedAt(ctx, field)
+			case "node":
+				return ec.fieldContext_InstanceLikesEdge_node(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type InstanceLikesEdge", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_addLike_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_removeLike(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_removeLike(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().RemoveLike(rctx, fc.Args["instanceId"].(uuid.UUID))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.Auth == nil {
+				return nil, errors.New("directive auth is not implemented")
+			}
+			return ec.directives.Auth(ctx, nil, directive0, required)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model.InstanceLikesEdge); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/wwwillw/pixelland-chat/graph/model.InstanceLikesEdge`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.InstanceLikesEdge)
+	fc.Result = res
+	return ec.marshalNInstanceLikesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceLikesEdge(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_removeLike(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cursor":
+				return ec.fieldContext_InstanceLikesEdge_cursor(ctx, field)
+			case "likedAt":
+				return ec.fieldContext_InstanceLikesEdge_likedAt(ctx, field)
+			case "node":
+				return ec.fieldContext_InstanceLikesEdge_node(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type InstanceLikesEdge", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_removeLike_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _PageInfo_hasPreviousPage(ctx context.Context, field graphql.CollectedField, obj *model.PageInfo) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
 	if err != nil {
@@ -6999,6 +7790,8 @@ func (ec *executionContext) fieldContext_Query_instance(ctx context.Context, fie
 				return ec.fieldContext_UserInstancesEdge_node(ctx, field)
 			case "instanceUser":
 				return ec.fieldContext_UserInstancesEdge_instanceUser(ctx, field)
+			case "likedByMe":
+				return ec.fieldContext_UserInstancesEdge_likedByMe(ctx, field)
 			case "rank":
 				return ec.fieldContext_UserInstancesEdge_rank(ctx, field)
 			case "pinned":
@@ -7536,6 +8329,8 @@ func (ec *executionContext) fieldContext_Subscription_instanceStream(ctx context
 				return ec.fieldContext_InstanceStreamNotification_userInstancesEdge(ctx, field)
 			case "instanceChannelsEdge":
 				return ec.fieldContext_InstanceStreamNotification_instanceChannelsEdge(ctx, field)
+			case "instanceLikesEdge":
+				return ec.fieldContext_InstanceStreamNotification_instanceLikesEdge(ctx, field)
 			case "instance":
 				return ec.fieldContext_InstanceStreamNotification_instance(ctx, field)
 			case "user":
@@ -8092,6 +8887,8 @@ func (ec *executionContext) fieldContext_UserInstancesConnection_edges(ctx conte
 				return ec.fieldContext_UserInstancesEdge_node(ctx, field)
 			case "instanceUser":
 				return ec.fieldContext_UserInstancesEdge_instanceUser(ctx, field)
+			case "likedByMe":
+				return ec.fieldContext_UserInstancesEdge_likedByMe(ctx, field)
 			case "rank":
 				return ec.fieldContext_UserInstancesEdge_rank(ctx, field)
 			case "pinned":
@@ -8208,8 +9005,12 @@ func (ec *executionContext) fieldContext_UserInstancesEdge_node(ctx context.Cont
 				return ec.fieldContext_Instance_showComments(ctx, field)
 			case "showLikes":
 				return ec.fieldContext_Instance_showLikes(ctx, field)
+			case "likesCount":
+				return ec.fieldContext_Instance_likesCount(ctx, field)
 			case "channelsConnection":
 				return ec.fieldContext_Instance_channelsConnection(ctx, field)
+			case "likesConnection":
+				return ec.fieldContext_Instance_likesConnection(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Instance", field.Name)
 		},
@@ -8272,6 +9073,50 @@ func (ec *executionContext) fieldContext_UserInstancesEdge_instanceUser(ctx cont
 				return ec.fieldContext_Author_bio(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserInstancesEdge_likedByMe(ctx context.Context, field graphql.CollectedField, obj *model.UserInstancesEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserInstancesEdge_likedByMe(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LikedByMe, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserInstancesEdge_likedByMe(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserInstancesEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	return fc, nil
@@ -11145,6 +11990,13 @@ func (ec *executionContext) _Instance(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "likesCount":
+
+			out.Values[i] = ec._Instance_likesCount(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "channelsConnection":
 			field := field
 
@@ -11155,6 +12007,26 @@ func (ec *executionContext) _Instance(ctx context.Context, sel ast.SelectionSet,
 					}
 				}()
 				res = ec._Instance_channelsConnection(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "likesConnection":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Instance_likesConnection(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -11246,6 +12118,83 @@ func (ec *executionContext) _InstanceChannelsEdge(ctx context.Context, sel ast.S
 	return out
 }
 
+var instanceLikesConnectionImplementors = []string{"InstanceLikesConnection"}
+
+func (ec *executionContext) _InstanceLikesConnection(ctx context.Context, sel ast.SelectionSet, obj *model.InstanceLikesConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, instanceLikesConnectionImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("InstanceLikesConnection")
+		case "pageInfo":
+
+			out.Values[i] = ec._InstanceLikesConnection_pageInfo(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "edges":
+
+			out.Values[i] = ec._InstanceLikesConnection_edges(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var instanceLikesEdgeImplementors = []string{"InstanceLikesEdge"}
+
+func (ec *executionContext) _InstanceLikesEdge(ctx context.Context, sel ast.SelectionSet, obj *model.InstanceLikesEdge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, instanceLikesEdgeImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("InstanceLikesEdge")
+		case "cursor":
+
+			out.Values[i] = ec._InstanceLikesEdge_cursor(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "likedAt":
+
+			out.Values[i] = ec._InstanceLikesEdge_likedAt(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "node":
+
+			out.Values[i] = ec._InstanceLikesEdge_node(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var instanceStreamNotificationImplementors = []string{"InstanceStreamNotification"}
 
 func (ec *executionContext) _InstanceStreamNotification(ctx context.Context, sel ast.SelectionSet, obj *model.InstanceStreamNotification) graphql.Marshaler {
@@ -11274,6 +12223,10 @@ func (ec *executionContext) _InstanceStreamNotification(ctx context.Context, sel
 		case "instanceChannelsEdge":
 
 			out.Values[i] = ec._InstanceStreamNotification_instanceChannelsEdge(ctx, field, obj)
+
+		case "instanceLikesEdge":
+
+			out.Values[i] = ec._InstanceStreamNotification_instanceLikesEdge(ctx, field, obj)
 
 		case "instance":
 
@@ -11624,6 +12577,24 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_redeemInvite(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "addLike":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_addLike(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "removeLike":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_removeLike(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -12053,6 +13024,13 @@ func (ec *executionContext) _UserInstancesEdge(ctx context.Context, sel ast.Sele
 		case "instanceUser":
 
 			out.Values[i] = ec._UserInstancesEdge_instanceUser(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "likedByMe":
+
+			out.Values[i] = ec._UserInstancesEdge_likedByMe(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -12683,6 +13661,78 @@ func (ec *executionContext) marshalNInstanceChannelsEdge2ᚖgithubᚗcomᚋwwwil
 func (ec *executionContext) unmarshalNInstanceInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceInput(ctx context.Context, v interface{}) (model.InstanceInput, error) {
 	res, err := ec.unmarshalInputInstanceInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInstanceLikesConnection2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceLikesConnection(ctx context.Context, sel ast.SelectionSet, v model.InstanceLikesConnection) graphql.Marshaler {
+	return ec._InstanceLikesConnection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNInstanceLikesConnection2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceLikesConnection(ctx context.Context, sel ast.SelectionSet, v *model.InstanceLikesConnection) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._InstanceLikesConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNInstanceLikesEdge2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceLikesEdge(ctx context.Context, sel ast.SelectionSet, v model.InstanceLikesEdge) graphql.Marshaler {
+	return ec._InstanceLikesEdge(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNInstanceLikesEdge2ᚕᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceLikesEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.InstanceLikesEdge) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNInstanceLikesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceLikesEdge(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNInstanceLikesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceLikesEdge(ctx context.Context, sel ast.SelectionSet, v *model.InstanceLikesEdge) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._InstanceLikesEdge(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNInstancePinInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstancePinInput(ctx context.Context, v interface{}) (model.InstancePinInput, error) {
@@ -13392,6 +14442,13 @@ func (ec *executionContext) marshalOInstanceChannelsEdge2ᚖgithubᚗcomᚋwwwil
 		return graphql.Null
 	}
 	return ec._InstanceChannelsEdge(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOInstanceLikesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceLikesEdge(ctx context.Context, sel ast.SelectionSet, v *model.InstanceLikesEdge) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._InstanceLikesEdge(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {

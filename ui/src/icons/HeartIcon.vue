@@ -1,0 +1,29 @@
+<template>
+  <svg
+    version="1.0"
+    xmlns="http://www.w3.org/2000/svg"
+    width="70.000000pt"
+    height="60.000000pt"
+    viewBox="0 0 70.000000 60.000000"
+    preserveAspectRatio="xMidYMid meet"
+  >
+    <g
+      transform="translate(0.000000,60.000000) scale(0.100000,-0.100000)"
+      :fill="fill"
+      stroke="none"
+    >
+      <path
+        d="M100 550 l0 -50 -50 0 -50 0 0 -100 0 -100 50 0 50 0 0 -50 0 -50 50
+0 50 0 0 -50 0 -50 50 0 50 0 0 -50 0 -50 50 0 50 0 0 50 0 50 50 0 50 0 0 50
+0 50 50 0 50 0 0 50 0 50 50 0 50 0 0 100 0 100 -50 0 -50 0 0 50 0 50 -100 0
+-100 0 0 -50 0 -50 -50 0 -50 0 0 50 0 50 -100 0 -100 0 0 -50z"
+      />
+    </g>
+  </svg>
+</template>
+
+<script setup lang="ts">
+defineProps<{
+  fill: string
+}>()
+</script>

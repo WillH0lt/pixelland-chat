@@ -21,6 +21,7 @@ import {
 } from '@/graphql/types.gen'
 import { useAuthorStore } from '@/store/author'
 import { useChannelStore } from '@/store/channel'
+import { useLikeStore } from '@/store/like'
 import { useMessageStore } from '@/store/message'
 import { ExtendedInstance } from '@/types/ExtendedInstance'
 import { timeSince } from '@/utils'
@@ -28,6 +29,7 @@ import { timeSince } from '@/utils'
 export const useInstanceStore = defineStore('instance', () => {
   const channelStore = useChannelStore()
   const authorStore = useAuthorStore()
+  const likeStore = useLikeStore()
   const messageStore = useMessageStore()
   let stopInstanceStream: () => void = () => null
 
@@ -73,6 +75,10 @@ export const useInstanceStore = defineStore('instance', () => {
 
     handleInstancesAdded([userInstancesEdge])
     channelStore.handleChannelsAdded(userInstancesEdge.node.channelsConnection.edges)
+    likeStore.reset()
+    likeStore.likedByMe = userInstancesEdge.likedByMe
+    likeStore.likesCount = userInstancesEdge.node.likesCount
+    likeStore.hasNextPage = userInstancesEdge.node.likesConnection.pageInfo.hasNextPage
 
     const instance = userInstancesEdge.node
     authorStore.handleAuthorsAdded([instance.author])
@@ -88,8 +94,15 @@ export const useInstanceStore = defineStore('instance', () => {
     stopInstanceStream = stop
     onInstanceStreamResult(result => {
       if (!result.data?.instanceStream) return
-      const { mutation, channelMessagesEdge, instanceChannelsEdge, author, user, instance } =
-        result.data.instanceStream
+      const {
+        mutation,
+        channelMessagesEdge,
+        instanceChannelsEdge,
+        instanceLikesEdge,
+        author,
+        user,
+        instance,
+      } = result.data.instanceStream
 
       if (mutation === MutationType.MessageAdded && channelMessagesEdge) {
         messageStore.handleMessagesAdded([channelMessagesEdge])
@@ -105,6 +118,10 @@ export const useInstanceStore = defineStore('instance', () => {
         authorStore.handleAuthorUpdated(author)
       } else if (mutation === MutationType.UserUpdated && user) {
         authorStore.handleUserUpdated(user)
+      } else if (mutation === MutationType.LikeAdded && instanceLikesEdge) {
+        likeStore.handleLikeAdded(instanceLikesEdge)
+      } else if (mutation === MutationType.LikeRemoved && instanceLikesEdge) {
+        likeStore.handleLikeRemoved(instanceLikesEdge)
       } else if (mutation === MutationType.InstanceUpdated && instance) {
         const extendedInstance = instances.value[instance.id] ?? ({} as ExtendedInstance)
         instances.value[instance.id] = mergeInstance(instance, extendedInstance)

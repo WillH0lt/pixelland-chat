@@ -58,6 +58,11 @@ export const routes = [
         component: () => import('./components/ChannelView.vue'),
       },
       {
+        name: 'likes',
+        path: '/instances/:instanceId/likes/',
+        component: () => import('./components/LikeView.vue'),
+      },
+      {
         name: 'groups',
         path: '/groups',
         component: () => import('./components/GroupsView.vue'),

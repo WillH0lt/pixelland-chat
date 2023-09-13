@@ -105,6 +105,8 @@ export type Instance = {
   readonly description: Scalars['String'];
   readonly icon: Scalars['String'];
   readonly id: Scalars['Uuid'];
+  readonly likesConnection: InstanceLikesConnection;
+  readonly likesCount: Scalars['Int'];
   readonly name: Scalars['String'];
   readonly readAccess: Access;
   readonly showAuthor: Scalars['Boolean'];
@@ -115,6 +117,12 @@ export type Instance = {
 
 
 export type InstanceChannelsConnectionArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+};
+
+
+export type InstanceLikesConnectionArgs = {
   after?: InputMaybe<Scalars['String']>;
   first?: InputMaybe<Scalars['Int']>;
 };
@@ -143,6 +151,19 @@ export type InstanceInput = {
   readonly showLikes: Scalars['Boolean'];
 };
 
+export type InstanceLikesConnection = {
+  readonly __typename?: 'InstanceLikesConnection';
+  readonly edges: ReadonlyArray<InstanceLikesEdge>;
+  readonly pageInfo: PageInfo;
+};
+
+export type InstanceLikesEdge = {
+  readonly __typename?: 'InstanceLikesEdge';
+  readonly cursor: Scalars['String'];
+  readonly likedAt: Scalars['Time'];
+  readonly node: Author;
+};
+
 export type InstancePinInput = {
   readonly pinned: Scalars['Boolean'];
 };
@@ -157,6 +178,7 @@ export type InstanceStreamNotification = {
   readonly channelMessagesEdge?: Maybe<ChannelMessagesEdge>;
   readonly instance?: Maybe<Instance>;
   readonly instanceChannelsEdge?: Maybe<InstanceChannelsEdge>;
+  readonly instanceLikesEdge?: Maybe<InstanceLikesEdge>;
   readonly mutation: MutationType;
   readonly user?: Maybe<User>;
   readonly userInstancesEdge?: Maybe<UserInstancesEdge>;
@@ -200,6 +222,7 @@ export type Mutation = {
   readonly addGroup: Instance;
   readonly addInstance: UserInstancesEdge;
   readonly addInvite: Invite;
+  readonly addLike: InstanceLikesEdge;
   readonly addMessage: ChannelMessagesEdge;
   readonly addRole: Author;
   readonly pinInstance: UserInstancesEdge;
@@ -207,6 +230,7 @@ export type Mutation = {
   readonly removeChannel: InstanceChannelsEdge;
   readonly removeInstance: UserInstancesEdge;
   readonly removeInvite: Invite;
+  readonly removeLike: InstanceLikesEdge;
   readonly removeMessage: ChannelMessagesEdge;
   readonly removeRole: Author;
   readonly reorderChannel: InstanceChannelsEdge;
@@ -234,6 +258,11 @@ export type MutationAddInstanceArgs = {
 
 export type MutationAddInviteArgs = {
   input: InviteInput;
+};
+
+
+export type MutationAddLikeArgs = {
+  instanceId: Scalars['Uuid'];
 };
 
 
@@ -271,6 +300,11 @@ export type MutationRemoveInstanceArgs = {
 
 export type MutationRemoveInviteArgs = {
   inviteId: Scalars['Uuid'];
+};
+
+
+export type MutationRemoveLikeArgs = {
+  instanceId: Scalars['Uuid'];
 };
 
 
@@ -320,6 +354,8 @@ export const MutationType = {
   ChannelUpdated: 'CHANNEL_UPDATED',
   InstanceRemoved: 'INSTANCE_REMOVED',
   InstanceUpdated: 'INSTANCE_UPDATED',
+  LikeAdded: 'LIKE_ADDED',
+  LikeRemoved: 'LIKE_REMOVED',
   MessageAdded: 'MESSAGE_ADDED',
   MessageRemoved: 'MESSAGE_REMOVED',
   UserUpdated: 'USER_UPDATED'
@@ -428,6 +464,7 @@ export type UserInstancesEdge = {
   readonly __typename?: 'UserInstancesEdge';
   readonly cursor: Scalars['String'];
   readonly instanceUser: Author;
+  readonly likedByMe: Scalars['Boolean'];
   readonly node: Instance;
   readonly pinned: Scalars['Boolean'];
   readonly rank: Scalars['String'];

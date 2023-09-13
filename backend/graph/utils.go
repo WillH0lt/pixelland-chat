@@ -181,6 +181,20 @@ func sendChannelNotification(instanceStreamObservers sync.Map, channel *model.Ch
 	})
 }
 
+func sendLikeNotification(instanceStreamObservers sync.Map, edge *model.InstanceLikesEdge, mutationType model.MutationType) {
+	instanceStreamObservers.Range(func(_, v interface{}) bool {
+		observer := v.(*InstanceStreamObserver)
+		if observer.instanceId == edge.Node.InstanceID {
+			notification, err := createLikeStreamNotification(edge, mutationType)
+			if err != nil {
+				return false
+			}
+			observer.stream <- notification
+		}
+		return true
+	})
+}
+
 func sendMessageNotification(instanceStreamObservers sync.Map, message *model.Message, channel *model.Channel, mutationType model.MutationType) {
 	instanceStreamObservers.Range(func(_, v interface{}) bool {
 		observer := v.(*InstanceStreamObserver)
@@ -317,6 +331,19 @@ func createUserInstancesEdge(instanceUser *model.InstanceUser, instance *model.I
 		InstanceUser: instanceUserToAuthor(instanceUser),
 		Rank:         instanceUser.Rank,
 		Pinned:       instanceUser.Pinned,
+		LikedByMe:    instanceUser.LikedByMe,
+	}, nil
+}
+
+func createInstanceLikesEdge(instanceUser *model.InstanceUser) (*model.InstanceLikesEdge, error) {
+	cursor, err := toCursorHash(*instanceUser.LikedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &model.InstanceLikesEdge{
+		Cursor:  cursor,
+		LikedAt: *instanceUser.LikedAt,
+		Node:    instanceUserToAuthor(instanceUser),
 	}, nil
 }
 
@@ -351,6 +378,13 @@ func createChannelMessagesEdge(message *model.Message) (*model.ChannelMessagesEd
 	return &model.ChannelMessagesEdge{
 		Cursor: cursor,
 		Node:   message,
+	}, nil
+}
+
+func createLikeStreamNotification(edge *model.InstanceLikesEdge, mutation model.MutationType) (*model.InstanceStreamNotification, error) {
+	return &model.InstanceStreamNotification{
+		Mutation:          mutation,
+		InstanceLikesEdge: edge,
 	}, nil
 }
 

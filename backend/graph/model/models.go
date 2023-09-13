@@ -32,6 +32,7 @@ type Instance struct {
 	ShowChat         bool            `json:"showChat"`
 	ShowComments     bool            `json:"showComments"`
 	ShowLikes        bool            `json:"showLikes"`
+	LikesCount       int             `json:"likesCount"`
 	Channels         []*Channel      ``
 	Users            []*InstanceUser ``
 	Invites          []*Invite       ``
@@ -80,6 +81,8 @@ type InstanceUser struct {
 	Roles      pq.StringArray `json:"roles" gorm:"type:text[]"`
 	Rank       string         `json:"rank"`
 	Pinned     bool           `json:"pinned"`
+	LikedByMe  bool           `json:"likedByMe"`
+	LikedAt    *time.Time     `json:"likedAt"`
 }
 
 type Invite struct {
