@@ -18,16 +18,17 @@ import (
 	"github.com/wwwillw/pixelland-chat/interfaces"
 )
 
-func toCursorHash(v interface{}) (string, error) {
+func toCursorHash(v interface{}) string {
 	switch v.(type) {
 	case time.Time:
-		return base64.StdEncoding.EncodeToString([]byte("time.Time|" + v.(time.Time).Format(time.RFC3339))), nil
+		return base64.StdEncoding.EncodeToString([]byte("time.Time|" + v.(time.Time).Format(time.RFC3339)))
 	case int:
-		return base64.StdEncoding.EncodeToString([]byte("int|" + strconv.Itoa(v.(int)))), nil
+		return base64.StdEncoding.EncodeToString([]byte("int|" + strconv.Itoa(v.(int))))
 	case string:
-		return base64.StdEncoding.EncodeToString([]byte("string|" + v.(string))), nil
+		return base64.StdEncoding.EncodeToString([]byte("string|" + v.(string)))
 	default:
-		return "", fmt.Errorf("cannot create cursor from type %T", v)
+		log.Error().Msgf("cannot create cursor from type %T", v)
+		return ""
 	}
 }
 
@@ -167,97 +168,109 @@ func getCallerInstanceUser(ctx context.Context, instanceId uuid.UUID) (*model.In
 	return &instanceUser, nil
 }
 
-func sendChannelNotification(instanceStreamObservers sync.Map, channel *model.Channel, mutationType model.MutationType) {
-	instanceStreamObservers.Range(func(_, v interface{}) bool {
-		observer := v.(*InstanceStreamObserver)
-		if observer.instanceId == channel.InstanceID && hasUnion(observer.roles, channel.Readers) {
-			notification, err := createChannelStreamNotification(channel, mutationType)
-			if err != nil {
-				return false
-			}
-			observer.stream <- notification
+func sendChannelNotice(streamObservers *sync.Map, channel *model.Channel, kind model.NoticeKind) {
+	streamObservers.Range(func(_, v interface{}) bool {
+		observer := v.(*StreamObserver)
+		if observer.InstanceId == channel.InstanceID && hasUnion(observer.Roles, channel.Readers) {
+			notice := createChannelStreamNotice(channel, kind)
+			observer.Stream <- notice
 		}
 		return true
 	})
 }
 
-func sendLikeNotification(instanceStreamObservers sync.Map, edge *model.InstanceLikesEdge, mutationType model.MutationType) {
-	instanceStreamObservers.Range(func(_, v interface{}) bool {
-		observer := v.(*InstanceStreamObserver)
-		if observer.instanceId == edge.Node.InstanceID {
-			notification, err := createLikeStreamNotification(edge, mutationType)
-			if err != nil {
-				return false
+func sendLikeNotice(streamObservers *sync.Map, edge *model.InstanceLikesEdge, kind model.NoticeKind) {
+	streamObservers.Range(func(_, v interface{}) bool {
+		observer := v.(*StreamObserver)
+		if observer.InstanceId == edge.Node.InstanceID {
+			notice := &model.Notice{
+				Kind:              kind,
+				InstanceLikesEdge: edge,
 			}
-			observer.stream <- notification
+			observer.Stream <- notice
 		}
 		return true
 	})
 }
 
-func sendMessageNotification(instanceStreamObservers sync.Map, message *model.Message, channel *model.Channel, mutationType model.MutationType) {
-	instanceStreamObservers.Range(func(_, v interface{}) bool {
-		observer := v.(*InstanceStreamObserver)
-		if observer.instanceId == channel.InstanceID && hasUnion(observer.roles, channel.Readers) {
-			notification, err := createMessageStreamNotification(message, mutationType)
-			if err != nil {
-				return false
+func sendMessageNotice(streamObservers *sync.Map, message *model.Message, channel *model.Channel, kind model.NoticeKind) {
+	streamObservers.Range(func(_, v interface{}) bool {
+		observer := v.(*StreamObserver)
+		if observer.InstanceId == channel.InstanceID && hasUnion(observer.Roles, channel.Readers) {
+			notice := &model.Notice{
+				Kind:                kind,
+				ChannelMessagesEdge: createChannelMessagesEdge(message),
 			}
-			observer.stream <- notification
+
+			observer.Stream <- notice
 		}
 		return true
 	})
 }
 
-func sendAuthorNotification(instanceStreamObservers sync.Map, author *model.Author, mutationType model.MutationType) {
-	instanceStreamObservers.Range(func(_, v interface{}) bool {
-		observer := v.(*InstanceStreamObserver)
-		if observer.instanceId == author.InstanceID {
-			notification := &model.InstanceStreamNotification{
-				Mutation: mutationType,
-				Author:   author,
+func sendAuthorNotice(streamObservers *sync.Map, author *model.Author, kind model.NoticeKind) {
+	streamObservers.Range(func(_, v interface{}) bool {
+		observer := v.(*StreamObserver)
+		if observer.InstanceId == author.InstanceID {
+			notice := &model.Notice{
+				Kind:   kind,
+				Author: author,
 			}
-			observer.stream <- notification
+			observer.Stream <- notice
 		}
 		return true
 	})
 }
 
-func sendUserNotification(instanceStreamObservers sync.Map, user *model.User, mutationType model.MutationType) {
-	instanceStreamObservers.Range(func(_, v interface{}) bool {
-		observer := v.(*InstanceStreamObserver)
+func sendInstanceUserNotice(streamObservers *sync.Map, user *model.User, kind model.NoticeKind) {
+	streamObservers.Range(func(_, v interface{}) bool {
+		observer := v.(*StreamObserver)
 		// TODO somehow send to each person who can see the user
 		// if observer.instanceId == edge.InstanceID {
-		notification := &model.InstanceStreamNotification{
-			Mutation: mutationType,
-			User:     user,
+		notice := &model.Notice{
+			Kind: kind,
+			User: user,
 		}
-		observer.stream <- notification
+		observer.Stream <- notice
 		// }
 		return true
 	})
 }
 
-func sendInstanceNotification(instanceStreamObservers sync.Map, instance *model.Instance, mutationType model.MutationType) {
-	instanceStreamObservers.Range(func(_, v interface{}) bool {
-		observer := v.(*InstanceStreamObserver)
-		log.Info().Msgf("UpdateInstance: %+v", instance)
-		if observer.instanceId == instance.ID {
-			notification := &model.InstanceStreamNotification{
-				Mutation: mutationType,
+func sendInstanceNotice(streamObservers *sync.Map, instance *model.Instance, kind model.NoticeKind) {
+	streamObservers.Range(func(_, v interface{}) bool {
+		observer := v.(*StreamObserver)
+		if observer.InstanceId == instance.ID {
+			notice := &model.Notice{
+				Kind:     kind,
 				Instance: instance,
 			}
-			observer.stream <- notification
+			observer.Stream <- notice
 		}
 		return true
 	})
 }
 
-func refreshInstanceStreamRoles(instanceStreamObservers sync.Map, instanceUser *model.InstanceUser) {
-	observer, ok := instanceStreamObservers.Load(instanceUser.ID)
+func sendUserNotificationNotice(streamObservers *sync.Map, notification *model.Notification) {
+	streamObservers.Range(func(_, v interface{}) bool {
+		observer := v.(*StreamObserver)
+		if observer.UserId == notification.UserID {
+			notice := &model.Notice{
+				Kind:                  model.NoticeKindNotificationAdded,
+				UserNotificationsEdge: createUserNotificationsEdge(notification),
+			}
+			observer.Stream <- notice
+		}
+
+		return true
+	})
+}
+
+func refreshInstanceStreamRoles(streamObservers *sync.Map, instanceUser *model.InstanceUser) {
+	observer, ok := streamObservers.Load(instanceUser.ID)
 	if ok {
 		roles := append(instanceUser.Roles, model.RoleAllUsers.String())
-		observer.(*InstanceStreamObserver).roles = roles
+		observer.(*StreamObserver).Roles = roles
 	}
 }
 
@@ -320,11 +333,8 @@ func assertIsNotBanned(instanceUser model.InstanceUser) error {
 	}
 }
 
-func createUserInstancesEdge(instanceUser *model.InstanceUser, instance *model.Instance) (*model.UserInstancesEdge, error) {
-	cursor, err := toCursorHash(instanceUser.CreatedAt)
-	if err != nil {
-		return nil, err
-	}
+func createUserInstancesEdge(instanceUser *model.InstanceUser, instance *model.Instance) *model.UserInstancesEdge {
+	cursor := toCursorHash(instanceUser.CreatedAt)
 	return &model.UserInstancesEdge{
 		Cursor:       cursor,
 		Node:         instance,
@@ -332,96 +342,62 @@ func createUserInstancesEdge(instanceUser *model.InstanceUser, instance *model.I
 		Rank:         instanceUser.Rank,
 		Pinned:       instanceUser.Pinned,
 		LikedByMe:    instanceUser.LikedByMe,
-	}, nil
+	}
 }
 
-func createInstanceLikesEdge(instanceUser *model.InstanceUser) (*model.InstanceLikesEdge, error) {
-	cursor, err := toCursorHash(*instanceUser.LikedAt)
-	if err != nil {
-		return nil, err
+func createUserNotificationsEdge(notification *model.Notification) *model.UserNotificationsEdge {
+	cursor := toCursorHash(notification.CreatedAt)
+
+	return &model.UserNotificationsEdge{
+		Cursor: cursor,
+		Node:   notification,
 	}
+}
+
+func createInstanceLikesEdge(instanceUser *model.InstanceUser) *model.InstanceLikesEdge {
+	cursor := toCursorHash(*instanceUser.LikedAt)
+
 	return &model.InstanceLikesEdge{
 		Cursor:  cursor,
 		LikedAt: *instanceUser.LikedAt,
 		Node:    instanceUserToAuthor(instanceUser),
-	}, nil
+	}
 }
 
-func createUserGroupsEdge(instance *model.Instance, members []*model.InstanceUser) (*model.UserGroupsEdge, error) {
-	cursor, err := toCursorHash(instance.UpdatedAt)
-	if err != nil {
-		return nil, err
-	}
+func createChannelMessagesEdge(message *model.Message) *model.ChannelMessagesEdge {
+	cursor := toCursorHash(message.CreatedAt)
 
-	memberAuthors := []*model.Author{}
-	for _, member := range members {
-		memberAuthor := instanceUserToAuthor(member)
-		memberAuthors = append(memberAuthors, memberAuthor)
-	}
-
-	return &model.UserGroupsEdge{
-		Cursor: cursor,
-		Node: &model.Group{
-			ID:        instance.ID,
-			ChannelID: instance.PrimaryChannelID,
-			CreatedAt: instance.CreatedAt,
-			Members:   memberAuthors,
-		},
-	}, nil
-}
-
-func createChannelMessagesEdge(message *model.Message) (*model.ChannelMessagesEdge, error) {
-	cursor, err := toCursorHash(message.CreatedAt)
-	if err != nil {
-		return nil, err
-	}
 	return &model.ChannelMessagesEdge{
 		Cursor: cursor,
 		Node:   message,
-	}, nil
-}
-
-func createLikeStreamNotification(edge *model.InstanceLikesEdge, mutation model.MutationType) (*model.InstanceStreamNotification, error) {
-	return &model.InstanceStreamNotification{
-		Mutation:          mutation,
-		InstanceLikesEdge: edge,
-	}, nil
-}
-
-func createMessageStreamNotification(message *model.Message, mutation model.MutationType) (*model.InstanceStreamNotification, error) {
-	edge, err := createChannelMessagesEdge(message)
-	if err != nil {
-		return nil, err
 	}
-
-	return &model.InstanceStreamNotification{
-		Mutation:            mutation,
-		ChannelMessagesEdge: edge,
-	}, nil
 }
 
-func createInstanceChannelsEdge(channel *model.Channel) (*model.InstanceChannelsEdge, error) {
-	cursor, err := toCursorHash(channel.Rank)
-	if err != nil {
-		return nil, err
+func createCollectionInstancesEdge(tag *model.Tag) *model.CollectionInstancesEdge {
+	cursor := toCursorHash(tag.CreatedAt)
+
+	return &model.CollectionInstancesEdge{
+		Cursor:   cursor,
+		TaggedAt: tag.CreatedAt,
+		Node:     tag.Instance,
 	}
+}
+
+func createChannelStreamNotice(channel *model.Channel, kind model.NoticeKind) *model.Notice {
+	edge := createInstanceChannelsEdge(channel)
+	return &model.Notice{
+		Kind:                 kind,
+		InstanceChannelsEdge: edge,
+	}
+}
+
+func createInstanceChannelsEdge(channel *model.Channel) *model.InstanceChannelsEdge {
+	cursor := toCursorHash(channel.Rank)
 
 	return &model.InstanceChannelsEdge{
 		Cursor: cursor,
 		Node:   channel,
-	}, nil
-}
-
-func createChannelStreamNotification(channel *model.Channel, mutation model.MutationType) (*model.InstanceStreamNotification, error) {
-	edge, err := createInstanceChannelsEdge(channel)
-	if err != nil {
-		return nil, err
 	}
-
-	return &model.InstanceStreamNotification{
-		Mutation:             mutation,
-		InstanceChannelsEdge: edge,
-	}, nil
 }
 
 func populateChannelFromInput(channel *model.Channel, input model.ChannelInput) error {
@@ -442,7 +418,7 @@ func populateChannelFromInput(channel *model.Channel, input model.ChannelInput) 
 	return nil
 }
 
-func populateInstanceFromInput(instance *model.Instance, input model.InstanceInput) error {
+func populateInstanceFromInput(instance *model.Instance, input model.InstanceInput) {
 	if input.ID != nil {
 		instance.ID = *input.ID
 	}
@@ -454,8 +430,10 @@ func populateInstanceFromInput(instance *model.Instance, input model.InstanceInp
 	instance.ShowChat = input.ShowChat
 	instance.ShowComments = input.ShowComments
 	instance.ShowLikes = input.ShowLikes
+}
 
-	return nil
+func populateTagFromInput(tag *model.Tag, input model.TagInput) {
+	tag.Kind = input.Tag.String()
 }
 
 func generateInviteCode() string {
@@ -493,4 +471,78 @@ func userToInstanceUser(user *model.User, instance model.Instance, roles []strin
 		Bio:        user.Bio,
 		Roles:      roles,
 	}
+}
+
+type ParsedContext struct {
+	Uid    string
+	Claims map[string]interface{}
+	Token  string
+}
+
+func parseContext(ctx context.Context) ParsedContext {
+
+	p := ParsedContext{}
+
+	uidVal := ctx.Value("uid")
+	uid, ok := uidVal.(string)
+	if ok {
+		p.Uid = uid
+	}
+
+	claimsVal := ctx.Value("claims")
+	claims, ok := claimsVal.(map[string]interface{})
+	if ok {
+		p.Claims = claims
+	}
+
+	tokenVal := ctx.Value("token")
+	token, ok := tokenVal.(string)
+	if ok {
+		p.Token = token
+	}
+
+	return p
+}
+
+func createNotificationCommentAdded(userID uuid.UUID, message *model.Message) (*model.Notification, error) {
+	db := interfaces.GetDatabase()
+
+	if message.Author == nil {
+		if err := db.Model(message).Association("Author").Find(&message.Author); err != nil {
+			return nil, err
+		}
+	}
+
+	notification := model.Notification{
+		Kind:       model.NotificationKindCommentAdded.String(),
+		UserID:     userID,
+		AuthorID:   message.Author.ID,
+		Author:     message.Author,
+		InstanceID: &message.Author.InstanceID,
+		MessageID:  &message.ID,
+	}
+
+	if err := db.Where(notification).FirstOrCreate(&notification).Error; err != nil {
+		return nil, err
+	}
+
+	return &notification, nil
+}
+
+func createNotificationLikeAdded(userID uuid.UUID, author *model.InstanceUser) (*model.Notification, error) {
+	db := interfaces.GetDatabase()
+
+	notification := model.Notification{
+		Kind:       model.NotificationKindLikeAdded.String(),
+		UserID:     userID,
+		AuthorID:   author.ID,
+		Author:     author,
+		InstanceID: &author.InstanceID,
+	}
+
+	if err := db.Where(notification).FirstOrCreate(&notification).Error; err != nil {
+		return nil, err
+	}
+
+	return &notification, nil
 }

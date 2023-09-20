@@ -1,4 +1,4 @@
-import { acceptHMRUpdate, defineStore } from 'pinia'
+import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
 import {
@@ -6,23 +6,27 @@ import {
   usePinInstanceMutation,
   useRemoveInstanceMutation,
   useReorderInstanceMutation,
+  useTagInstanceMutation,
+  useUntagInstanceMutation,
   useUpdateInstanceMutation,
 } from '@/graphql/mutations/instance.gen'
 import { useInstanceQuery } from '@/graphql/queries/instance.gen'
-import { useInstanceStreamSubscription } from '@/graphql/subscriptions/instanceStream.gen'
+import { useStreamSubscription } from '@/graphql/subscriptions/stream.gen'
 import {
   Instance,
   InstanceChannelsEdge,
   InstanceInput,
   InstancePinInput,
   InstanceReorderInput,
-  MutationType,
+  NoticeKind,
+  TagInput,
   UserInstancesEdge,
 } from '@/graphql/types.gen'
 import { useAuthorStore } from '@/store/author'
 import { useChannelStore } from '@/store/channel'
 import { useLikeStore } from '@/store/like'
 import { useMessageStore } from '@/store/message'
+import { useNotificationStore } from '@/store/notification'
 import { ExtendedInstance } from '@/types/ExtendedInstance'
 import { timeSince } from '@/utils'
 
@@ -31,6 +35,7 @@ export const useInstanceStore = defineStore('instance', () => {
   const authorStore = useAuthorStore()
   const likeStore = useLikeStore()
   const messageStore = useMessageStore()
+  const notificationStore = useNotificationStore()
   let stopInstanceStream: () => void = () => null
 
   // =========================================
@@ -88,45 +93,49 @@ export const useInstanceStore = defineStore('instance', () => {
     activeInstanceId.value = instance.id
 
     // subscribe to instance stream
-    const { onResult: onInstanceStreamResult, stop } = useInstanceStreamSubscription({
+    const { onResult: onStreamResult, stop } = useStreamSubscription({
       instanceId: instance.id,
     })
     stopInstanceStream = stop
-    onInstanceStreamResult(result => {
-      if (!result.data?.instanceStream) return
+    onStreamResult(result => {
+      if (!result.data?.stream) return
       const {
-        mutation,
+        kind,
         channelMessagesEdge,
         instanceChannelsEdge,
         instanceLikesEdge,
         author,
         user,
         instance,
-      } = result.data.instanceStream
+        userNotificationsEdge,
+      } = result.data.stream
 
-      if (mutation === MutationType.MessageAdded && channelMessagesEdge) {
+      if (kind === NoticeKind.MessageAdded && channelMessagesEdge) {
         messageStore.handleMessagesAdded([channelMessagesEdge])
-      } else if (mutation === MutationType.MessageRemoved && channelMessagesEdge) {
+      } else if (kind === NoticeKind.MessageRemoved && channelMessagesEdge) {
         messageStore.handleMessageRemoved(channelMessagesEdge)
-      } else if (mutation === MutationType.ChannelAdded && instanceChannelsEdge) {
+      } else if (kind === NoticeKind.ChannelAdded && instanceChannelsEdge) {
         channelStore.handleChannelsAdded([instanceChannelsEdge])
-      } else if (mutation === MutationType.ChannelUpdated && instanceChannelsEdge) {
+      } else if (kind === NoticeKind.ChannelUpdated && instanceChannelsEdge) {
         channelStore.handleChannelUpdated(instanceChannelsEdge)
-      } else if (mutation === MutationType.ChannelRemoved && instanceChannelsEdge) {
+      } else if (kind === NoticeKind.ChannelRemoved && instanceChannelsEdge) {
         channelStore.handleChannelRemoved(instanceChannelsEdge)
-      } else if (mutation === MutationType.AuthorUpdated && author) {
+      } else if (kind === NoticeKind.AuthorUpdated && author) {
         authorStore.handleAuthorUpdated(author)
-      } else if (mutation === MutationType.UserUpdated && user) {
+      } else if (kind === NoticeKind.UserUpdated && user) {
         authorStore.handleUserUpdated(user)
-      } else if (mutation === MutationType.LikeAdded && instanceLikesEdge) {
+      } else if (kind === NoticeKind.LikeAdded && instanceLikesEdge) {
         likeStore.handleLikeAdded(instanceLikesEdge)
-      } else if (mutation === MutationType.LikeRemoved && instanceLikesEdge) {
+      } else if (kind === NoticeKind.LikeRemoved && instanceLikesEdge) {
         likeStore.handleLikeRemoved(instanceLikesEdge)
-      } else if (mutation === MutationType.InstanceUpdated && instance) {
+      } else if (kind === NoticeKind.InstanceUpdated && instance) {
         const extendedInstance = instances.value[instance.id] ?? ({} as ExtendedInstance)
         instances.value[instance.id] = mergeInstance(instance, extendedInstance)
+      } else if (kind === NoticeKind.NotificationAdded && userNotificationsEdge) {
+        notificationStore.handleNotificationsAdded([userNotificationsEdge])
+        notificationStore.hasUnread = true
       }
-      // TODO handle instance removed mutation
+      // TODO handle instance removed kind
     })
   }
 
@@ -237,6 +246,28 @@ export const useInstanceStore = defineStore('instance', () => {
     }
   }
 
+  async function tagInstance(instanceId: string, input: TagInput) {
+    const { mutate } = useTagInstanceMutation({
+      variables: {
+        instanceId,
+        input,
+      },
+    })
+
+    await mutate()
+  }
+
+  async function untagInstance(instanceId: string, input: TagInput) {
+    const { mutate } = useUntagInstanceMutation({
+      variables: {
+        instanceId,
+        input,
+      },
+    })
+
+    await mutate()
+  }
+
   function handleInstancesAdded(edges: UserInstancesEdge[]) {
     for (const edge of edges) {
       instances.value[edge.node.id] = extendInstance(edge)
@@ -260,6 +291,8 @@ export const useInstanceStore = defineStore('instance', () => {
     reorderInstance,
     pinInstance,
     handleInstancesAdded,
+    tagInstance,
+    untagInstance,
   }
 })
 

@@ -13,6 +13,8 @@ export const updateUser = gql`
     $likesAfter: String = ""
     $messagesLast: Int = 0
     $messagesBefore: String = ""
+    $notificationsLast: Int = 0
+    $notificationsBefore: String = ""
   ) {
     updateUser(input: $input) {
       ...UserFragment

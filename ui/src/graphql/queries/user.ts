@@ -4,7 +4,6 @@ import { UserFragment, UserInstancesEdgeFragment } from '@/graphql/fragments/fra
 
 export const user = gql`
   query user(
-    $uid: String!
     $instancesFirst: Int = 0
     $instancesAfter: String = ""
     $channelsFirst: Int = 0
@@ -13,8 +12,10 @@ export const user = gql`
     $likesAfter: String = ""
     $messagesLast: Int = 0
     $messagesBefore: String = ""
+    $notificationsLast: Int = 0
+    $notificationsBefore: String = ""
   ) {
-    user(uid: $uid) {
+    user {
       ...UserFragment
     }
   }

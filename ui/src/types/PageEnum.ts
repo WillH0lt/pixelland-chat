@@ -1,5 +1,5 @@
 export enum PAGE {
-  Home,
-  Channel,
-  CreateChannel,
+  INSTANCE,
+  PROFILE,
+  NOTIFICATIONS,
 }

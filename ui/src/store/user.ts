@@ -5,10 +5,12 @@ import { NULL_UUID } from '@/constants'
 import { useUpdateUserMutation } from '@/graphql/mutations/user.gen'
 import { User, UserInput } from '@/graphql/types.gen'
 import { useInstanceStore } from '@/store/instance'
+import { useNotificationStore } from '@/store/notification'
 import { generateAvatar } from '@/utils'
 
 export const useUserStore = defineStore('user', () => {
   const instanceStore = useInstanceStore()
+  const notificationsStore = useNotificationStore()
   // =========================================
   // state
   const user = ref<User>({
@@ -30,8 +32,10 @@ export const useUserStore = defineStore('user', () => {
     }
 
     user.value = result.data.updateUser
-    const edges = result?.data?.updateUser?.instancesConnection?.edges ?? []
+    const edges = result.data.updateUser.instancesConnection.edges ?? []
     instanceStore.handleInstancesAdded(edges)
+    notificationsStore.hasUnread = result.data.updateUser.notificationsConnection.hasUnread ?? false
+
     return user.value
   }
 

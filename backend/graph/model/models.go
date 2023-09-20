@@ -10,29 +10,32 @@ import (
 
 type User struct {
 	gorm.Model
-	ID            uuid.UUID       `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
-	UID           string          `json:"uid"`
-	Name          string          `json:"name"`
-	Avatar        string          `json:"avatar"`
-	Bio           string          `json:"bio"`
-	InstanceUsers []*InstanceUser ``
+	ID                  uuid.UUID       `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	UID                 string          `json:"uid"`
+	Name                string          `json:"name"`
+	Avatar              string          `json:"avatar"`
+	Bio                 string          `json:"bio"`
+	InstanceUsers       []*InstanceUser ``
+	Notifications       []*Notification ``
+	ReadNotificationsAt *time.Time      ``
 }
 
 type Instance struct {
 	gorm.Model
-	ID               uuid.UUID       `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
-	Name             string          `json:"name"`
-	Description      string          `json:"description"`
-	AuthorID         uuid.UUID       `json:"authorId" gorm:"type:uuid"`
-	Author           *InstanceUser   ``
-	ReadAccess       string          `json:"readAccess"`
-	Icon             string          `json:"icon"`
-	IsGroup          bool            ``
+	ID          uuid.UUID     `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	Name        string        `json:"name"`
+	Description string        `json:"description"`
+	AuthorID    uuid.UUID     `json:"authorId" gorm:"type:uuid"`
+	Author      *InstanceUser ``
+	ReadAccess  string        `json:"readAccess"`
+	Icon        string        `json:"icon"`
+	// IsGroup          bool            ``
 	ShowAuthor       bool            `json:"showAuthor"`
 	ShowChat         bool            `json:"showChat"`
 	ShowComments     bool            `json:"showComments"`
 	ShowLikes        bool            `json:"showLikes"`
 	LikesCount       int             `json:"likesCount"`
+	CommentsCount    int             `json:"commentsCount"`
 	Channels         []*Channel      ``
 	Users            []*InstanceUser ``
 	Invites          []*Invite       ``
@@ -95,4 +98,34 @@ type Invite struct {
 	Code        string        `json:"code"`
 	ExpiresAt   *time.Time    `json:"expiresAt"`
 	Redemptions *int          `json:"redemptions"`
+}
+
+type Notification struct {
+	gorm.Model
+	ID         uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	Kind       string    `json:"kind"`
+	UserID     uuid.UUID `json:"userId" gorm:"type:uuid"`
+	User       *User
+	AuthorID   uuid.UUID     `json:"authorId" gorm:"type:uuid"`
+	Author     *InstanceUser ``
+	InstanceID *uuid.UUID    `json:"instanceId" gorm:"type:uuid"`
+	Instance   *Instance     ``
+	MessageID  *uuid.UUID    `json:"messageId" gorm:"type:uuid"`
+	Message    *Message      ``
+}
+
+type Tag struct {
+	gorm.Model
+	ID         uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	Kind       string    `json:"kind"`
+	InstanceID uuid.UUID `json:"instanceId" gorm:"type:uuid"`
+	Instance   *Instance `gorm:"foreignKey:InstanceID"`
+	AuthorID   uuid.UUID `json:"authorId" gorm:"type:uuid"`
+	Author     *User     `gorm:"foreignKey:AuthorID"`
+}
+
+// abstract - only used so gql-generate can create resolver
+type Collection struct {
+	gorm.Model
+	Tag string `json:"tag"`
 }

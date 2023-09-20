@@ -188,6 +188,8 @@ func updateAuthContext(ctx context.Context, authHeader string, enforceAuth bool)
 
 	auth := interfaces.GetAuthClient()
 	uid := ""
+	claims := map[string]interface{}{}
+
 	if enforceAuth {
 		token, err := auth.VerifyIDToken(ctx, tokenStr)
 		if err != nil {
@@ -195,9 +197,16 @@ func updateAuthContext(ctx context.Context, authHeader string, enforceAuth bool)
 			return ctx
 		}
 		uid = token.UID
+		claims = token.Claims
 	} else {
 		uid = tokenStr
+		claims = map[string]interface{}{}
+		claims["admin"] = true
 	}
 
-	return context.WithValue(ctx, "uid", uid)
+	ctx = context.WithValue(ctx, "claims", claims)
+	ctx = context.WithValue(ctx, "token", tokenStr)
+	ctx = context.WithValue(ctx, "uid", uid)
+
+	return ctx
 }

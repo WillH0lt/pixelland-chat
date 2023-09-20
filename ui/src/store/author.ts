@@ -1,6 +1,7 @@
-import { acceptHMRUpdate, defineStore } from 'pinia'
-import { computed, reactive, ref } from 'vue'
+import { defineStore } from 'pinia'
+import { computed, reactive } from 'vue'
 
+import { NULL_UUID } from '@/constants'
 import { useAddRoleMutation, useRemoveRoleMutation } from '@/graphql/mutations/author.gen'
 import { Author, Role, User } from '@/graphql/types.gen'
 import { useChannelStore } from '@/store/channel'
@@ -20,9 +21,21 @@ export const useAuthorStore = defineStore('author', () => {
   // =========================================
   // getters
   const instanceUser = computed(() => {
-    return Object.values(allAuthors).find(
+    const author = Object.values(allAuthors).find(
       c => c.userId === userStore.user.id && c.instanceId === instanceStore.instance.id
-    )!
+    )
+    return (
+      author ??
+      extendAuthor({
+        id: NULL_UUID,
+        instanceId: instanceStore.instance.id,
+        userId: userStore.user.id,
+        roles: [],
+        avatar: userStore.user.avatar,
+        name: userStore.user.name,
+        bio: userStore.user.bio,
+      })
+    )
   })
   const isAdmin = computed(() => {
     return instanceUser.value.roles.includes(Role.Admin)

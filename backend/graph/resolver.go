@@ -13,16 +13,17 @@ import (
 	"github.com/wwwillw/pixelland-chat/graph/model"
 )
 
-type InstanceStreamObserver struct {
-	instanceId uuid.UUID
-	roles      []string
-	stream     chan *model.InstanceStreamNotification
+type StreamObserver struct {
+	UserId     uuid.UUID
+	InstanceId uuid.UUID
+	Roles      []string
+	Stream     chan *model.Notice
 }
 
 type Resolver struct {
-	InstanceStreamObservers sync.Map
-	MessageLog              sync.Map
-	ProfanityDetector       *goaway.ProfanityDetector
+	StreamObservers   sync.Map
+	MessageLog        sync.Map
+	ProfanityDetector *goaway.ProfanityDetector
 }
 
 func New() Config {
@@ -44,9 +45,9 @@ func New() Config {
 
 	return Config{
 		Resolvers: &Resolver{
-			InstanceStreamObservers: sync.Map{},
-			MessageLog:              sync.Map{},
-			ProfanityDetector:       profanityDetector,
+			StreamObservers:   sync.Map{},
+			MessageLog:        sync.Map{},
+			ProfanityDetector: profanityDetector,
 		},
 		Directives: DirectiveRoot{
 			Constraint: directives.ConstraintDirective,

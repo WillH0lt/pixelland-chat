@@ -3,7 +3,7 @@
     <img
       class="bg-accent h-12 w-12 mx-2 hover:cursor-pointer hover:brightness-110 transition pixelated"
       :src="authorStore.instanceUser?.avatar"
-      @click="emitter.emit('chat:user:edit')"
+      @click="appStore.selectedPage = PAGE.PROFILE"
     />
     <ElementTextArea
       v-if="appStore.verified && appStore.isLoggedIn"
@@ -18,14 +18,14 @@
     />
     <div v-else class="flex-1 text-xl h-full text-black bg-gray-light flex items-center pl-2">
       <div v-if="!appStore.isLoggedIn">
-        👋 You must
+        👋
         <a class="underline hover:cursor-pointer" @click="emitter.emit('chat:login:request')"
           >log in</a
         >
         to join chat.
       </div>
       <div v-else-if="!appStore.verified">
-        👋 Please
+        👋
         <a class="underline hover:cursor-pointer" @click="emitter.emit('chat:verify:request')"
           >verify your email</a
         >
@@ -71,6 +71,7 @@ import { useAppStore } from '@/store/app'
 import { useAuthorStore } from '@/store/author'
 import { useChannelStore } from '@/store/channel'
 import { useMessageStore } from '@/store/message'
+import { PAGE } from '@/types/PageEnum'
 import { getMostPermissiveRole } from '@/utils'
 
 const props = defineProps<{

@@ -7,10 +7,11 @@ import {
   InstanceFragment,
   InstanceLikesEdgeFragment,
   UserFragment,
+  UserNotificationsEdgeFragment,
 } from '@/graphql/fragments/fragments'
 
-export const instanceStream = gql`
-  subscription instanceStream(
+export const stream = gql`
+  subscription stream(
     $instanceId: Uuid!
     $instancesFirst: Int = 0
     $instancesAfter: String = ""
@@ -20,9 +21,11 @@ export const instanceStream = gql`
     $likesAfter: String = ""
     $messagesLast: Int = 0
     $messagesBefore: String = ""
+    $notificationsLast: Int = 0
+    $notificationsBefore: String = ""
   ) {
-    instanceStream(instanceId: $instanceId) {
-      mutation
+    stream(instanceId: $instanceId) {
+      kind
       channelMessagesEdge {
         ...ChannelMessagesEdgeFragment
       }
@@ -41,6 +44,9 @@ export const instanceStream = gql`
       instance {
         ...InstanceFragment
       }
+      userNotificationsEdge {
+        ...UserNotificationsEdgeFragment
+      }
     }
   }
   ${ChannelMessagesEdgeFragment}
@@ -49,4 +55,5 @@ export const instanceStream = gql`
   ${InstanceChannelsEdgeFragment}
   ${InstanceLikesEdgeFragment}
   ${UserFragment}
+  ${UserNotificationsEdgeFragment}
 `

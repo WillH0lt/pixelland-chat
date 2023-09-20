@@ -1,5 +1,4 @@
-import { resolve } from 'path'
-import { acceptHMRUpdate, defineStore } from 'pinia'
+import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 import { useAddInviteMutation, useRedeemInviteMutation } from '@/graphql/mutations/invite.gen'
@@ -14,7 +13,7 @@ export const useInviteStore = defineStore('invite', () => {
 
   // =========================================
   // actions
-  async function fetchInvite(instanceId: string) {
+  async function fetchInvite(instanceId: string): Promise<ExtendedInvite> {
     const { onResult } = useInviteQuery({
       instanceId,
     })
@@ -26,7 +25,8 @@ export const useInviteStore = defineStore('invite', () => {
         }
         if (!result.data?.invite) return
         handleInviteAdded(result.data.invite)
-        resolve(invite.value)
+        const extendedInvite = extendInvite(result.data.invite)
+        resolve(extendedInvite)
       })
     })
   }
@@ -86,10 +86,6 @@ export const useInviteStore = defineStore('invite', () => {
     redeemInvite,
   }
 })
-
-if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useInviteStore, import.meta.hot))
-}
 
 function extendInvite(invite: Invite): ExtendedInvite {
   return {

@@ -61,7 +61,7 @@ func InitDatabase(config DatabaseConfig, retries int) (*Database, error) {
 		return nil, err
 	}
 	sqlDB.SetMaxIdleConns(10)
-	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetMaxOpenConns(30)
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	db_instance = Database{db}
@@ -78,6 +78,8 @@ func (db *Database) RunMigrations() error {
 		&model.Message{},
 		&model.InstanceUser{},
 		&model.Invite{},
+		&model.Notification{},
+		&model.Tag{},
 	)
 }
 
@@ -116,7 +118,6 @@ func (db *Database) Seed() error {
 		ShowChat:     true,
 		ShowLikes:    true,
 		ShowComments: true,
-		IsGroup:      false,
 		Icon:         "https://storage.googleapis.com/pixelland_dev_tiles/db9238ed-8377-4600-9b17-c0ecd06c3f23/0.png",
 		Description:  loremIpsumGenerator.Sentence(),
 	}

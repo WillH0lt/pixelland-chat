@@ -74,6 +74,8 @@ onMounted(() => {
   cancelRefresh = setInterval(() => {
     messageStore.refreshTimeSince(props.channelId)
   }, 1000 * 10)
+
+  console.log('MOUNTED')
 })
 
 onUnmounted(() => {

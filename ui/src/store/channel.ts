@@ -14,9 +14,11 @@ import {
   InstanceChannelsEdge,
   UserInstancesEdge,
 } from '@/graphql/types.gen'
+import { useMessageStore } from '@/store/message'
 import { ExtendedChannel } from '@/types/ExtendedChannel'
 
 export const useChannelStore = defineStore('channel', () => {
+  const messageStore = useMessageStore()
   // =========================================
   // state
   const channels = ref<{ [channelId: string]: ExtendedChannel }>({})

@@ -42,17 +42,19 @@ type Config struct {
 
 type ResolverRoot interface {
 	Channel() ChannelResolver
+	Collection() CollectionResolver
 	Instance() InstanceResolver
 	Invite() InviteResolver
 	Message() MessageResolver
 	Mutation() MutationResolver
+	Notification() NotificationResolver
 	Query() QueryResolver
 	Subscription() SubscriptionResolver
 	User() UserResolver
 }
 
 type DirectiveRoot struct {
-	Auth       func(ctx context.Context, obj interface{}, next graphql.Resolver, required *bool) (res interface{}, err error)
+	Auth       func(ctx context.Context, obj interface{}, next graphql.Resolver, accessLevel string) (res interface{}, err error)
 	Constraint func(ctx context.Context, obj interface{}, next graphql.Resolver, min *float64, max *float64) (res interface{}, err error)
 }
 
@@ -93,17 +95,26 @@ type ComplexityRoot struct {
 		Node   func(childComplexity int) int
 	}
 
-	Group struct {
-		ChannelID          func(childComplexity int) int
-		CreatedAt          func(childComplexity int) int
-		ID                 func(childComplexity int) int
-		Members            func(childComplexity int) int
-		MessagesConnection func(childComplexity int, last *int, before *string) int
+	Collection struct {
+		InstancesConnection func(childComplexity int, first *int, after *string) int
+		Tag                 func(childComplexity int) int
+	}
+
+	CollectionInstancesConnection struct {
+		Edges    func(childComplexity int) int
+		PageInfo func(childComplexity int) int
+	}
+
+	CollectionInstancesEdge struct {
+		Cursor   func(childComplexity int) int
+		Node     func(childComplexity int) int
+		TaggedAt func(childComplexity int) int
 	}
 
 	Instance struct {
 		Author             func(childComplexity int) int
 		ChannelsConnection func(childComplexity int, first *int, after *string) int
+		CommentsCount      func(childComplexity int) int
 		CreatedAt          func(childComplexity int) int
 		Description        func(childComplexity int) int
 		ID                 func(childComplexity int) int
@@ -139,17 +150,6 @@ type ComplexityRoot struct {
 		Node    func(childComplexity int) int
 	}
 
-	InstanceStreamNotification struct {
-		Author               func(childComplexity int) int
-		ChannelMessagesEdge  func(childComplexity int) int
-		Instance             func(childComplexity int) int
-		InstanceChannelsEdge func(childComplexity int) int
-		InstanceLikesEdge    func(childComplexity int) int
-		Mutation             func(childComplexity int) int
-		User                 func(childComplexity int) int
-		UserInstancesEdge    func(childComplexity int) int
-	}
-
 	Invite struct {
 		Author      func(childComplexity int) int
 		Code        func(childComplexity int) int
@@ -171,7 +171,6 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		AddChannel      func(childComplexity int, input model.ChannelInput) int
-		AddGroup        func(childComplexity int, input model.GroupInput) int
 		AddInstance     func(childComplexity int, input model.InstanceInput) int
 		AddInvite       func(childComplexity int, input model.InviteInput) int
 		AddLike         func(childComplexity int, instanceID uuid.UUID) int
@@ -187,9 +186,32 @@ type ComplexityRoot struct {
 		RemoveRole      func(childComplexity int, authorID uuid.UUID, role model.Role) int
 		ReorderChannel  func(childComplexity int, channelID uuid.UUID, input model.ChannelReorderInput) int
 		ReorderInstance func(childComplexity int, instanceID uuid.UUID, input model.InstanceReorderInput) int
+		TagInstance     func(childComplexity int, instanceID uuid.UUID, input model.TagInput) int
+		UntagInstance   func(childComplexity int, instanceID uuid.UUID, input model.TagInput) int
 		UpdateChannel   func(childComplexity int, channelID uuid.UUID, input model.ChannelInput) int
 		UpdateInstance  func(childComplexity int, instanceID uuid.UUID, input model.InstanceInput) int
 		UpdateUser      func(childComplexity int, input model.UserInput) int
+	}
+
+	Notice struct {
+		Author                func(childComplexity int) int
+		ChannelMessagesEdge   func(childComplexity int) int
+		Instance              func(childComplexity int) int
+		InstanceChannelsEdge  func(childComplexity int) int
+		InstanceLikesEdge     func(childComplexity int) int
+		Kind                  func(childComplexity int) int
+		User                  func(childComplexity int) int
+		UserInstancesEdge     func(childComplexity int) int
+		UserNotificationsEdge func(childComplexity int) int
+	}
+
+	Notification struct {
+		Author    func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Instance  func(childComplexity int) int
+		Kind      func(childComplexity int) int
+		Message   func(childComplexity int) int
 	}
 
 	PageInfo struct {
@@ -200,31 +222,23 @@ type ComplexityRoot struct {
 	Query struct {
 		Channel     func(childComplexity int, id uuid.UUID) int
 		CheckInvite func(childComplexity int, code string) int
+		Collection  func(childComplexity int, tag model.TagKind) int
 		Instance    func(childComplexity int, id uuid.UUID) int
 		Invite      func(childComplexity int, instanceID uuid.UUID) int
-		User        func(childComplexity int, uid string) int
+		User        func(childComplexity int) int
 	}
 
 	Subscription struct {
-		InstanceStream func(childComplexity int, instanceID uuid.UUID) int
+		Stream func(childComplexity int, instanceID uuid.UUID) int
 	}
 
 	User struct {
-		Avatar              func(childComplexity int) int
-		Bio                 func(childComplexity int) int
-		ID                  func(childComplexity int) int
-		InstancesConnection func(childComplexity int, first *int, after *string) int
-		Name                func(childComplexity int) int
-	}
-
-	UserGroupsConnection struct {
-		Edges    func(childComplexity int) int
-		PageInfo func(childComplexity int) int
-	}
-
-	UserGroupsEdge struct {
-		Cursor func(childComplexity int) int
-		Node   func(childComplexity int) int
+		Avatar                  func(childComplexity int) int
+		Bio                     func(childComplexity int) int
+		ID                      func(childComplexity int) int
+		InstancesConnection     func(childComplexity int, first *int, after *string) int
+		Name                    func(childComplexity int) int
+		NotificationsConnection func(childComplexity int, last *int, before *string) int
 	}
 
 	UserInstancesConnection struct {
@@ -240,12 +254,27 @@ type ComplexityRoot struct {
 		Pinned       func(childComplexity int) int
 		Rank         func(childComplexity int) int
 	}
+
+	UserNotificationsConnection struct {
+		Edges     func(childComplexity int) int
+		HasUnread func(childComplexity int) int
+		PageInfo  func(childComplexity int) int
+	}
+
+	UserNotificationsEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
 }
 
 type ChannelResolver interface {
 	MessagesConnection(ctx context.Context, obj *model.Channel, last *int, before *string) (*model.ChannelMessagesConnection, error)
 	Publishers(ctx context.Context, obj *model.Channel) ([]model.Role, error)
 	Readers(ctx context.Context, obj *model.Channel) ([]model.Role, error)
+}
+type CollectionResolver interface {
+	Tag(ctx context.Context, obj *model.Collection) (model.TagKind, error)
+	InstancesConnection(ctx context.Context, obj *model.Collection, first *int, after *string) (*model.CollectionInstancesConnection, error)
 }
 type InstanceResolver interface {
 	Author(ctx context.Context, obj *model.Instance) (*model.Author, error)
@@ -267,7 +296,8 @@ type MutationResolver interface {
 	RemoveInstance(ctx context.Context, instanceID uuid.UUID) (*model.UserInstancesEdge, error)
 	ReorderInstance(ctx context.Context, instanceID uuid.UUID, input model.InstanceReorderInput) (*model.UserInstancesEdge, error)
 	PinInstance(ctx context.Context, instanceID uuid.UUID, input model.InstancePinInput) (*model.UserInstancesEdge, error)
-	AddGroup(ctx context.Context, input model.GroupInput) (*model.Instance, error)
+	TagInstance(ctx context.Context, instanceID uuid.UUID, input model.TagInput) (*model.Instance, error)
+	UntagInstance(ctx context.Context, instanceID uuid.UUID, input model.TagInput) (*model.Instance, error)
 	AddChannel(ctx context.Context, input model.ChannelInput) (*model.InstanceChannelsEdge, error)
 	UpdateChannel(ctx context.Context, channelID uuid.UUID, input model.ChannelInput) (*model.InstanceChannelsEdge, error)
 	ReorderChannel(ctx context.Context, channelID uuid.UUID, input model.ChannelReorderInput) (*model.InstanceChannelsEdge, error)
@@ -282,18 +312,24 @@ type MutationResolver interface {
 	AddLike(ctx context.Context, instanceID uuid.UUID) (*model.InstanceLikesEdge, error)
 	RemoveLike(ctx context.Context, instanceID uuid.UUID) (*model.InstanceLikesEdge, error)
 }
+type NotificationResolver interface {
+	Kind(ctx context.Context, obj *model.Notification) (model.NotificationKind, error)
+	Author(ctx context.Context, obj *model.Notification) (*model.Author, error)
+}
 type QueryResolver interface {
-	User(ctx context.Context, uid string) (*model.User, error)
+	User(ctx context.Context) (*model.User, error)
+	Collection(ctx context.Context, tag model.TagKind) (*model.Collection, error)
 	Instance(ctx context.Context, id uuid.UUID) (*model.UserInstancesEdge, error)
 	Channel(ctx context.Context, id uuid.UUID) (*model.Channel, error)
 	Invite(ctx context.Context, instanceID uuid.UUID) (*model.Invite, error)
 	CheckInvite(ctx context.Context, code string) (*model.Invite, error)
 }
 type SubscriptionResolver interface {
-	InstanceStream(ctx context.Context, instanceID uuid.UUID) (<-chan *model.InstanceStreamNotification, error)
+	Stream(ctx context.Context, instanceID uuid.UUID) (<-chan *model.Notice, error)
 }
 type UserResolver interface {
 	InstancesConnection(ctx context.Context, obj *model.User, first *int, after *string) (*model.UserInstancesConnection, error)
+	NotificationsConnection(ctx context.Context, obj *model.User, last *int, before *string) (*model.UserNotificationsConnection, error)
 }
 
 type executableSchema struct {
@@ -484,45 +520,59 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ChannelMessagesEdge.Node(childComplexity), true
 
-	case "Group.channelId":
-		if e.complexity.Group.ChannelID == nil {
+	case "Collection.instancesConnection":
+		if e.complexity.Collection.InstancesConnection == nil {
 			break
 		}
 
-		return e.complexity.Group.ChannelID(childComplexity), true
-
-	case "Group.createdAt":
-		if e.complexity.Group.CreatedAt == nil {
-			break
-		}
-
-		return e.complexity.Group.CreatedAt(childComplexity), true
-
-	case "Group.id":
-		if e.complexity.Group.ID == nil {
-			break
-		}
-
-		return e.complexity.Group.ID(childComplexity), true
-
-	case "Group.members":
-		if e.complexity.Group.Members == nil {
-			break
-		}
-
-		return e.complexity.Group.Members(childComplexity), true
-
-	case "Group.messagesConnection":
-		if e.complexity.Group.MessagesConnection == nil {
-			break
-		}
-
-		args, err := ec.field_Group_messagesConnection_args(context.TODO(), rawArgs)
+		args, err := ec.field_Collection_instancesConnection_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Group.MessagesConnection(childComplexity, args["last"].(*int), args["before"].(*string)), true
+		return e.complexity.Collection.InstancesConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
+
+	case "Collection.tag":
+		if e.complexity.Collection.Tag == nil {
+			break
+		}
+
+		return e.complexity.Collection.Tag(childComplexity), true
+
+	case "CollectionInstancesConnection.edges":
+		if e.complexity.CollectionInstancesConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.CollectionInstancesConnection.Edges(childComplexity), true
+
+	case "CollectionInstancesConnection.pageInfo":
+		if e.complexity.CollectionInstancesConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.CollectionInstancesConnection.PageInfo(childComplexity), true
+
+	case "CollectionInstancesEdge.cursor":
+		if e.complexity.CollectionInstancesEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.CollectionInstancesEdge.Cursor(childComplexity), true
+
+	case "CollectionInstancesEdge.node":
+		if e.complexity.CollectionInstancesEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.CollectionInstancesEdge.Node(childComplexity), true
+
+	case "CollectionInstancesEdge.taggedAt":
+		if e.complexity.CollectionInstancesEdge.TaggedAt == nil {
+			break
+		}
+
+		return e.complexity.CollectionInstancesEdge.TaggedAt(childComplexity), true
 
 	case "Instance.author":
 		if e.complexity.Instance.Author == nil {
@@ -542,6 +592,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Instance.ChannelsConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
+
+	case "Instance.commentsCount":
+		if e.complexity.Instance.CommentsCount == nil {
+			break
+		}
+
+		return e.complexity.Instance.CommentsCount(childComplexity), true
 
 	case "Instance.createdAt":
 		if e.complexity.Instance.CreatedAt == nil {
@@ -695,62 +752,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.InstanceLikesEdge.Node(childComplexity), true
 
-	case "InstanceStreamNotification.author":
-		if e.complexity.InstanceStreamNotification.Author == nil {
-			break
-		}
-
-		return e.complexity.InstanceStreamNotification.Author(childComplexity), true
-
-	case "InstanceStreamNotification.channelMessagesEdge":
-		if e.complexity.InstanceStreamNotification.ChannelMessagesEdge == nil {
-			break
-		}
-
-		return e.complexity.InstanceStreamNotification.ChannelMessagesEdge(childComplexity), true
-
-	case "InstanceStreamNotification.instance":
-		if e.complexity.InstanceStreamNotification.Instance == nil {
-			break
-		}
-
-		return e.complexity.InstanceStreamNotification.Instance(childComplexity), true
-
-	case "InstanceStreamNotification.instanceChannelsEdge":
-		if e.complexity.InstanceStreamNotification.InstanceChannelsEdge == nil {
-			break
-		}
-
-		return e.complexity.InstanceStreamNotification.InstanceChannelsEdge(childComplexity), true
-
-	case "InstanceStreamNotification.instanceLikesEdge":
-		if e.complexity.InstanceStreamNotification.InstanceLikesEdge == nil {
-			break
-		}
-
-		return e.complexity.InstanceStreamNotification.InstanceLikesEdge(childComplexity), true
-
-	case "InstanceStreamNotification.mutation":
-		if e.complexity.InstanceStreamNotification.Mutation == nil {
-			break
-		}
-
-		return e.complexity.InstanceStreamNotification.Mutation(childComplexity), true
-
-	case "InstanceStreamNotification.user":
-		if e.complexity.InstanceStreamNotification.User == nil {
-			break
-		}
-
-		return e.complexity.InstanceStreamNotification.User(childComplexity), true
-
-	case "InstanceStreamNotification.userInstancesEdge":
-		if e.complexity.InstanceStreamNotification.UserInstancesEdge == nil {
-			break
-		}
-
-		return e.complexity.InstanceStreamNotification.UserInstancesEdge(childComplexity), true
-
 	case "Invite.author":
 		if e.complexity.Invite.Author == nil {
 			break
@@ -853,18 +854,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.AddChannel(childComplexity, args["input"].(model.ChannelInput)), true
-
-	case "Mutation.addGroup":
-		if e.complexity.Mutation.AddGroup == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_addGroup_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.AddGroup(childComplexity, args["input"].(model.GroupInput)), true
 
 	case "Mutation.addInstance":
 		if e.complexity.Mutation.AddInstance == nil {
@@ -1046,6 +1035,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.ReorderInstance(childComplexity, args["instanceId"].(uuid.UUID), args["input"].(model.InstanceReorderInput)), true
 
+	case "Mutation.tagInstance":
+		if e.complexity.Mutation.TagInstance == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_tagInstance_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.TagInstance(childComplexity, args["instanceId"].(uuid.UUID), args["input"].(model.TagInput)), true
+
+	case "Mutation.untagInstance":
+		if e.complexity.Mutation.UntagInstance == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_untagInstance_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UntagInstance(childComplexity, args["instanceId"].(uuid.UUID), args["input"].(model.TagInput)), true
+
 	case "Mutation.updateChannel":
 		if e.complexity.Mutation.UpdateChannel == nil {
 			break
@@ -1081,6 +1094,111 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateUser(childComplexity, args["input"].(model.UserInput)), true
+
+	case "Notice.author":
+		if e.complexity.Notice.Author == nil {
+			break
+		}
+
+		return e.complexity.Notice.Author(childComplexity), true
+
+	case "Notice.channelMessagesEdge":
+		if e.complexity.Notice.ChannelMessagesEdge == nil {
+			break
+		}
+
+		return e.complexity.Notice.ChannelMessagesEdge(childComplexity), true
+
+	case "Notice.instance":
+		if e.complexity.Notice.Instance == nil {
+			break
+		}
+
+		return e.complexity.Notice.Instance(childComplexity), true
+
+	case "Notice.instanceChannelsEdge":
+		if e.complexity.Notice.InstanceChannelsEdge == nil {
+			break
+		}
+
+		return e.complexity.Notice.InstanceChannelsEdge(childComplexity), true
+
+	case "Notice.instanceLikesEdge":
+		if e.complexity.Notice.InstanceLikesEdge == nil {
+			break
+		}
+
+		return e.complexity.Notice.InstanceLikesEdge(childComplexity), true
+
+	case "Notice.kind":
+		if e.complexity.Notice.Kind == nil {
+			break
+		}
+
+		return e.complexity.Notice.Kind(childComplexity), true
+
+	case "Notice.user":
+		if e.complexity.Notice.User == nil {
+			break
+		}
+
+		return e.complexity.Notice.User(childComplexity), true
+
+	case "Notice.userInstancesEdge":
+		if e.complexity.Notice.UserInstancesEdge == nil {
+			break
+		}
+
+		return e.complexity.Notice.UserInstancesEdge(childComplexity), true
+
+	case "Notice.userNotificationsEdge":
+		if e.complexity.Notice.UserNotificationsEdge == nil {
+			break
+		}
+
+		return e.complexity.Notice.UserNotificationsEdge(childComplexity), true
+
+	case "Notification.author":
+		if e.complexity.Notification.Author == nil {
+			break
+		}
+
+		return e.complexity.Notification.Author(childComplexity), true
+
+	case "Notification.createdAt":
+		if e.complexity.Notification.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Notification.CreatedAt(childComplexity), true
+
+	case "Notification.id":
+		if e.complexity.Notification.ID == nil {
+			break
+		}
+
+		return e.complexity.Notification.ID(childComplexity), true
+
+	case "Notification.instance":
+		if e.complexity.Notification.Instance == nil {
+			break
+		}
+
+		return e.complexity.Notification.Instance(childComplexity), true
+
+	case "Notification.kind":
+		if e.complexity.Notification.Kind == nil {
+			break
+		}
+
+		return e.complexity.Notification.Kind(childComplexity), true
+
+	case "Notification.message":
+		if e.complexity.Notification.Message == nil {
+			break
+		}
+
+		return e.complexity.Notification.Message(childComplexity), true
 
 	case "PageInfo.hasNextPage":
 		if e.complexity.PageInfo.HasNextPage == nil {
@@ -1120,6 +1238,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.CheckInvite(childComplexity, args["code"].(string)), true
 
+	case "Query.collection":
+		if e.complexity.Query.Collection == nil {
+			break
+		}
+
+		args, err := ec.field_Query_collection_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Collection(childComplexity, args["tag"].(model.TagKind)), true
+
 	case "Query.instance":
 		if e.complexity.Query.Instance == nil {
 			break
@@ -1149,24 +1279,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_user_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
+		return e.complexity.Query.User(childComplexity), true
 
-		return e.complexity.Query.User(childComplexity, args["uid"].(string)), true
-
-	case "Subscription.instanceStream":
-		if e.complexity.Subscription.InstanceStream == nil {
+	case "Subscription.stream":
+		if e.complexity.Subscription.Stream == nil {
 			break
 		}
 
-		args, err := ec.field_Subscription_instanceStream_args(context.TODO(), rawArgs)
+		args, err := ec.field_Subscription_stream_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Subscription.InstanceStream(childComplexity, args["instanceId"].(uuid.UUID)), true
+		return e.complexity.Subscription.Stream(childComplexity, args["instanceId"].(uuid.UUID)), true
 
 	case "User.avatar":
 		if e.complexity.User.Avatar == nil {
@@ -1208,33 +1333,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Name(childComplexity), true
 
-	case "UserGroupsConnection.edges":
-		if e.complexity.UserGroupsConnection.Edges == nil {
+	case "User.notificationsConnection":
+		if e.complexity.User.NotificationsConnection == nil {
 			break
 		}
 
-		return e.complexity.UserGroupsConnection.Edges(childComplexity), true
-
-	case "UserGroupsConnection.pageInfo":
-		if e.complexity.UserGroupsConnection.PageInfo == nil {
-			break
+		args, err := ec.field_User_notificationsConnection_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
 		}
 
-		return e.complexity.UserGroupsConnection.PageInfo(childComplexity), true
-
-	case "UserGroupsEdge.cursor":
-		if e.complexity.UserGroupsEdge.Cursor == nil {
-			break
-		}
-
-		return e.complexity.UserGroupsEdge.Cursor(childComplexity), true
-
-	case "UserGroupsEdge.node":
-		if e.complexity.UserGroupsEdge.Node == nil {
-			break
-		}
-
-		return e.complexity.UserGroupsEdge.Node(childComplexity), true
+		return e.complexity.User.NotificationsConnection(childComplexity, args["last"].(*int), args["before"].(*string)), true
 
 	case "UserInstancesConnection.edges":
 		if e.complexity.UserInstancesConnection.Edges == nil {
@@ -1292,6 +1401,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UserInstancesEdge.Rank(childComplexity), true
 
+	case "UserNotificationsConnection.edges":
+		if e.complexity.UserNotificationsConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.UserNotificationsConnection.Edges(childComplexity), true
+
+	case "UserNotificationsConnection.hasUnread":
+		if e.complexity.UserNotificationsConnection.HasUnread == nil {
+			break
+		}
+
+		return e.complexity.UserNotificationsConnection.HasUnread(childComplexity), true
+
+	case "UserNotificationsConnection.pageInfo":
+		if e.complexity.UserNotificationsConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.UserNotificationsConnection.PageInfo(childComplexity), true
+
+	case "UserNotificationsEdge.cursor":
+		if e.complexity.UserNotificationsEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.UserNotificationsEdge.Cursor(childComplexity), true
+
+	case "UserNotificationsEdge.node":
+		if e.complexity.UserNotificationsEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.UserNotificationsEdge.Node(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -1302,12 +1446,12 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputChannelInput,
 		ec.unmarshalInputChannelReorderInput,
-		ec.unmarshalInputGroupInput,
 		ec.unmarshalInputInstanceInput,
 		ec.unmarshalInputInstancePinInput,
 		ec.unmarshalInputInstanceReorderInput,
 		ec.unmarshalInputInviteInput,
 		ec.unmarshalInputMessageInput,
+		ec.unmarshalInputTagInput,
 		ec.unmarshalInputUserInput,
 	)
 	first := true
@@ -1408,15 +1552,15 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) dir_auth_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *bool
-	if tmp, ok := rawArgs["required"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("required"))
-		arg0, err = ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
+	var arg0 string
+	if tmp, ok := rawArgs["accessLevel"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accessLevel"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["required"] = arg0
+	args["accessLevel"] = arg0
 	return args, nil
 }
 
@@ -1491,12 +1635,12 @@ func (ec *executionContext) field_Channel_messagesConnection_args(ctx context.Co
 	return args, nil
 }
 
-func (ec *executionContext) field_Group_messagesConnection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Collection_instancesConnection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *int
-	if tmp, ok := rawArgs["last"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
 		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOInt2ᚖint(ctx, tmp) }
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			min, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 0)
@@ -1525,16 +1669,16 @@ func (ec *executionContext) field_Group_messagesConnection_args(ctx context.Cont
 			return nil, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be *int`, tmp))
 		}
 	}
-	args["last"] = arg0
+	args["first"] = arg0
 	var arg1 *string
-	if tmp, ok := rawArgs["before"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
 		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["before"] = arg1
+	args["after"] = arg1
 	return args, nil
 }
 
@@ -1639,21 +1783,6 @@ func (ec *executionContext) field_Mutation_addChannel_args(ctx context.Context, 
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg0, err = ec.unmarshalNChannelInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannelInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_addGroup_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.GroupInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNGroupInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐGroupInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1932,6 +2061,54 @@ func (ec *executionContext) field_Mutation_reorderInstance_args(ctx context.Cont
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_tagInstance_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 uuid.UUID
+	if tmp, ok := rawArgs["instanceId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("instanceId"))
+		arg0, err = ec.unmarshalNUuid2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["instanceId"] = arg0
+	var arg1 model.TagInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg1, err = ec.unmarshalNTagInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐTagInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_untagInstance_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 uuid.UUID
+	if tmp, ok := rawArgs["instanceId"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("instanceId"))
+		arg0, err = ec.unmarshalNUuid2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["instanceId"] = arg0
+	var arg1 model.TagInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg1, err = ec.unmarshalNTagInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐTagInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_updateChannel_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2040,6 +2217,21 @@ func (ec *executionContext) field_Query_checkInvite_args(ctx context.Context, ra
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_collection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.TagKind
+	if tmp, ok := rawArgs["tag"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tag"))
+		arg0, err = ec.unmarshalNTagKind2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐTagKind(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["tag"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_instance_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2070,22 +2262,7 @@ func (ec *executionContext) field_Query_invite_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["uid"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("uid"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["uid"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Subscription_instanceStream_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Subscription_stream_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 uuid.UUID
@@ -2144,6 +2321,53 @@ func (ec *executionContext) field_User_instancesConnection_args(ctx context.Cont
 		}
 	}
 	args["after"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_User_notificationsConnection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["last"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
+		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOInt2ᚖint(ctx, tmp) }
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			min, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 0)
+			if err != nil {
+				return nil, err
+			}
+			max, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 50)
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.Constraint == nil {
+				return nil, errors.New("directive constraint is not implemented")
+			}
+			return ec.directives.Constraint(ctx, rawArgs, directive0, min, max)
+		}
+
+		tmp, err = directive1(ctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if data, ok := tmp.(*int); ok {
+			arg0 = data
+		} else if tmp == nil {
+			arg0 = nil
+		} else {
+			return nil, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be *int`, tmp))
+		}
+	}
+	args["last"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["before"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["before"] = arg1
 	return args, nil
 }
 
@@ -3279,8 +3503,8 @@ func (ec *executionContext) fieldContext_ChannelMessagesEdge_node(ctx context.Co
 	return fc, nil
 }
 
-func (ec *executionContext) _Group_id(ctx context.Context, field graphql.CollectedField, obj *model.Group) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Group_id(ctx, field)
+func (ec *executionContext) _Collection_tag(ctx context.Context, field graphql.CollectedField, obj *model.Collection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Collection_tag(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3293,7 +3517,7 @@ func (ec *executionContext) _Group_id(ctx context.Context, field graphql.Collect
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
+		return ec.resolvers.Collection().Tag(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3305,26 +3529,26 @@ func (ec *executionContext) _Group_id(ctx context.Context, field graphql.Collect
 		}
 		return graphql.Null
 	}
-	res := resTmp.(uuid.UUID)
+	res := resTmp.(model.TagKind)
 	fc.Result = res
-	return ec.marshalNUuid2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, field.Selections, res)
+	return ec.marshalNTagKind2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐTagKind(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Group_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Collection_tag(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Group",
+		Object:     "Collection",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Uuid does not have child fields")
+			return nil, errors.New("field of type TagKind does not have child fields")
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Group_channelId(ctx context.Context, field graphql.CollectedField, obj *model.Group) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Group_channelId(ctx, field)
+func (ec *executionContext) _Collection_instancesConnection(ctx context.Context, field graphql.CollectedField, obj *model.Collection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Collection_instancesConnection(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3337,7 +3561,7 @@ func (ec *executionContext) _Group_channelId(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ChannelID, nil
+		return ec.resolvers.Collection().InstancesConnection(rctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3349,26 +3573,43 @@ func (ec *executionContext) _Group_channelId(ctx context.Context, field graphql.
 		}
 		return graphql.Null
 	}
-	res := resTmp.(uuid.UUID)
+	res := resTmp.(*model.CollectionInstancesConnection)
 	fc.Result = res
-	return ec.marshalNUuid2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, field.Selections, res)
+	return ec.marshalNCollectionInstancesConnection2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐCollectionInstancesConnection(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Group_channelId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Collection_instancesConnection(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Group",
+		Object:     "Collection",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Uuid does not have child fields")
+			switch field.Name {
+			case "pageInfo":
+				return ec.fieldContext_CollectionInstancesConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_CollectionInstancesConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CollectionInstancesConnection", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Collection_instancesConnection_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Group_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Group) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Group_createdAt(ctx, field)
+func (ec *executionContext) _CollectionInstancesConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.CollectionInstancesConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CollectionInstancesConnection_pageInfo(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3381,7 +3622,229 @@ func (ec *executionContext) _Group_createdAt(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.CreatedAt, nil
+		return obj.PageInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.PageInfo)
+	fc.Result = res
+	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CollectionInstancesConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CollectionInstancesConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "hasPreviousPage":
+				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
+			case "hasNextPage":
+				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CollectionInstancesConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.CollectionInstancesConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CollectionInstancesConnection_edges(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Edges, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.CollectionInstancesEdge)
+	fc.Result = res
+	return ec.marshalNCollectionInstancesEdge2ᚕᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐCollectionInstancesEdgeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CollectionInstancesConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CollectionInstancesConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cursor":
+				return ec.fieldContext_CollectionInstancesEdge_cursor(ctx, field)
+			case "node":
+				return ec.fieldContext_CollectionInstancesEdge_node(ctx, field)
+			case "taggedAt":
+				return ec.fieldContext_CollectionInstancesEdge_taggedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type CollectionInstancesEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CollectionInstancesEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.CollectionInstancesEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CollectionInstancesEdge_cursor(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cursor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CollectionInstancesEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CollectionInstancesEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CollectionInstancesEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.CollectionInstancesEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CollectionInstancesEdge_node(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Node, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Instance)
+	fc.Result = res
+	return ec.marshalNInstance2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstance(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CollectionInstancesEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CollectionInstancesEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Instance_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Instance_name(ctx, field)
+			case "author":
+				return ec.fieldContext_Instance_author(ctx, field)
+			case "readAccess":
+				return ec.fieldContext_Instance_readAccess(ctx, field)
+			case "icon":
+				return ec.fieldContext_Instance_icon(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Instance_createdAt(ctx, field)
+			case "description":
+				return ec.fieldContext_Instance_description(ctx, field)
+			case "showAuthor":
+				return ec.fieldContext_Instance_showAuthor(ctx, field)
+			case "showChat":
+				return ec.fieldContext_Instance_showChat(ctx, field)
+			case "showComments":
+				return ec.fieldContext_Instance_showComments(ctx, field)
+			case "showLikes":
+				return ec.fieldContext_Instance_showLikes(ctx, field)
+			case "likesCount":
+				return ec.fieldContext_Instance_likesCount(ctx, field)
+			case "commentsCount":
+				return ec.fieldContext_Instance_commentsCount(ctx, field)
+			case "channelsConnection":
+				return ec.fieldContext_Instance_channelsConnection(ctx, field)
+			case "likesConnection":
+				return ec.fieldContext_Instance_likesConnection(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Instance", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CollectionInstancesEdge_taggedAt(ctx context.Context, field graphql.CollectedField, obj *model.CollectionInstancesEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CollectionInstancesEdge_taggedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TaggedAt, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3398,136 +3861,15 @@ func (ec *executionContext) _Group_createdAt(ctx context.Context, field graphql.
 	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Group_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_CollectionInstancesEdge_taggedAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Group",
+		Object:     "CollectionInstancesEdge",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Time does not have child fields")
 		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Group_members(ctx context.Context, field graphql.CollectedField, obj *model.Group) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Group_members(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Members, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Author)
-	fc.Result = res
-	return ec.marshalNAuthor2ᚕᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAuthorᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Group_members(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Group",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Author_id(ctx, field)
-			case "userId":
-				return ec.fieldContext_Author_userId(ctx, field)
-			case "instanceId":
-				return ec.fieldContext_Author_instanceId(ctx, field)
-			case "roles":
-				return ec.fieldContext_Author_roles(ctx, field)
-			case "name":
-				return ec.fieldContext_Author_name(ctx, field)
-			case "avatar":
-				return ec.fieldContext_Author_avatar(ctx, field)
-			case "bio":
-				return ec.fieldContext_Author_bio(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Group_messagesConnection(ctx context.Context, field graphql.CollectedField, obj *model.Group) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Group_messagesConnection(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.MessagesConnection, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.ChannelMessagesConnection)
-	fc.Result = res
-	return ec.marshalNChannelMessagesConnection2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannelMessagesConnection(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Group_messagesConnection(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Group",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "pageInfo":
-				return ec.fieldContext_ChannelMessagesConnection_pageInfo(ctx, field)
-			case "edges":
-				return ec.fieldContext_ChannelMessagesConnection_edges(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ChannelMessagesConnection", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Group_messagesConnection_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return
 	}
 	return fc, nil
 }
@@ -4064,6 +4406,50 @@ func (ec *executionContext) _Instance_likesCount(ctx context.Context, field grap
 }
 
 func (ec *executionContext) fieldContext_Instance_likesCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Instance",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Instance_commentsCount(ctx context.Context, field graphql.CollectedField, obj *model.Instance) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Instance_commentsCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CommentsCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Instance_commentsCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Instance",
 		Field:      field,
@@ -4664,429 +5050,6 @@ func (ec *executionContext) fieldContext_InstanceLikesEdge_node(ctx context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _InstanceStreamNotification_mutation(ctx context.Context, field graphql.CollectedField, obj *model.InstanceStreamNotification) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_InstanceStreamNotification_mutation(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Mutation, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(model.MutationType)
-	fc.Result = res
-	return ec.marshalNMutationType2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐMutationType(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_InstanceStreamNotification_mutation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "InstanceStreamNotification",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type MutationType does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _InstanceStreamNotification_channelMessagesEdge(ctx context.Context, field graphql.CollectedField, obj *model.InstanceStreamNotification) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_InstanceStreamNotification_channelMessagesEdge(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ChannelMessagesEdge, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.ChannelMessagesEdge)
-	fc.Result = res
-	return ec.marshalOChannelMessagesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannelMessagesEdge(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_InstanceStreamNotification_channelMessagesEdge(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "InstanceStreamNotification",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "cursor":
-				return ec.fieldContext_ChannelMessagesEdge_cursor(ctx, field)
-			case "node":
-				return ec.fieldContext_ChannelMessagesEdge_node(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ChannelMessagesEdge", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _InstanceStreamNotification_userInstancesEdge(ctx context.Context, field graphql.CollectedField, obj *model.InstanceStreamNotification) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_InstanceStreamNotification_userInstancesEdge(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.UserInstancesEdge, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.UserInstancesEdge)
-	fc.Result = res
-	return ec.marshalOUserInstancesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_InstanceStreamNotification_userInstancesEdge(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "InstanceStreamNotification",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "cursor":
-				return ec.fieldContext_UserInstancesEdge_cursor(ctx, field)
-			case "node":
-				return ec.fieldContext_UserInstancesEdge_node(ctx, field)
-			case "instanceUser":
-				return ec.fieldContext_UserInstancesEdge_instanceUser(ctx, field)
-			case "likedByMe":
-				return ec.fieldContext_UserInstancesEdge_likedByMe(ctx, field)
-			case "rank":
-				return ec.fieldContext_UserInstancesEdge_rank(ctx, field)
-			case "pinned":
-				return ec.fieldContext_UserInstancesEdge_pinned(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type UserInstancesEdge", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _InstanceStreamNotification_instanceChannelsEdge(ctx context.Context, field graphql.CollectedField, obj *model.InstanceStreamNotification) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_InstanceStreamNotification_instanceChannelsEdge(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.InstanceChannelsEdge, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.InstanceChannelsEdge)
-	fc.Result = res
-	return ec.marshalOInstanceChannelsEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdge(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_InstanceStreamNotification_instanceChannelsEdge(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "InstanceStreamNotification",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "cursor":
-				return ec.fieldContext_InstanceChannelsEdge_cursor(ctx, field)
-			case "node":
-				return ec.fieldContext_InstanceChannelsEdge_node(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type InstanceChannelsEdge", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _InstanceStreamNotification_instanceLikesEdge(ctx context.Context, field graphql.CollectedField, obj *model.InstanceStreamNotification) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_InstanceStreamNotification_instanceLikesEdge(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.InstanceLikesEdge, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.InstanceLikesEdge)
-	fc.Result = res
-	return ec.marshalOInstanceLikesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceLikesEdge(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_InstanceStreamNotification_instanceLikesEdge(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "InstanceStreamNotification",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "cursor":
-				return ec.fieldContext_InstanceLikesEdge_cursor(ctx, field)
-			case "likedAt":
-				return ec.fieldContext_InstanceLikesEdge_likedAt(ctx, field)
-			case "node":
-				return ec.fieldContext_InstanceLikesEdge_node(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type InstanceLikesEdge", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _InstanceStreamNotification_instance(ctx context.Context, field graphql.CollectedField, obj *model.InstanceStreamNotification) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_InstanceStreamNotification_instance(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Instance, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.Instance)
-	fc.Result = res
-	return ec.marshalOInstance2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstance(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_InstanceStreamNotification_instance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "InstanceStreamNotification",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Instance_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Instance_name(ctx, field)
-			case "author":
-				return ec.fieldContext_Instance_author(ctx, field)
-			case "readAccess":
-				return ec.fieldContext_Instance_readAccess(ctx, field)
-			case "icon":
-				return ec.fieldContext_Instance_icon(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Instance_createdAt(ctx, field)
-			case "description":
-				return ec.fieldContext_Instance_description(ctx, field)
-			case "showAuthor":
-				return ec.fieldContext_Instance_showAuthor(ctx, field)
-			case "showChat":
-				return ec.fieldContext_Instance_showChat(ctx, field)
-			case "showComments":
-				return ec.fieldContext_Instance_showComments(ctx, field)
-			case "showLikes":
-				return ec.fieldContext_Instance_showLikes(ctx, field)
-			case "likesCount":
-				return ec.fieldContext_Instance_likesCount(ctx, field)
-			case "channelsConnection":
-				return ec.fieldContext_Instance_channelsConnection(ctx, field)
-			case "likesConnection":
-				return ec.fieldContext_Instance_likesConnection(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Instance", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _InstanceStreamNotification_user(ctx context.Context, field graphql.CollectedField, obj *model.InstanceStreamNotification) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_InstanceStreamNotification_user(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.User, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.User)
-	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_InstanceStreamNotification_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "InstanceStreamNotification",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "name":
-				return ec.fieldContext_User_name(ctx, field)
-			case "avatar":
-				return ec.fieldContext_User_avatar(ctx, field)
-			case "bio":
-				return ec.fieldContext_User_bio(ctx, field)
-			case "instancesConnection":
-				return ec.fieldContext_User_instancesConnection(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _InstanceStreamNotification_author(ctx context.Context, field graphql.CollectedField, obj *model.InstanceStreamNotification) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_InstanceStreamNotification_author(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Author, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.Author)
-	fc.Result = res
-	return ec.marshalOAuthor2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAuthor(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_InstanceStreamNotification_author(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "InstanceStreamNotification",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Author_id(ctx, field)
-			case "userId":
-				return ec.fieldContext_Author_userId(ctx, field)
-			case "instanceId":
-				return ec.fieldContext_Author_instanceId(ctx, field)
-			case "roles":
-				return ec.fieldContext_Author_roles(ctx, field)
-			case "name":
-				return ec.fieldContext_Author_name(ctx, field)
-			case "avatar":
-				return ec.fieldContext_Author_avatar(ctx, field)
-			case "bio":
-				return ec.fieldContext_Author_bio(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Invite_id(ctx context.Context, field graphql.CollectedField, obj *model.Invite) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Invite_id(ctx, field)
 	if err != nil {
@@ -5235,6 +5198,8 @@ func (ec *executionContext) fieldContext_Invite_instance(ctx context.Context, fi
 				return ec.fieldContext_Instance_showLikes(ctx, field)
 			case "likesCount":
 				return ec.fieldContext_Instance_likesCount(ctx, field)
+			case "commentsCount":
+				return ec.fieldContext_Instance_commentsCount(ctx, field)
 			case "channelsConnection":
 				return ec.fieldContext_Instance_channelsConnection(ctx, field)
 			case "likesConnection":
@@ -5730,14 +5695,14 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 			return ec.resolvers.Mutation().UpdateUser(rctx, fc.Args["input"].(model.UserInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "user")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -5785,6 +5750,8 @@ func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context
 				return ec.fieldContext_User_bio(ctx, field)
 			case "instancesConnection":
 				return ec.fieldContext_User_instancesConnection(ctx, field)
+			case "notificationsConnection":
+				return ec.fieldContext_User_notificationsConnection(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -5821,14 +5788,14 @@ func (ec *executionContext) _Mutation_addInstance(ctx context.Context, field gra
 			return ec.resolvers.Mutation().AddInstance(rctx, fc.Args["input"].(model.InstanceInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "user")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -5914,14 +5881,14 @@ func (ec *executionContext) _Mutation_updateInstance(ctx context.Context, field 
 			return ec.resolvers.Mutation().UpdateInstance(rctx, fc.Args["instanceId"].(uuid.UUID), fc.Args["input"].(model.InstanceInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "user")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -6007,14 +5974,14 @@ func (ec *executionContext) _Mutation_removeInstance(ctx context.Context, field 
 			return ec.resolvers.Mutation().RemoveInstance(rctx, fc.Args["instanceId"].(uuid.UUID))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "user")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -6100,14 +6067,14 @@ func (ec *executionContext) _Mutation_reorderInstance(ctx context.Context, field
 			return ec.resolvers.Mutation().ReorderInstance(rctx, fc.Args["instanceId"].(uuid.UUID), fc.Args["input"].(model.InstanceReorderInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "user")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -6193,14 +6160,14 @@ func (ec *executionContext) _Mutation_pinInstance(ctx context.Context, field gra
 			return ec.resolvers.Mutation().PinInstance(rctx, fc.Args["instanceId"].(uuid.UUID), fc.Args["input"].(model.InstancePinInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "user")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -6268,8 +6235,8 @@ func (ec *executionContext) fieldContext_Mutation_pinInstance(ctx context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_addGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_addGroup(ctx, field)
+func (ec *executionContext) _Mutation_tagInstance(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_tagInstance(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -6283,17 +6250,17 @@ func (ec *executionContext) _Mutation_addGroup(ctx context.Context, field graphq
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().AddGroup(rctx, fc.Args["input"].(model.GroupInput))
+			return ec.resolvers.Mutation().TagInstance(rctx, fc.Args["instanceId"].(uuid.UUID), fc.Args["input"].(model.TagInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "admin")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -6323,7 +6290,7 @@ func (ec *executionContext) _Mutation_addGroup(ctx context.Context, field graphq
 	return ec.marshalNInstance2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstance(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_addGroup(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_tagInstance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -6355,6 +6322,8 @@ func (ec *executionContext) fieldContext_Mutation_addGroup(ctx context.Context, 
 				return ec.fieldContext_Instance_showLikes(ctx, field)
 			case "likesCount":
 				return ec.fieldContext_Instance_likesCount(ctx, field)
+			case "commentsCount":
+				return ec.fieldContext_Instance_commentsCount(ctx, field)
 			case "channelsConnection":
 				return ec.fieldContext_Instance_channelsConnection(ctx, field)
 			case "likesConnection":
@@ -6370,7 +6339,118 @@ func (ec *executionContext) fieldContext_Mutation_addGroup(ctx context.Context, 
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_addGroup_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_tagInstance_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_untagInstance(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_untagInstance(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().UntagInstance(rctx, fc.Args["instanceId"].(uuid.UUID), fc.Args["input"].(model.TagInput))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			accessLevel, err := ec.unmarshalNString2string(ctx, "admin")
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.Auth == nil {
+				return nil, errors.New("directive auth is not implemented")
+			}
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model.Instance); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/wwwillw/pixelland-chat/graph/model.Instance`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Instance)
+	fc.Result = res
+	return ec.marshalNInstance2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstance(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_untagInstance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Instance_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Instance_name(ctx, field)
+			case "author":
+				return ec.fieldContext_Instance_author(ctx, field)
+			case "readAccess":
+				return ec.fieldContext_Instance_readAccess(ctx, field)
+			case "icon":
+				return ec.fieldContext_Instance_icon(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Instance_createdAt(ctx, field)
+			case "description":
+				return ec.fieldContext_Instance_description(ctx, field)
+			case "showAuthor":
+				return ec.fieldContext_Instance_showAuthor(ctx, field)
+			case "showChat":
+				return ec.fieldContext_Instance_showChat(ctx, field)
+			case "showComments":
+				return ec.fieldContext_Instance_showComments(ctx, field)
+			case "showLikes":
+				return ec.fieldContext_Instance_showLikes(ctx, field)
+			case "likesCount":
+				return ec.fieldContext_Instance_likesCount(ctx, field)
+			case "commentsCount":
+				return ec.fieldContext_Instance_commentsCount(ctx, field)
+			case "channelsConnection":
+				return ec.fieldContext_Instance_channelsConnection(ctx, field)
+			case "likesConnection":
+				return ec.fieldContext_Instance_likesConnection(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Instance", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_untagInstance_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -6395,14 +6475,14 @@ func (ec *executionContext) _Mutation_addChannel(ctx context.Context, field grap
 			return ec.resolvers.Mutation().AddChannel(rctx, fc.Args["input"].(model.ChannelInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "user")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -6480,14 +6560,14 @@ func (ec *executionContext) _Mutation_updateChannel(ctx context.Context, field g
 			return ec.resolvers.Mutation().UpdateChannel(rctx, fc.Args["channelId"].(uuid.UUID), fc.Args["input"].(model.ChannelInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "user")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -6565,14 +6645,14 @@ func (ec *executionContext) _Mutation_reorderChannel(ctx context.Context, field 
 			return ec.resolvers.Mutation().ReorderChannel(rctx, fc.Args["channelId"].(uuid.UUID), fc.Args["input"].(model.ChannelReorderInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "user")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -6650,14 +6730,14 @@ func (ec *executionContext) _Mutation_removeChannel(ctx context.Context, field g
 			return ec.resolvers.Mutation().RemoveChannel(rctx, fc.Args["channelId"].(uuid.UUID))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "user")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -6735,14 +6815,14 @@ func (ec *executionContext) _Mutation_addMessage(ctx context.Context, field grap
 			return ec.resolvers.Mutation().AddMessage(rctx, fc.Args["input"].(model.MessageInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "user")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -6820,14 +6900,14 @@ func (ec *executionContext) _Mutation_removeMessage(ctx context.Context, field g
 			return ec.resolvers.Mutation().RemoveMessage(rctx, fc.Args["messageId"].(uuid.UUID))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "user")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -6905,14 +6985,14 @@ func (ec *executionContext) _Mutation_addRole(ctx context.Context, field graphql
 			return ec.resolvers.Mutation().AddRole(rctx, fc.Args["authorId"].(uuid.UUID), fc.Args["role"].(model.Role))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "user")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -7000,14 +7080,14 @@ func (ec *executionContext) _Mutation_removeRole(ctx context.Context, field grap
 			return ec.resolvers.Mutation().RemoveRole(rctx, fc.Args["authorId"].(uuid.UUID), fc.Args["role"].(model.Role))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "user")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -7095,14 +7175,14 @@ func (ec *executionContext) _Mutation_addInvite(ctx context.Context, field graph
 			return ec.resolvers.Mutation().AddInvite(rctx, fc.Args["input"].(model.InviteInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "user")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -7192,14 +7272,14 @@ func (ec *executionContext) _Mutation_removeInvite(ctx context.Context, field gr
 			return ec.resolvers.Mutation().RemoveInvite(rctx, fc.Args["inviteId"].(uuid.UUID))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "user")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -7289,14 +7369,14 @@ func (ec *executionContext) _Mutation_redeemInvite(ctx context.Context, field gr
 			return ec.resolvers.Mutation().RedeemInvite(rctx, fc.Args["code"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "user")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -7386,14 +7466,14 @@ func (ec *executionContext) _Mutation_addLike(ctx context.Context, field graphql
 			return ec.resolvers.Mutation().AddLike(rctx, fc.Args["instanceId"].(uuid.UUID))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "user")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -7473,14 +7553,14 @@ func (ec *executionContext) _Mutation_removeLike(ctx context.Context, field grap
 			return ec.resolvers.Mutation().RemoveLike(rctx, fc.Args["instanceId"].(uuid.UUID))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "user")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -7538,6 +7618,798 @@ func (ec *executionContext) fieldContext_Mutation_removeLike(ctx context.Context
 	if fc.Args, err = ec.field_Mutation_removeLike_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Notice_kind(ctx context.Context, field graphql.CollectedField, obj *model.Notice) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Notice_kind(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Kind, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.NoticeKind)
+	fc.Result = res
+	return ec.marshalNNoticeKind2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐNoticeKind(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Notice_kind(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Notice",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type NoticeKind does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Notice_channelMessagesEdge(ctx context.Context, field graphql.CollectedField, obj *model.Notice) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Notice_channelMessagesEdge(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ChannelMessagesEdge, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.ChannelMessagesEdge)
+	fc.Result = res
+	return ec.marshalOChannelMessagesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐChannelMessagesEdge(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Notice_channelMessagesEdge(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Notice",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cursor":
+				return ec.fieldContext_ChannelMessagesEdge_cursor(ctx, field)
+			case "node":
+				return ec.fieldContext_ChannelMessagesEdge_node(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ChannelMessagesEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Notice_userInstancesEdge(ctx context.Context, field graphql.CollectedField, obj *model.Notice) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Notice_userInstancesEdge(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserInstancesEdge, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.UserInstancesEdge)
+	fc.Result = res
+	return ec.marshalOUserInstancesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserInstancesEdge(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Notice_userInstancesEdge(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Notice",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cursor":
+				return ec.fieldContext_UserInstancesEdge_cursor(ctx, field)
+			case "node":
+				return ec.fieldContext_UserInstancesEdge_node(ctx, field)
+			case "instanceUser":
+				return ec.fieldContext_UserInstancesEdge_instanceUser(ctx, field)
+			case "likedByMe":
+				return ec.fieldContext_UserInstancesEdge_likedByMe(ctx, field)
+			case "rank":
+				return ec.fieldContext_UserInstancesEdge_rank(ctx, field)
+			case "pinned":
+				return ec.fieldContext_UserInstancesEdge_pinned(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserInstancesEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Notice_instanceChannelsEdge(ctx context.Context, field graphql.CollectedField, obj *model.Notice) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Notice_instanceChannelsEdge(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.InstanceChannelsEdge, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.InstanceChannelsEdge)
+	fc.Result = res
+	return ec.marshalOInstanceChannelsEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceChannelsEdge(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Notice_instanceChannelsEdge(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Notice",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cursor":
+				return ec.fieldContext_InstanceChannelsEdge_cursor(ctx, field)
+			case "node":
+				return ec.fieldContext_InstanceChannelsEdge_node(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type InstanceChannelsEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Notice_instanceLikesEdge(ctx context.Context, field graphql.CollectedField, obj *model.Notice) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Notice_instanceLikesEdge(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.InstanceLikesEdge, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.InstanceLikesEdge)
+	fc.Result = res
+	return ec.marshalOInstanceLikesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceLikesEdge(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Notice_instanceLikesEdge(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Notice",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cursor":
+				return ec.fieldContext_InstanceLikesEdge_cursor(ctx, field)
+			case "likedAt":
+				return ec.fieldContext_InstanceLikesEdge_likedAt(ctx, field)
+			case "node":
+				return ec.fieldContext_InstanceLikesEdge_node(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type InstanceLikesEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Notice_userNotificationsEdge(ctx context.Context, field graphql.CollectedField, obj *model.Notice) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Notice_userNotificationsEdge(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserNotificationsEdge, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.UserNotificationsEdge)
+	fc.Result = res
+	return ec.marshalOUserNotificationsEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserNotificationsEdge(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Notice_userNotificationsEdge(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Notice",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cursor":
+				return ec.fieldContext_UserNotificationsEdge_cursor(ctx, field)
+			case "node":
+				return ec.fieldContext_UserNotificationsEdge_node(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserNotificationsEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Notice_instance(ctx context.Context, field graphql.CollectedField, obj *model.Notice) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Notice_instance(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Instance, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Instance)
+	fc.Result = res
+	return ec.marshalOInstance2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstance(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Notice_instance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Notice",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Instance_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Instance_name(ctx, field)
+			case "author":
+				return ec.fieldContext_Instance_author(ctx, field)
+			case "readAccess":
+				return ec.fieldContext_Instance_readAccess(ctx, field)
+			case "icon":
+				return ec.fieldContext_Instance_icon(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Instance_createdAt(ctx, field)
+			case "description":
+				return ec.fieldContext_Instance_description(ctx, field)
+			case "showAuthor":
+				return ec.fieldContext_Instance_showAuthor(ctx, field)
+			case "showChat":
+				return ec.fieldContext_Instance_showChat(ctx, field)
+			case "showComments":
+				return ec.fieldContext_Instance_showComments(ctx, field)
+			case "showLikes":
+				return ec.fieldContext_Instance_showLikes(ctx, field)
+			case "likesCount":
+				return ec.fieldContext_Instance_likesCount(ctx, field)
+			case "commentsCount":
+				return ec.fieldContext_Instance_commentsCount(ctx, field)
+			case "channelsConnection":
+				return ec.fieldContext_Instance_channelsConnection(ctx, field)
+			case "likesConnection":
+				return ec.fieldContext_Instance_likesConnection(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Instance", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Notice_user(ctx context.Context, field graphql.CollectedField, obj *model.Notice) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Notice_user(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.User, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalOUser2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Notice_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Notice",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "name":
+				return ec.fieldContext_User_name(ctx, field)
+			case "avatar":
+				return ec.fieldContext_User_avatar(ctx, field)
+			case "bio":
+				return ec.fieldContext_User_bio(ctx, field)
+			case "instancesConnection":
+				return ec.fieldContext_User_instancesConnection(ctx, field)
+			case "notificationsConnection":
+				return ec.fieldContext_User_notificationsConnection(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Notice_author(ctx context.Context, field graphql.CollectedField, obj *model.Notice) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Notice_author(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Author, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Author)
+	fc.Result = res
+	return ec.marshalOAuthor2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAuthor(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Notice_author(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Notice",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Author_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Author_userId(ctx, field)
+			case "instanceId":
+				return ec.fieldContext_Author_instanceId(ctx, field)
+			case "roles":
+				return ec.fieldContext_Author_roles(ctx, field)
+			case "name":
+				return ec.fieldContext_Author_name(ctx, field)
+			case "avatar":
+				return ec.fieldContext_Author_avatar(ctx, field)
+			case "bio":
+				return ec.fieldContext_Author_bio(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Notification_id(ctx context.Context, field graphql.CollectedField, obj *model.Notification) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Notification_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(uuid.UUID)
+	fc.Result = res
+	return ec.marshalNUuid2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Notification_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Notification",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Uuid does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Notification_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Notification) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Notification_createdAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Notification_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Notification",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Notification_kind(ctx context.Context, field graphql.CollectedField, obj *model.Notification) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Notification_kind(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Notification().Kind(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.NotificationKind)
+	fc.Result = res
+	return ec.marshalNNotificationKind2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐNotificationKind(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Notification_kind(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Notification",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type NotificationKind does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Notification_author(ctx context.Context, field graphql.CollectedField, obj *model.Notification) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Notification_author(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Notification().Author(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Author)
+	fc.Result = res
+	return ec.marshalNAuthor2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAuthor(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Notification_author(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Notification",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Author_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Author_userId(ctx, field)
+			case "instanceId":
+				return ec.fieldContext_Author_instanceId(ctx, field)
+			case "roles":
+				return ec.fieldContext_Author_roles(ctx, field)
+			case "name":
+				return ec.fieldContext_Author_name(ctx, field)
+			case "avatar":
+				return ec.fieldContext_Author_avatar(ctx, field)
+			case "bio":
+				return ec.fieldContext_Author_bio(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Notification_instance(ctx context.Context, field graphql.CollectedField, obj *model.Notification) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Notification_instance(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Instance, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Instance)
+	fc.Result = res
+	return ec.marshalOInstance2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstance(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Notification_instance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Notification",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Instance_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Instance_name(ctx, field)
+			case "author":
+				return ec.fieldContext_Instance_author(ctx, field)
+			case "readAccess":
+				return ec.fieldContext_Instance_readAccess(ctx, field)
+			case "icon":
+				return ec.fieldContext_Instance_icon(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Instance_createdAt(ctx, field)
+			case "description":
+				return ec.fieldContext_Instance_description(ctx, field)
+			case "showAuthor":
+				return ec.fieldContext_Instance_showAuthor(ctx, field)
+			case "showChat":
+				return ec.fieldContext_Instance_showChat(ctx, field)
+			case "showComments":
+				return ec.fieldContext_Instance_showComments(ctx, field)
+			case "showLikes":
+				return ec.fieldContext_Instance_showLikes(ctx, field)
+			case "likesCount":
+				return ec.fieldContext_Instance_likesCount(ctx, field)
+			case "commentsCount":
+				return ec.fieldContext_Instance_commentsCount(ctx, field)
+			case "channelsConnection":
+				return ec.fieldContext_Instance_channelsConnection(ctx, field)
+			case "likesConnection":
+				return ec.fieldContext_Instance_likesConnection(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Instance", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Notification_message(ctx context.Context, field graphql.CollectedField, obj *model.Notification) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Notification_message(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Message)
+	fc.Result = res
+	return ec.marshalOMessage2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐMessage(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Notification_message(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Notification",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Message_id(ctx, field)
+			case "text":
+				return ec.fieldContext_Message_text(ctx, field)
+			case "author":
+				return ec.fieldContext_Message_author(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Message_createdAt(ctx, field)
+			case "channelId":
+				return ec.fieldContext_Message_channelId(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Message", field.Name)
+		},
 	}
 	return fc, nil
 }
@@ -7645,17 +8517,17 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().User(rctx, fc.Args["uid"].(string))
+			return ec.resolvers.Query().User(rctx)
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "user")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -7703,8 +8575,84 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_bio(ctx, field)
 			case "instancesConnection":
 				return ec.fieldContext_User_instancesConnection(ctx, field)
+			case "notificationsConnection":
+				return ec.fieldContext_User_notificationsConnection(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_collection(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_collection(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().Collection(rctx, fc.Args["tag"].(model.TagKind))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			accessLevel, err := ec.unmarshalNString2string(ctx, "guest")
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.Auth == nil {
+				return nil, errors.New("directive auth is not implemented")
+			}
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model.Collection); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/wwwillw/pixelland-chat/graph/model.Collection`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Collection)
+	fc.Result = res
+	return ec.marshalNCollection2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐCollection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_collection(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "tag":
+				return ec.fieldContext_Collection_tag(ctx, field)
+			case "instancesConnection":
+				return ec.fieldContext_Collection_instancesConnection(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Collection", field.Name)
 		},
 	}
 	defer func() {
@@ -7714,7 +8662,7 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_user_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_collection_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -7739,14 +8687,14 @@ func (ec *executionContext) _Query_instance(ctx context.Context, field graphql.C
 			return ec.resolvers.Query().Instance(rctx, fc.Args["id"].(uuid.UUID))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, false)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "guest")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -7832,14 +8780,14 @@ func (ec *executionContext) _Query_channel(ctx context.Context, field graphql.Co
 			return ec.resolvers.Query().Channel(rctx, fc.Args["id"].(uuid.UUID))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, false)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "guest")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -7939,14 +8887,14 @@ func (ec *executionContext) _Query_invite(ctx context.Context, field graphql.Col
 			return ec.resolvers.Query().Invite(rctx, fc.Args["instanceId"].(uuid.UUID))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, false)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "guest")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -8036,14 +8984,14 @@ func (ec *executionContext) _Query_checkInvite(ctx context.Context, field graphq
 			return ec.resolvers.Query().CheckInvite(rctx, fc.Args["code"].(string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, false)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "guest")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -8244,8 +9192,8 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Subscription_instanceStream(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
-	fc, err := ec.fieldContext_Subscription_instanceStream(ctx, field)
+func (ec *executionContext) _Subscription_stream(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	fc, err := ec.fieldContext_Subscription_stream(ctx, field)
 	if err != nil {
 		return nil
 	}
@@ -8259,17 +9207,17 @@ func (ec *executionContext) _Subscription_instanceStream(ctx context.Context, fi
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Subscription().InstanceStream(rctx, fc.Args["instanceId"].(uuid.UUID))
+			return ec.resolvers.Subscription().Stream(rctx, fc.Args["instanceId"].(uuid.UUID))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			required, err := ec.unmarshalOBoolean2ᚖbool(ctx, false)
+			accessLevel, err := ec.unmarshalNString2string(ctx, "guest")
 			if err != nil {
 				return nil, err
 			}
 			if ec.directives.Auth == nil {
 				return nil, errors.New("directive auth is not implemented")
 			}
-			return ec.directives.Auth(ctx, nil, directive0, required)
+			return ec.directives.Auth(ctx, nil, directive0, accessLevel)
 		}
 
 		tmp, err := directive1(rctx)
@@ -8279,10 +9227,10 @@ func (ec *executionContext) _Subscription_instanceStream(ctx context.Context, fi
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.(<-chan *model.InstanceStreamNotification); ok {
+		if data, ok := tmp.(<-chan *model.Notice); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be <-chan *github.com/wwwillw/pixelland-chat/graph/model.InstanceStreamNotification`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be <-chan *github.com/wwwillw/pixelland-chat/graph/model.Notice`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -8296,7 +9244,7 @@ func (ec *executionContext) _Subscription_instanceStream(ctx context.Context, fi
 	}
 	return func(ctx context.Context) graphql.Marshaler {
 		select {
-		case res, ok := <-resTmp.(<-chan *model.InstanceStreamNotification):
+		case res, ok := <-resTmp.(<-chan *model.Notice):
 			if !ok {
 				return nil
 			}
@@ -8304,7 +9252,7 @@ func (ec *executionContext) _Subscription_instanceStream(ctx context.Context, fi
 				w.Write([]byte{'{'})
 				graphql.MarshalString(field.Alias).MarshalGQL(w)
 				w.Write([]byte{':'})
-				ec.marshalNInstanceStreamNotification2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceStreamNotification(ctx, field.Selections, res).MarshalGQL(w)
+				ec.marshalNNotice2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐNotice(ctx, field.Selections, res).MarshalGQL(w)
 				w.Write([]byte{'}'})
 			})
 		case <-ctx.Done():
@@ -8313,7 +9261,7 @@ func (ec *executionContext) _Subscription_instanceStream(ctx context.Context, fi
 	}
 }
 
-func (ec *executionContext) fieldContext_Subscription_instanceStream(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Subscription_stream(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Subscription",
 		Field:      field,
@@ -8321,24 +9269,26 @@ func (ec *executionContext) fieldContext_Subscription_instanceStream(ctx context
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "mutation":
-				return ec.fieldContext_InstanceStreamNotification_mutation(ctx, field)
+			case "kind":
+				return ec.fieldContext_Notice_kind(ctx, field)
 			case "channelMessagesEdge":
-				return ec.fieldContext_InstanceStreamNotification_channelMessagesEdge(ctx, field)
+				return ec.fieldContext_Notice_channelMessagesEdge(ctx, field)
 			case "userInstancesEdge":
-				return ec.fieldContext_InstanceStreamNotification_userInstancesEdge(ctx, field)
+				return ec.fieldContext_Notice_userInstancesEdge(ctx, field)
 			case "instanceChannelsEdge":
-				return ec.fieldContext_InstanceStreamNotification_instanceChannelsEdge(ctx, field)
+				return ec.fieldContext_Notice_instanceChannelsEdge(ctx, field)
 			case "instanceLikesEdge":
-				return ec.fieldContext_InstanceStreamNotification_instanceLikesEdge(ctx, field)
+				return ec.fieldContext_Notice_instanceLikesEdge(ctx, field)
+			case "userNotificationsEdge":
+				return ec.fieldContext_Notice_userNotificationsEdge(ctx, field)
 			case "instance":
-				return ec.fieldContext_InstanceStreamNotification_instance(ctx, field)
+				return ec.fieldContext_Notice_instance(ctx, field)
 			case "user":
-				return ec.fieldContext_InstanceStreamNotification_user(ctx, field)
+				return ec.fieldContext_Notice_user(ctx, field)
 			case "author":
-				return ec.fieldContext_InstanceStreamNotification_author(ctx, field)
+				return ec.fieldContext_Notice_author(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type InstanceStreamNotification", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Notice", field.Name)
 		},
 	}
 	defer func() {
@@ -8348,7 +9298,7 @@ func (ec *executionContext) fieldContext_Subscription_instanceStream(ctx context
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Subscription_instanceStream_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Subscription_stream_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -8592,8 +9542,8 @@ func (ec *executionContext) fieldContext_User_instancesConnection(ctx context.Co
 	return fc, nil
 }
 
-func (ec *executionContext) _UserGroupsConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.UserGroupsConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UserGroupsConnection_pageInfo(ctx, field)
+func (ec *executionContext) _User_notificationsConnection(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_notificationsConnection(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -8606,7 +9556,7 @@ func (ec *executionContext) _UserGroupsConnection_pageInfo(ctx context.Context, 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.PageInfo, nil
+		return ec.resolvers.User().NotificationsConnection(rctx, obj, fc.Args["last"].(*int), fc.Args["before"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -8618,176 +9568,39 @@ func (ec *executionContext) _UserGroupsConnection_pageInfo(ctx context.Context, 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.PageInfo)
+	res := resTmp.(*model.UserNotificationsConnection)
 	fc.Result = res
-	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
+	return ec.marshalNUserNotificationsConnection2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserNotificationsConnection(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_UserGroupsConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_User_notificationsConnection(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "UserGroupsConnection",
+		Object:     "User",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "hasPreviousPage":
-				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
-			case "hasNextPage":
-				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_UserNotificationsConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_UserNotificationsConnection_edges(ctx, field)
+			case "hasUnread":
+				return ec.fieldContext_UserNotificationsConnection_hasUnread(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type UserNotificationsConnection", field.Name)
 		},
 	}
-	return fc, nil
-}
-
-func (ec *executionContext) _UserGroupsConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.UserGroupsConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UserGroupsConnection_edges(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
 	defer func() {
 		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Edges, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.UserGroupsEdge)
-	fc.Result = res
-	return ec.marshalNUserGroupsEdge2ᚕᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserGroupsEdgeᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_UserGroupsConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "UserGroupsConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "cursor":
-				return ec.fieldContext_UserGroupsEdge_cursor(ctx, field)
-			case "node":
-				return ec.fieldContext_UserGroupsEdge_node(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type UserGroupsEdge", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _UserGroupsEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.UserGroupsEdge) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UserGroupsEdge_cursor(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
 	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Cursor, nil
-	})
-	if err != nil {
+	if fc.Args, err = ec.field_User_notificationsConnection_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_UserGroupsEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "UserGroupsEdge",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _UserGroupsEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.UserGroupsEdge) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UserGroupsEdge_node(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Node, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Group)
-	fc.Result = res
-	return ec.marshalNGroup2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐGroup(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_UserGroupsEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "UserGroupsEdge",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Group_id(ctx, field)
-			case "channelId":
-				return ec.fieldContext_Group_channelId(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Group_createdAt(ctx, field)
-			case "members":
-				return ec.fieldContext_Group_members(ctx, field)
-			case "messagesConnection":
-				return ec.fieldContext_Group_messagesConnection(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Group", field.Name)
-		},
+		return
 	}
 	return fc, nil
 }
@@ -9007,6 +9820,8 @@ func (ec *executionContext) fieldContext_UserInstancesEdge_node(ctx context.Cont
 				return ec.fieldContext_Instance_showLikes(ctx, field)
 			case "likesCount":
 				return ec.fieldContext_Instance_likesCount(ctx, field)
+			case "commentsCount":
+				return ec.fieldContext_Instance_commentsCount(ctx, field)
 			case "channelsConnection":
 				return ec.fieldContext_Instance_channelsConnection(ctx, field)
 			case "likesConnection":
@@ -9205,6 +10020,252 @@ func (ec *executionContext) fieldContext_UserInstancesEdge_pinned(ctx context.Co
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserNotificationsConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.UserNotificationsConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserNotificationsConnection_pageInfo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.PageInfo)
+	fc.Result = res
+	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserNotificationsConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserNotificationsConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "hasPreviousPage":
+				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
+			case "hasNextPage":
+				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserNotificationsConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.UserNotificationsConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserNotificationsConnection_edges(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Edges, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.UserNotificationsEdge)
+	fc.Result = res
+	return ec.marshalNUserNotificationsEdge2ᚕᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserNotificationsEdgeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserNotificationsConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserNotificationsConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cursor":
+				return ec.fieldContext_UserNotificationsEdge_cursor(ctx, field)
+			case "node":
+				return ec.fieldContext_UserNotificationsEdge_node(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserNotificationsEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserNotificationsConnection_hasUnread(ctx context.Context, field graphql.CollectedField, obj *model.UserNotificationsConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserNotificationsConnection_hasUnread(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HasUnread, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserNotificationsConnection_hasUnread(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserNotificationsConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserNotificationsEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.UserNotificationsEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserNotificationsEdge_cursor(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cursor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserNotificationsEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserNotificationsEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserNotificationsEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.UserNotificationsEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserNotificationsEdge_node(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Node, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Notification)
+	fc.Result = res
+	return ec.marshalNNotification2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐNotification(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserNotificationsEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserNotificationsEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Notification_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Notification_createdAt(ctx, field)
+			case "kind":
+				return ec.fieldContext_Notification_kind(ctx, field)
+			case "author":
+				return ec.fieldContext_Notification_author(ctx, field)
+			case "instance":
+				return ec.fieldContext_Notification_instance(ctx, field)
+			case "message":
+				return ec.fieldContext_Notification_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Notification", field.Name)
 		},
 	}
 	return fc, nil
@@ -11093,34 +12154,6 @@ func (ec *executionContext) unmarshalInputChannelReorderInput(ctx context.Contex
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputGroupInput(ctx context.Context, obj interface{}) (model.GroupInput, error) {
-	var it model.GroupInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"invitees"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "invitees":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("invitees"))
-			it.Invitees, err = ec.unmarshalNUuid2ᚕgithubᚗcomᚋgoogleᚋuuidᚐUUIDᚄ(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputInstanceInput(ctx context.Context, obj interface{}) (model.InstanceInput, error) {
 	var it model.InstanceInput
 	asMap := map[string]interface{}{}
@@ -11428,6 +12461,34 @@ func (ec *executionContext) unmarshalInputMessageInput(ctx context.Context, obj 
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("channelId"))
 			it.ChannelID, err = ec.unmarshalNUuid2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputTagInput(ctx context.Context, obj interface{}) (model.TagInput, error) {
+	var it model.TagInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"tag"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "tag":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tag"))
+			it.Tag, err = ec.unmarshalNTagKind2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐTagKind(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -11821,47 +12882,129 @@ func (ec *executionContext) _ChannelMessagesEdge(ctx context.Context, sel ast.Se
 	return out
 }
 
-var groupImplementors = []string{"Group"}
+var collectionImplementors = []string{"Collection"}
 
-func (ec *executionContext) _Group(ctx context.Context, sel ast.SelectionSet, obj *model.Group) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, groupImplementors)
+func (ec *executionContext) _Collection(ctx context.Context, sel ast.SelectionSet, obj *model.Collection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, collectionImplementors)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("Group")
-		case "id":
+			out.Values[i] = graphql.MarshalString("Collection")
+		case "tag":
+			field := field
 
-			out.Values[i] = ec._Group_id(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Collection_tag(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "instancesConnection":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Collection_instancesConnection(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var collectionInstancesConnectionImplementors = []string{"CollectionInstancesConnection"}
+
+func (ec *executionContext) _CollectionInstancesConnection(ctx context.Context, sel ast.SelectionSet, obj *model.CollectionInstancesConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, collectionInstancesConnectionImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CollectionInstancesConnection")
+		case "pageInfo":
+
+			out.Values[i] = ec._CollectionInstancesConnection_pageInfo(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "channelId":
+		case "edges":
 
-			out.Values[i] = ec._Group_channelId(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "createdAt":
-
-			out.Values[i] = ec._Group_createdAt(ctx, field, obj)
+			out.Values[i] = ec._CollectionInstancesConnection_edges(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "members":
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
 
-			out.Values[i] = ec._Group_members(ctx, field, obj)
+var collectionInstancesEdgeImplementors = []string{"CollectionInstancesEdge"}
+
+func (ec *executionContext) _CollectionInstancesEdge(ctx context.Context, sel ast.SelectionSet, obj *model.CollectionInstancesEdge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, collectionInstancesEdgeImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CollectionInstancesEdge")
+		case "cursor":
+
+			out.Values[i] = ec._CollectionInstancesEdge_cursor(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "messagesConnection":
+		case "node":
 
-			out.Values[i] = ec._Group_messagesConnection(ctx, field, obj)
+			out.Values[i] = ec._CollectionInstancesEdge_node(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "taggedAt":
+
+			out.Values[i] = ec._CollectionInstancesEdge_taggedAt(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -11993,6 +13136,13 @@ func (ec *executionContext) _Instance(ctx context.Context, sel ast.SelectionSet,
 		case "likesCount":
 
 			out.Values[i] = ec._Instance_likesCount(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "commentsCount":
+
+			out.Values[i] = ec._Instance_commentsCount(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
@@ -12184,62 +13334,6 @@ func (ec *executionContext) _InstanceLikesEdge(ctx context.Context, sel ast.Sele
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var instanceStreamNotificationImplementors = []string{"InstanceStreamNotification"}
-
-func (ec *executionContext) _InstanceStreamNotification(ctx context.Context, sel ast.SelectionSet, obj *model.InstanceStreamNotification) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, instanceStreamNotificationImplementors)
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("InstanceStreamNotification")
-		case "mutation":
-
-			out.Values[i] = ec._InstanceStreamNotification_mutation(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "channelMessagesEdge":
-
-			out.Values[i] = ec._InstanceStreamNotification_channelMessagesEdge(ctx, field, obj)
-
-		case "userInstancesEdge":
-
-			out.Values[i] = ec._InstanceStreamNotification_userInstancesEdge(ctx, field, obj)
-
-		case "instanceChannelsEdge":
-
-			out.Values[i] = ec._InstanceStreamNotification_instanceChannelsEdge(ctx, field, obj)
-
-		case "instanceLikesEdge":
-
-			out.Values[i] = ec._InstanceStreamNotification_instanceLikesEdge(ctx, field, obj)
-
-		case "instance":
-
-			out.Values[i] = ec._InstanceStreamNotification_instance(ctx, field, obj)
-
-		case "user":
-
-			out.Values[i] = ec._InstanceStreamNotification_user(ctx, field, obj)
-
-		case "author":
-
-			out.Values[i] = ec._InstanceStreamNotification_author(ctx, field, obj)
-
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -12474,10 +13568,19 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "addGroup":
+		case "tagInstance":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_addGroup(ctx, field)
+				return ec._Mutation_tagInstance(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "untagInstance":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_untagInstance(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
@@ -12611,6 +13714,149 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 	return out
 }
 
+var noticeImplementors = []string{"Notice"}
+
+func (ec *executionContext) _Notice(ctx context.Context, sel ast.SelectionSet, obj *model.Notice) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, noticeImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Notice")
+		case "kind":
+
+			out.Values[i] = ec._Notice_kind(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "channelMessagesEdge":
+
+			out.Values[i] = ec._Notice_channelMessagesEdge(ctx, field, obj)
+
+		case "userInstancesEdge":
+
+			out.Values[i] = ec._Notice_userInstancesEdge(ctx, field, obj)
+
+		case "instanceChannelsEdge":
+
+			out.Values[i] = ec._Notice_instanceChannelsEdge(ctx, field, obj)
+
+		case "instanceLikesEdge":
+
+			out.Values[i] = ec._Notice_instanceLikesEdge(ctx, field, obj)
+
+		case "userNotificationsEdge":
+
+			out.Values[i] = ec._Notice_userNotificationsEdge(ctx, field, obj)
+
+		case "instance":
+
+			out.Values[i] = ec._Notice_instance(ctx, field, obj)
+
+		case "user":
+
+			out.Values[i] = ec._Notice_user(ctx, field, obj)
+
+		case "author":
+
+			out.Values[i] = ec._Notice_author(ctx, field, obj)
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var notificationImplementors = []string{"Notification"}
+
+func (ec *executionContext) _Notification(ctx context.Context, sel ast.SelectionSet, obj *model.Notification) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, notificationImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Notification")
+		case "id":
+
+			out.Values[i] = ec._Notification_id(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "createdAt":
+
+			out.Values[i] = ec._Notification_createdAt(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "kind":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Notification_kind(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "author":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Notification_author(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "instance":
+
+			out.Values[i] = ec._Notification_instance(ctx, field, obj)
+
+		case "message":
+
+			out.Values[i] = ec._Notification_message(ctx, field, obj)
+
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var pageInfoImplementors = []string{"PageInfo"}
 
 func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet, obj *model.PageInfo) graphql.Marshaler {
@@ -12675,6 +13921,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_user(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
+			})
+		case "collection":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_collection(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -12816,8 +14085,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 	}
 
 	switch fields[0].Name {
-	case "instanceStream":
-		return ec._Subscription_instanceStream(ctx, fields[0])
+	case "stream":
+		return ec._Subscription_stream(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -12881,76 +14150,26 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 				return innerFunc(ctx)
 
 			})
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
+		case "notificationsConnection":
+			field := field
 
-var userGroupsConnectionImplementors = []string{"UserGroupsConnection"}
-
-func (ec *executionContext) _UserGroupsConnection(ctx context.Context, sel ast.SelectionSet, obj *model.UserGroupsConnection) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, userGroupsConnectionImplementors)
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("UserGroupsConnection")
-		case "pageInfo":
-
-			out.Values[i] = ec._UserGroupsConnection_pageInfo(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_notificationsConnection(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
 			}
-		case "edges":
 
-			out.Values[i] = ec._UserGroupsConnection_edges(ctx, field, obj)
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
 
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var userGroupsEdgeImplementors = []string{"UserGroupsEdge"}
-
-func (ec *executionContext) _UserGroupsEdge(ctx context.Context, sel ast.SelectionSet, obj *model.UserGroupsEdge) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, userGroupsEdgeImplementors)
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("UserGroupsEdge")
-		case "cursor":
-
-			out.Values[i] = ec._UserGroupsEdge_cursor(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "node":
-
-			out.Values[i] = ec._UserGroupsEdge_node(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -13045,6 +14264,83 @@ func (ec *executionContext) _UserInstancesEdge(ctx context.Context, sel ast.Sele
 		case "pinned":
 
 			out.Values[i] = ec._UserInstancesEdge_pinned(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var userNotificationsConnectionImplementors = []string{"UserNotificationsConnection"}
+
+func (ec *executionContext) _UserNotificationsConnection(ctx context.Context, sel ast.SelectionSet, obj *model.UserNotificationsConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, userNotificationsConnectionImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UserNotificationsConnection")
+		case "pageInfo":
+
+			out.Values[i] = ec._UserNotificationsConnection_pageInfo(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "edges":
+
+			out.Values[i] = ec._UserNotificationsConnection_edges(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "hasUnread":
+
+			out.Values[i] = ec._UserNotificationsConnection_hasUnread(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var userNotificationsEdgeImplementors = []string{"UserNotificationsEdge"}
+
+func (ec *executionContext) _UserNotificationsEdge(ctx context.Context, sel ast.SelectionSet, obj *model.UserNotificationsEdge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, userNotificationsEdgeImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UserNotificationsEdge")
+		case "cursor":
+
+			out.Values[i] = ec._UserNotificationsEdge_cursor(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "node":
+
+			out.Values[i] = ec._UserNotificationsEdge_node(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++
@@ -13392,50 +14688,6 @@ func (ec *executionContext) marshalNAuthor2githubᚗcomᚋwwwillwᚋpixellandᚑ
 	return ec._Author(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNAuthor2ᚕᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAuthorᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Author) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNAuthor2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAuthor(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
 func (ec *executionContext) marshalNAuthor2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAuthor(ctx context.Context, sel ast.SelectionSet, v *model.Author) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -13557,19 +14809,86 @@ func (ec *executionContext) unmarshalNChannelReorderInput2githubᚗcomᚋwwwillw
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNGroup2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐGroup(ctx context.Context, sel ast.SelectionSet, v *model.Group) graphql.Marshaler {
+func (ec *executionContext) marshalNCollection2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐCollection(ctx context.Context, sel ast.SelectionSet, v model.Collection) graphql.Marshaler {
+	return ec._Collection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNCollection2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐCollection(ctx context.Context, sel ast.SelectionSet, v *model.Collection) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._Group(ctx, sel, v)
+	return ec._Collection(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNGroupInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐGroupInput(ctx context.Context, v interface{}) (model.GroupInput, error) {
-	res, err := ec.unmarshalInputGroupInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
+func (ec *executionContext) marshalNCollectionInstancesConnection2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐCollectionInstancesConnection(ctx context.Context, sel ast.SelectionSet, v model.CollectionInstancesConnection) graphql.Marshaler {
+	return ec._CollectionInstancesConnection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNCollectionInstancesConnection2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐCollectionInstancesConnection(ctx context.Context, sel ast.SelectionSet, v *model.CollectionInstancesConnection) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._CollectionInstancesConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNCollectionInstancesEdge2ᚕᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐCollectionInstancesEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.CollectionInstancesEdge) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNCollectionInstancesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐCollectionInstancesEdge(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNCollectionInstancesEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐCollectionInstancesEdge(ctx context.Context, sel ast.SelectionSet, v *model.CollectionInstancesEdge) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._CollectionInstancesEdge(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNInstance2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstance(ctx context.Context, sel ast.SelectionSet, v model.Instance) graphql.Marshaler {
@@ -13745,20 +15064,6 @@ func (ec *executionContext) unmarshalNInstanceReorderInput2githubᚗcomᚋwwwill
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNInstanceStreamNotification2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceStreamNotification(ctx context.Context, sel ast.SelectionSet, v model.InstanceStreamNotification) graphql.Marshaler {
-	return ec._InstanceStreamNotification(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNInstanceStreamNotification2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceStreamNotification(ctx context.Context, sel ast.SelectionSet, v *model.InstanceStreamNotification) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._InstanceStreamNotification(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
 	res, err := graphql.UnmarshalInt(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -13808,13 +15113,47 @@ func (ec *executionContext) unmarshalNMessageInput2githubᚗcomᚋwwwillwᚋpixe
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNMutationType2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐMutationType(ctx context.Context, v interface{}) (model.MutationType, error) {
-	var res model.MutationType
+func (ec *executionContext) marshalNNotice2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐNotice(ctx context.Context, sel ast.SelectionSet, v model.Notice) graphql.Marshaler {
+	return ec._Notice(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNNotice2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐNotice(ctx context.Context, sel ast.SelectionSet, v *model.Notice) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Notice(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNNoticeKind2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐNoticeKind(ctx context.Context, v interface{}) (model.NoticeKind, error) {
+	var res model.NoticeKind
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNMutationType2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐMutationType(ctx context.Context, sel ast.SelectionSet, v model.MutationType) graphql.Marshaler {
+func (ec *executionContext) marshalNNoticeKind2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐNoticeKind(ctx context.Context, sel ast.SelectionSet, v model.NoticeKind) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) marshalNNotification2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐNotification(ctx context.Context, sel ast.SelectionSet, v *model.Notification) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Notification(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNNotificationKind2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐNotificationKind(ctx context.Context, v interface{}) (model.NotificationKind, error) {
+	var res model.NotificationKind
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNNotificationKind2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐNotificationKind(ctx context.Context, sel ast.SelectionSet, v model.NotificationKind) graphql.Marshaler {
 	return v
 }
 
@@ -13914,6 +15253,21 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
+func (ec *executionContext) unmarshalNTagInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐTagInput(ctx context.Context, v interface{}) (model.TagInput, error) {
+	res, err := ec.unmarshalInputTagInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNTagKind2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐTagKind(ctx context.Context, v interface{}) (model.TagKind, error) {
+	var res model.TagKind
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNTagKind2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐTagKind(ctx context.Context, sel ast.SelectionSet, v model.TagKind) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
 	res, err := graphql.UnmarshalTime(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -13941,60 +15295,6 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋwwwillwᚋpixelland�
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNUserGroupsEdge2ᚕᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserGroupsEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.UserGroupsEdge) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNUserGroupsEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserGroupsEdge(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-func (ec *executionContext) marshalNUserGroupsEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserGroupsEdge(ctx context.Context, sel ast.SelectionSet, v *model.UserGroupsEdge) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._UserGroupsEdge(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNUserInput2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserInput(ctx context.Context, v interface{}) (model.UserInput, error) {
@@ -14074,6 +15374,74 @@ func (ec *executionContext) marshalNUserInstancesEdge2ᚖgithubᚗcomᚋwwwillw�
 	return ec._UserInstancesEdge(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNUserNotificationsConnection2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserNotificationsConnection(ctx context.Context, sel ast.SelectionSet, v model.UserNotificationsConnection) graphql.Marshaler {
+	return ec._UserNotificationsConnection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUserNotificationsConnection2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserNotificationsConnection(ctx context.Context, sel ast.SelectionSet, v *model.UserNotificationsConnection) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._UserNotificationsConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNUserNotificationsEdge2ᚕᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserNotificationsEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.UserNotificationsEdge) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNUserNotificationsEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserNotificationsEdge(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNUserNotificationsEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserNotificationsEdge(ctx context.Context, sel ast.SelectionSet, v *model.UserNotificationsEdge) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._UserNotificationsEdge(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNUuid2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx context.Context, v interface{}) (uuid.UUID, error) {
 	res, err := scalars.UnmarshalUuid(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -14087,38 +15455,6 @@ func (ec *executionContext) marshalNUuid2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) unmarshalNUuid2ᚕgithubᚗcomᚋgoogleᚋuuidᚐUUIDᚄ(ctx context.Context, v interface{}) ([]uuid.UUID, error) {
-	var vSlice []interface{}
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
-	var err error
-	res := make([]uuid.UUID, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNUuid2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) marshalNUuid2ᚕgithubᚗcomᚋgoogleᚋuuidᚐUUIDᚄ(ctx context.Context, sel ast.SelectionSet, v []uuid.UUID) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	for i := range v {
-		ret[i] = ec.marshalNUuid2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, sel, v[i])
-	}
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -14467,6 +15803,13 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return res
 }
 
+func (ec *executionContext) marshalOMessage2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐMessage(ctx context.Context, sel ast.SelectionSet, v *model.Message) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Message(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
 	if v == nil {
 		return nil, nil
@@ -14511,6 +15854,13 @@ func (ec *executionContext) marshalOUserInstancesEdge2ᚖgithubᚗcomᚋwwwillw�
 		return graphql.Null
 	}
 	return ec._UserInstancesEdge(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOUserNotificationsEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐUserNotificationsEdge(ctx context.Context, sel ast.SelectionSet, v *model.UserNotificationsEdge) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._UserNotificationsEdge(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOUuid2ᚖgithubᚗcomᚋgoogleᚋuuidᚐUUID(ctx context.Context, v interface{}) (*uuid.UUID, error) {

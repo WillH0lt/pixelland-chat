@@ -1,27 +1,26 @@
 <template>
-  <div class="absolute inset-0 h-full bg-gray-dark">
-    <div v-if="error">Error: {{ error }}</div>
-    <div v-else-if="loading">Loading</div>
-    <div v-else>
-      <InstanceView @close="emitter.emit('chat:close')" />
-      <router-view @close="router.back()" v-slot="{ Component, route }" @keydown.stop>
-        <transition name="slide">
-          <component
-            v-if="route.name !== 'home'"
-            :is="Component"
-            class="absolute inset-0 bg-gray-dark"
-          />
-        </transition>
-      </router-view>
-    </div>
-    <transition name="appear">
-      <ElementDialog
-        v-if="dialogStore.visible"
-        @close="dialogStore.visible = false"
-        :options="dialogStore.options"
-      />
-    </transition>
+  <div class="absolute inset-0 bg-gray-dark" v-if="error">Error: {{ error }}</div>
+  <div class="absolute inset-0 bg-gray-dark" v-else-if="loading">Loading</div>
+  <div class="absolute inset-0 bg-gray-dark" v-else>
+    <HomeView v-if="appStore.showBottomBar" @close="emitter.emit('chat:close')" />
+    <InstanceView class="h-full" v-else @close="emitter.emit('chat:close')" />
+    <router-view @close="router.back()" v-slot="{ Component, route }" @keydown.stop>
+      <transition name="slide">
+        <component
+          v-if="route.name !== 'home'"
+          :is="Component"
+          class="absolute inset-0 bg-gray-dark"
+        />
+      </transition>
+    </router-view>
   </div>
+  <transition name="appear">
+    <ElementDialog
+      v-if="dialogStore.visible"
+      @close="dialogStore.visible = false"
+      :options="dialogStore.options"
+    />
+  </transition>
 </template>
 
 <script setup lang="ts">
@@ -31,10 +30,12 @@ import { useRouter } from 'vue-router'
 
 import { emitter } from '@/Emitter'
 import ElementDialog from '@/components/ElementDialog.vue'
+import HomeView from '@/components/HomeView.vue'
 import InstanceView from '@/components/InstanceView.vue'
 import { useAppStore } from '@/store/app'
 import { useDialogStore } from '@/store/dialog'
 import { useInstanceStore } from '@/store/instance'
+import { useNotificationStore } from '@/store/notification'
 import { useUnreadStore } from '@/store/unread'
 import { useUserStore } from '@/store/user'
 import {
@@ -51,6 +52,7 @@ const router = useRouter()
 const appStore = useAppStore()
 const dialogStore = useDialogStore()
 const instanceStore = useInstanceStore()
+const notificationStore = useNotificationStore()
 const unreadStore = useUnreadStore()
 const userStore = useUserStore()
 
@@ -75,7 +77,8 @@ const updateAppHeight = () => {
 window.addEventListener('resize', updateAppHeight)
 updateAppHeight()
 
-const hasUnread = computed(() => unreadStore.instanceHasUnread(instanceStore.instance.id))
+const hasUnreadMessages = computed(() => unreadStore.instanceHasUnread(instanceStore.instance.id))
+const hasUnreadNotifications = computed(() => notificationStore.hasUnread)
 
 onMounted(async () => {
   const params = extractUrlParams()
@@ -97,8 +100,18 @@ onMounted(async () => {
   if (params.inviteBasePath) {
     appStore.inviteBasePath = params.inviteBasePath
   }
+  if (params.isSuperAdmin) {
+    appStore.isSuperAdmin = params.isSuperAdmin === 'true'
+  }
+  if (params.showBottomBar) {
+    appStore.showBottomBar = params.showBottomBar === 'true'
+  }
 
-  if (import.meta.env.MODE === MODE.PROD || import.meta.env.MODE === MODE.STAGING) {
+  if (
+    import.meta.env.MODE === MODE.PROD ||
+    import.meta.env.MODE === MODE.STAGING ||
+    window !== window.parent // in iframe
+  ) {
     const host = await Chatty.createClient()
       .on('chat:user:connect', connectUser)
       .on('chat:instance:set', setInstance)
@@ -117,7 +130,6 @@ onMounted(async () => {
       .catch(console.error)
 
     emitter.on('chat:close', () => host?.send('chat:close'))
-    emitter.on('chat:user:edit', () => host?.send('chat:user:edit'))
     emitter.on('chat:instance:edit', instanceId => host?.send('chat:instance:edit', { instanceId }))
     emitter.on('chat:instance:click', instanceId =>
       host?.send('chat:instance:click', { instanceId })
@@ -125,13 +137,16 @@ onMounted(async () => {
     emitter.on('chat:login:request', () => host?.send('chat:login:request'))
     emitter.on('chat:verify:request', () => host?.send('chat:verify:request'))
 
-    watch(hasUnread, () => {
-      host?.send('chat:unread:update', { hasUnread: hasUnread.value })
+    watch(hasUnreadMessages, () => {
+      host?.send('chat:messages:unread', { hasUnread: hasUnreadMessages.value })
+    })
+    watch(hasUnreadNotifications, () => {
+      host?.send('chat:notifications:unread', { hasUnread: hasUnreadNotifications.value })
     })
   } else {
     const token = 'JenRxFv73kScEjTx4t0iH6l0ZdB3'
     await connectUser({
-      name: '👍 SJDKLFJSDF*J lksdj',
+      name: 'SJDKLFJSDF*J lksdj',
       bio: `just a person`,
       avatar: 'https://avatars.dicebear.com/api/human/123.svg',
       token: token,
@@ -144,6 +159,8 @@ onMounted(async () => {
       token: token,
       verified: true,
     })
+
+    appStore.isSuperAdmin = true
 
     // setTimeout(() => {
     //   router.push({ name: 'viewInvite', params: { code: 'rQMyXZEX' } })

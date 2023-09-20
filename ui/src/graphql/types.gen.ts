@@ -78,29 +78,36 @@ export type ChannelReorderInput = {
   readonly prevChannelId?: InputMaybe<Scalars['Uuid']>;
 };
 
-export type Group = {
-  readonly __typename?: 'Group';
-  readonly channelId: Scalars['Uuid'];
-  readonly createdAt: Scalars['Time'];
-  readonly id: Scalars['Uuid'];
-  readonly members: ReadonlyArray<Author>;
-  readonly messagesConnection: ChannelMessagesConnection;
+export type Collection = {
+  readonly __typename?: 'Collection';
+  readonly instancesConnection: CollectionInstancesConnection;
+  readonly tag: TagKind;
 };
 
 
-export type GroupMessagesConnectionArgs = {
-  before?: InputMaybe<Scalars['String']>;
-  last?: InputMaybe<Scalars['Int']>;
+export type CollectionInstancesConnectionArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
 };
 
-export type GroupInput = {
-  readonly invitees: ReadonlyArray<Scalars['Uuid']>;
+export type CollectionInstancesConnection = {
+  readonly __typename?: 'CollectionInstancesConnection';
+  readonly edges: ReadonlyArray<CollectionInstancesEdge>;
+  readonly pageInfo: PageInfo;
+};
+
+export type CollectionInstancesEdge = {
+  readonly __typename?: 'CollectionInstancesEdge';
+  readonly cursor: Scalars['String'];
+  readonly node: Instance;
+  readonly taggedAt: Scalars['Time'];
 };
 
 export type Instance = {
   readonly __typename?: 'Instance';
   readonly author: Author;
   readonly channelsConnection: InstanceChannelsConnection;
+  readonly commentsCount: Scalars['Int'];
   readonly createdAt: Scalars['Time'];
   readonly description: Scalars['String'];
   readonly icon: Scalars['String'];
@@ -172,18 +179,6 @@ export type InstanceReorderInput = {
   readonly prevInstanceId?: InputMaybe<Scalars['Uuid']>;
 };
 
-export type InstanceStreamNotification = {
-  readonly __typename?: 'InstanceStreamNotification';
-  readonly author?: Maybe<Author>;
-  readonly channelMessagesEdge?: Maybe<ChannelMessagesEdge>;
-  readonly instance?: Maybe<Instance>;
-  readonly instanceChannelsEdge?: Maybe<InstanceChannelsEdge>;
-  readonly instanceLikesEdge?: Maybe<InstanceLikesEdge>;
-  readonly mutation: MutationType;
-  readonly user?: Maybe<User>;
-  readonly userInstancesEdge?: Maybe<UserInstancesEdge>;
-};
-
 export type Invite = {
   readonly __typename?: 'Invite';
   readonly author: Author;
@@ -219,7 +214,6 @@ export type MessageInput = {
 export type Mutation = {
   readonly __typename?: 'Mutation';
   readonly addChannel: InstanceChannelsEdge;
-  readonly addGroup: Instance;
   readonly addInstance: UserInstancesEdge;
   readonly addInvite: Invite;
   readonly addLike: InstanceLikesEdge;
@@ -235,6 +229,8 @@ export type Mutation = {
   readonly removeRole: Author;
   readonly reorderChannel: InstanceChannelsEdge;
   readonly reorderInstance: UserInstancesEdge;
+  readonly tagInstance: Instance;
+  readonly untagInstance: Instance;
   readonly updateChannel: InstanceChannelsEdge;
   readonly updateInstance: UserInstancesEdge;
   readonly updateUser: User;
@@ -243,11 +239,6 @@ export type Mutation = {
 
 export type MutationAddChannelArgs = {
   input: ChannelInput;
-};
-
-
-export type MutationAddGroupArgs = {
-  input: GroupInput;
 };
 
 
@@ -331,6 +322,18 @@ export type MutationReorderInstanceArgs = {
 };
 
 
+export type MutationTagInstanceArgs = {
+  input: TagInput;
+  instanceId: Scalars['Uuid'];
+};
+
+
+export type MutationUntagInstanceArgs = {
+  input: TagInput;
+  instanceId: Scalars['Uuid'];
+};
+
+
 export type MutationUpdateChannelArgs = {
   channelId: Scalars['Uuid'];
   input: ChannelInput;
@@ -347,7 +350,20 @@ export type MutationUpdateUserArgs = {
   input: UserInput;
 };
 
-export const MutationType = {
+export type Notice = {
+  readonly __typename?: 'Notice';
+  readonly author?: Maybe<Author>;
+  readonly channelMessagesEdge?: Maybe<ChannelMessagesEdge>;
+  readonly instance?: Maybe<Instance>;
+  readonly instanceChannelsEdge?: Maybe<InstanceChannelsEdge>;
+  readonly instanceLikesEdge?: Maybe<InstanceLikesEdge>;
+  readonly kind: NoticeKind;
+  readonly user?: Maybe<User>;
+  readonly userInstancesEdge?: Maybe<UserInstancesEdge>;
+  readonly userNotificationsEdge?: Maybe<UserNotificationsEdge>;
+};
+
+export const NoticeKind = {
   AuthorUpdated: 'AUTHOR_UPDATED',
   ChannelAdded: 'CHANNEL_ADDED',
   ChannelRemoved: 'CHANNEL_REMOVED',
@@ -358,10 +374,27 @@ export const MutationType = {
   LikeRemoved: 'LIKE_REMOVED',
   MessageAdded: 'MESSAGE_ADDED',
   MessageRemoved: 'MESSAGE_REMOVED',
+  NotificationAdded: 'NOTIFICATION_ADDED',
   UserUpdated: 'USER_UPDATED'
 } as const;
 
-export type MutationType = typeof MutationType[keyof typeof MutationType];
+export type NoticeKind = typeof NoticeKind[keyof typeof NoticeKind];
+export type Notification = {
+  readonly __typename?: 'Notification';
+  readonly author: Author;
+  readonly createdAt: Scalars['Time'];
+  readonly id: Scalars['Uuid'];
+  readonly instance?: Maybe<Instance>;
+  readonly kind: NotificationKind;
+  readonly message?: Maybe<Message>;
+};
+
+export const NotificationKind = {
+  CommentAdded: 'COMMENT_ADDED',
+  LikeAdded: 'LIKE_ADDED'
+} as const;
+
+export type NotificationKind = typeof NotificationKind[keyof typeof NotificationKind];
 export type PageInfo = {
   readonly __typename?: 'PageInfo';
   readonly hasNextPage: Scalars['Boolean'];
@@ -372,6 +405,7 @@ export type Query = {
   readonly __typename?: 'Query';
   readonly channel: Channel;
   readonly checkInvite: Invite;
+  readonly collection: Collection;
   readonly instance: UserInstancesEdge;
   readonly invite: Invite;
   readonly user: User;
@@ -388,6 +422,11 @@ export type QueryCheckInviteArgs = {
 };
 
 
+export type QueryCollectionArgs = {
+  tag: TagKind;
+};
+
+
 export type QueryInstanceArgs = {
   id: Scalars['Uuid'];
 };
@@ -395,11 +434,6 @@ export type QueryInstanceArgs = {
 
 export type QueryInviteArgs = {
   instanceId: Scalars['Uuid'];
-};
-
-
-export type QueryUserArgs = {
-  uid: Scalars['String'];
 };
 
 export const Role = {
@@ -413,14 +447,23 @@ export const Role = {
 export type Role = typeof Role[keyof typeof Role];
 export type Subscription = {
   readonly __typename?: 'Subscription';
-  readonly instanceStream: InstanceStreamNotification;
+  readonly stream: Notice;
 };
 
 
-export type SubscriptionInstanceStreamArgs = {
+export type SubscriptionStreamArgs = {
   instanceId: Scalars['Uuid'];
 };
 
+export type TagInput = {
+  readonly tag: TagKind;
+};
+
+export const TagKind = {
+  Featured: 'FEATURED'
+} as const;
+
+export type TagKind = typeof TagKind[keyof typeof TagKind];
 export type User = {
   readonly __typename?: 'User';
   readonly avatar: Scalars['String'];
@@ -428,6 +471,7 @@ export type User = {
   readonly id: Scalars['Uuid'];
   readonly instancesConnection: UserInstancesConnection;
   readonly name: Scalars['String'];
+  readonly notificationsConnection: UserNotificationsConnection;
 };
 
 
@@ -436,16 +480,10 @@ export type UserInstancesConnectionArgs = {
   first?: InputMaybe<Scalars['Int']>;
 };
 
-export type UserGroupsConnection = {
-  readonly __typename?: 'UserGroupsConnection';
-  readonly edges: ReadonlyArray<UserGroupsEdge>;
-  readonly pageInfo: PageInfo;
-};
 
-export type UserGroupsEdge = {
-  readonly __typename?: 'UserGroupsEdge';
-  readonly cursor: Scalars['String'];
-  readonly node: Group;
+export type UserNotificationsConnectionArgs = {
+  before?: InputMaybe<Scalars['String']>;
+  last?: InputMaybe<Scalars['Int']>;
 };
 
 export type UserInput = {
@@ -468,4 +506,17 @@ export type UserInstancesEdge = {
   readonly node: Instance;
   readonly pinned: Scalars['Boolean'];
   readonly rank: Scalars['String'];
+};
+
+export type UserNotificationsConnection = {
+  readonly __typename?: 'UserNotificationsConnection';
+  readonly edges: ReadonlyArray<UserNotificationsEdge>;
+  readonly hasUnread: Scalars['Boolean'];
+  readonly pageInfo: PageInfo;
+};
+
+export type UserNotificationsEdge = {
+  readonly __typename?: 'UserNotificationsEdge';
+  readonly cursor: Scalars['String'];
+  readonly node: Notification;
 };

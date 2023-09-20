@@ -22,6 +22,16 @@ import (
 
 // MessagesConnection is the resolver for the messagesConnection field.
 func (r *channelResolver) MessagesConnection(ctx context.Context, obj *model.Channel, last *int, before *string) (*model.ChannelMessagesConnection, error) {
+	if last == nil || *last == 0 {
+		return &model.ChannelMessagesConnection{
+			Edges: make([]*model.ChannelMessagesEdge, 0),
+			PageInfo: &model.PageInfo{
+				HasNextPage:     false,
+				HasPreviousPage: false,
+			},
+		}, nil
+	}
+
 	db := interfaces.GetDatabase()
 	messages := []model.Message{}
 
@@ -44,10 +54,7 @@ func (r *channelResolver) MessagesConnection(ctx context.Context, obj *model.Cha
 
 	edges := []*model.ChannelMessagesEdge{}
 	for i := len(messages) - 1; i >= 0; i-- {
-		edge, err := createChannelMessagesEdge(&messages[i])
-		if err != nil {
-			return nil, err
-		}
+		edge := createChannelMessagesEdge(&messages[i])
 		edges = append(edges, edge)
 	}
 
@@ -70,13 +77,68 @@ func (r *channelResolver) Readers(ctx context.Context, obj *model.Channel) ([]mo
 	return stringsToRoles(obj.Readers), nil
 }
 
+// Tag is the resolver for the tag field.
+func (r *collectionResolver) Tag(ctx context.Context, obj *model.Collection) (model.TagKind, error) {
+	return model.TagKind(obj.Tag), nil
+}
+
+// InstancesConnection is the resolver for the instancesConnection field.
+func (r *collectionResolver) InstancesConnection(ctx context.Context, obj *model.Collection, first *int, after *string) (*model.CollectionInstancesConnection, error) {
+	if first == nil || *first == 0 {
+		return &model.CollectionInstancesConnection{
+			Edges: make([]*model.CollectionInstancesEdge, 0),
+			PageInfo: &model.PageInfo{
+				HasNextPage:     false,
+				HasPreviousPage: false,
+			},
+		}, nil
+	}
+
+	db := interfaces.GetDatabase()
+
+	tags := []model.Tag{}
+	tx := db.Model(&model.Tag{}).Limit(*first + 1).Order("created_at desc")
+
+	if *after != "" {
+		createdAt, err := fromCursorHash(*after)
+		if err != nil {
+			return nil, err
+		}
+		tx = tx.Where("created_at > ?", createdAt)
+	}
+
+	tx.Preload("Instance").Find(&tags)
+
+	hasNextPage := (len(tags) == *first+1)
+	if len(tags) > 0 && hasNextPage {
+		tags = tags[:len(tags)-1]
+	}
+
+	edges := []*model.CollectionInstancesEdge{}
+	for i := 0; i < len(tags); i++ {
+		edge := createCollectionInstancesEdge(&tags[i])
+		edges = append(edges, edge)
+	}
+
+	return &model.CollectionInstancesConnection{
+		Edges: edges,
+		PageInfo: &model.PageInfo{
+			HasNextPage:     hasNextPage,
+			HasPreviousPage: false, // TODO
+		},
+	}, nil
+}
+
 // Author is the resolver for the author field.
 func (r *instanceResolver) Author(ctx context.Context, obj *model.Instance) (*model.Author, error) {
-	db := interfaces.GetDatabase()
 	instanceUser := model.InstanceUser{}
-	if err := db.Model(&obj).Association("Author").Find(&instanceUser); err != nil {
-		log.Error().Err(err).Msg("failed to get instance author")
-		return nil, err
+	if obj.Author == nil {
+		db := interfaces.GetDatabase()
+		if err := db.First(&instanceUser, obj.AuthorID).Error; err != nil {
+			return nil, err
+		}
+	} else {
+		instanceUser = *obj.Author
 	}
 
 	return instanceUserToAuthor(&instanceUser), nil
@@ -89,6 +151,16 @@ func (r *instanceResolver) ReadAccess(ctx context.Context, obj *model.Instance) 
 
 // ChannelsConnection is the resolver for the channelsConnection field.
 func (r *instanceResolver) ChannelsConnection(ctx context.Context, obj *model.Instance, first *int, after *string) (*model.InstanceChannelsConnection, error) {
+	if first == nil || *first == 0 {
+		return &model.InstanceChannelsConnection{
+			Edges: make([]*model.InstanceChannelsEdge, 0),
+			PageInfo: &model.PageInfo{
+				HasNextPage:     false,
+				HasPreviousPage: false,
+			},
+		}, nil
+	}
+
 	callerInstanceUser, err := getCallerInstanceUser(ctx, obj.ID)
 	if err != nil {
 		return nil, err
@@ -131,10 +203,7 @@ func (r *instanceResolver) ChannelsConnection(ctx context.Context, obj *model.In
 
 	edges := []*model.InstanceChannelsEdge{}
 	for i := 0; i < len(channels); i++ {
-		edge, err := createInstanceChannelsEdge(&channels[i])
-		if err != nil {
-			return nil, err
-		}
+		edge := createInstanceChannelsEdge(&channels[i])
 		edges = append(edges, edge)
 	}
 
@@ -149,6 +218,16 @@ func (r *instanceResolver) ChannelsConnection(ctx context.Context, obj *model.In
 
 // LikesConnection is the resolver for the likesConnection field.
 func (r *instanceResolver) LikesConnection(ctx context.Context, obj *model.Instance, first *int, after *string) (*model.InstanceLikesConnection, error) {
+	if first == nil || *first == 0 {
+		return &model.InstanceLikesConnection{
+			Edges: make([]*model.InstanceLikesEdge, 0),
+			PageInfo: &model.PageInfo{
+				HasNextPage:     false,
+				HasPreviousPage: false,
+			},
+		}, nil
+	}
+
 	db := interfaces.GetDatabase()
 	instanceUsers := []model.InstanceUser{}
 
@@ -174,10 +253,7 @@ func (r *instanceResolver) LikesConnection(ctx context.Context, obj *model.Insta
 
 	edges := []*model.InstanceLikesEdge{}
 	for i := 0; i < len(instanceUsers); i++ {
-		edge, err := createInstanceLikesEdge(&instanceUsers[i])
-		if err != nil {
-			return nil, err
-		}
+		edge := createInstanceLikesEdge(&instanceUsers[i])
 		edges = append(edges, edge)
 	}
 
@@ -192,12 +268,32 @@ func (r *instanceResolver) LikesConnection(ctx context.Context, obj *model.Insta
 
 // Author is the resolver for the author field.
 func (r *inviteResolver) Author(ctx context.Context, obj *model.Invite) (*model.Author, error) {
-	return instanceUserToAuthor(obj.Author), nil
+	instanceUser := model.InstanceUser{}
+	if obj.Author == nil {
+		db := interfaces.GetDatabase()
+		if err := db.First(&instanceUser, obj.AuthorID).Error; err != nil {
+			return nil, err
+		}
+	} else {
+		instanceUser = *obj.Author
+	}
+
+	return instanceUserToAuthor(&instanceUser), nil
 }
 
 // Author is the resolver for the author field.
 func (r *messageResolver) Author(ctx context.Context, obj *model.Message) (*model.Author, error) {
-	return instanceUserToAuthor(obj.Author), nil
+	instanceUser := model.InstanceUser{}
+	if obj.Author == nil {
+		db := interfaces.GetDatabase()
+		if err := db.First(&instanceUser, obj.AuthorID).Error; err != nil {
+			return nil, err
+		}
+	} else {
+		instanceUser = *obj.Author
+	}
+
+	return instanceUserToAuthor(&instanceUser), nil
 }
 
 // UpdateUser is the resolver for the updateUser field.
@@ -230,7 +326,10 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UserInput
 			return nil, err
 		}
 
-		sendUserNotification(r.InstanceStreamObservers, caller, model.MutationTypeUserUpdated)
+		sendInstanceUserNotice(&r.StreamObservers, caller, model.NoticeKindUserUpdated)
+
+		// client := interfaces.GetPubSubClient()
+		// go client.PublishUserEvent(ctx, model.NoticeKindUserUpdated, *caller)
 	}
 
 	return caller, nil
@@ -240,9 +339,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UserInput
 func (r *mutationResolver) AddInstance(ctx context.Context, input model.InstanceInput) (*model.UserInstancesEdge, error) {
 	db := interfaces.GetDatabase()
 
-	instance := model.Instance{
-		IsGroup: false,
-	}
+	instance := model.Instance{}
 	populateInstanceFromInput(&instance, input)
 
 	if err := db.Create(&instance).Error; err != nil {
@@ -312,10 +409,7 @@ func (r *mutationResolver) AddInstance(ctx context.Context, input model.Instance
 		return nil, err
 	}
 
-	edge, err := createUserInstancesEdge(instanceUser, instanceUser.Instance)
-	if err != nil {
-		return nil, err
-	}
+	edge := createUserInstancesEdge(instanceUser, instanceUser.Instance)
 	return edge, nil
 }
 
@@ -347,15 +441,12 @@ func (r *mutationResolver) UpdateInstance(ctx context.Context, instanceID uuid.U
 		return nil, err
 	}
 
-	sendInstanceNotification(r.InstanceStreamObservers, &instance, model.MutationTypeInstanceUpdated)
+	sendInstanceNotice(&r.StreamObservers, &instance, model.NoticeKindInstanceUpdated)
 
 	client := interfaces.GetPubSubClient()
-	go client.PublishInstanceEvent(ctx, model.MutationTypeInstanceUpdated, instance)
+	go client.PublishInstanceEvent(ctx, model.NoticeKindInstanceUpdated, instance)
 
-	edge, err := createUserInstancesEdge(callerInstanceUser, &instance)
-	if err != nil {
-		return nil, err
-	}
+	edge := createUserInstancesEdge(callerInstanceUser, &instance)
 	return edge, nil
 }
 
@@ -387,12 +478,13 @@ func (r *mutationResolver) RemoveInstance(ctx context.Context, instanceID uuid.U
 		return nil, err
 	}
 
-	sendInstanceNotification(r.InstanceStreamObservers, &instance, model.MutationTypeInstanceRemoved)
-
-	edge, err := createUserInstancesEdge(callerInstanceUser, &instance)
-	if err != nil {
+	if err := db.Delete(&model.Notification{}, "instance_id = ?", instanceID).Error; err != nil {
 		return nil, err
 	}
+
+	sendInstanceNotice(&r.StreamObservers, &instance, model.NoticeKindInstanceRemoved)
+
+	edge := createUserInstancesEdge(callerInstanceUser, &instance)
 	return edge, nil
 }
 
@@ -455,10 +547,7 @@ func (r *mutationResolver) ReorderInstance(ctx context.Context, instanceID uuid.
 		return nil, err
 	}
 
-	edge, err := createUserInstancesEdge(&instanceUser, instanceUser.Instance)
-	if err != nil {
-		return nil, err
-	}
+	edge := createUserInstancesEdge(&instanceUser, instanceUser.Instance)
 	return edge, nil
 }
 
@@ -506,58 +595,65 @@ func (r *mutationResolver) PinInstance(ctx context.Context, instanceID uuid.UUID
 		return nil, err
 	}
 
-	edge, err := createUserInstancesEdge(&instanceUser, instanceUser.Instance)
-	if err != nil {
-		return nil, err
-	}
+	edge := createUserInstancesEdge(&instanceUser, instanceUser.Instance)
 	return edge, nil
 }
 
-// AddGroup is the resolver for the addGroup field.
-func (r *mutationResolver) AddGroup(ctx context.Context, input model.GroupInput) (*model.Instance, error) {
-	db := interfaces.GetDatabase()
-
-	instance := model.Instance{
-		IsGroup: true,
-	}
-
-	if err := db.Create(&instance).Error; err != nil {
-		return nil, err
-	}
-
+// TagInstance is the resolver for the tagInstance field.
+func (r *mutationResolver) TagInstance(ctx context.Context, instanceID uuid.UUID, input model.TagInput) (*model.Instance, error) {
 	caller, err := upsertCaller(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	roles := []string{
-		model.RoleMember.String(),
-	}
-	instanceUser := userToInstanceUser(caller, instance, roles)
-	if err := db.Save(&instanceUser).Error; err != nil {
+	db := interfaces.GetDatabase()
+
+	tag := model.Tag{}
+	if err := db.Where("instance_id = ? AND kind = ?", instanceID, input.Tag).Find(&tag).Error; err != nil {
 		return nil, err
 	}
 
-	channel := model.Channel{
-		InstanceID: instance.ID,
-		AuthorID:   instanceUser.ID,
-		Publishers: []string{
-			model.RoleMember.String(),
-		},
-		Readers: []string{
-			model.RoleMember.String(),
-		},
+	if tag.ID != uuid.Nil {
+		return nil, errors.New(fmt.Sprintf("instance already has %s tag", input.Tag.String()))
 	}
-	if err := db.Create(&channel).Error; err != nil {
+
+	instance := model.Instance{}
+	if err := db.Model(&instance).First(&instance, instanceID).Error; err != nil {
 		return nil, err
 	}
 
-	instance.PrimaryChannel = &channel
-	if err := db.Save(&instance).Error; err != nil {
+	tag.AuthorID = caller.ID
+	tag.Author = caller
+	tag.InstanceID = instanceID
+	tag.Instance = &instance
+
+	populateTagFromInput(&tag, input)
+
+	if err := db.Save(&tag).Error; err != nil {
 		return nil, err
 	}
 
-	return &instance, nil
+	return tag.Instance, nil
+}
+
+// UntagInstance is the resolver for the untagInstance field.
+func (r *mutationResolver) UntagInstance(ctx context.Context, instanceID uuid.UUID, input model.TagInput) (*model.Instance, error) {
+	db := interfaces.GetDatabase()
+
+	tag := model.Tag{}
+	if err := db.Preload("Instance").Where("instance_id = ? AND kind = ?", instanceID, input.Tag).Find(&tag).Error; err != nil {
+		return nil, err
+	}
+
+	if tag.ID == uuid.Nil {
+		return nil, errors.New(fmt.Sprintf("instance does not have %s tag", input.Tag.String()))
+	}
+
+	if err := db.Delete(&tag).Error; err != nil {
+		return nil, err
+	}
+
+	return tag.Instance, nil
 }
 
 // AddChannel is the resolver for the addChannel field.
@@ -605,12 +701,9 @@ func (r *mutationResolver) AddChannel(ctx context.Context, input model.ChannelIn
 		return nil, err
 	}
 
-	sendChannelNotification(r.InstanceStreamObservers, &channel, model.MutationTypeChannelAdded)
+	sendChannelNotice(&r.StreamObservers, &channel, model.NoticeKindChannelAdded)
 
-	edge, err := createInstanceChannelsEdge(&channel)
-	if err != nil {
-		return nil, err
-	}
+	edge := createInstanceChannelsEdge(&channel)
 	return edge, nil
 }
 
@@ -643,12 +736,9 @@ func (r *mutationResolver) UpdateChannel(ctx context.Context, channelID uuid.UUI
 		return nil, err
 	}
 
-	sendChannelNotification(r.InstanceStreamObservers, &channel, model.MutationTypeChannelUpdated)
+	sendChannelNotice(&r.StreamObservers, &channel, model.NoticeKindChannelUpdated)
 
-	edge, err := createInstanceChannelsEdge(&channel)
-	if err != nil {
-		return nil, err
-	}
+	edge := createInstanceChannelsEdge(&channel)
 	return edge, nil
 }
 
@@ -711,12 +801,9 @@ func (r *mutationResolver) ReorderChannel(ctx context.Context, channelID uuid.UU
 		return nil, err
 	}
 
-	sendChannelNotification(r.InstanceStreamObservers, &channel, model.MutationTypeChannelUpdated)
+	sendChannelNotice(&r.StreamObservers, &channel, model.NoticeKindChannelUpdated)
 
-	edge, err := createInstanceChannelsEdge(&channel)
-	if err != nil {
-		return nil, err
-	}
+	edge := createInstanceChannelsEdge(&channel)
 	return edge, nil
 }
 
@@ -740,12 +827,9 @@ func (r *mutationResolver) RemoveChannel(ctx context.Context, channelID uuid.UUI
 
 	db.Delete(&channel, channelID)
 
-	sendChannelNotification(r.InstanceStreamObservers, &channel, model.MutationTypeChannelRemoved)
+	sendChannelNotice(&r.StreamObservers, &channel, model.NoticeKindChannelRemoved)
 
-	edge, err := createInstanceChannelsEdge(&channel)
-	if err != nil {
-		return nil, err
-	}
+	edge := createInstanceChannelsEdge(&channel)
 	return edge, nil
 }
 
@@ -756,6 +840,7 @@ func (r *mutationResolver) AddMessage(ctx context.Context, input model.MessageIn
 	if err := db.First(&channel, input.ChannelID).Error; err != nil {
 		return nil, err
 	}
+
 	callerInstanceUser, err := getCallerInstanceUser(ctx, channel.InstanceID)
 	if err != nil {
 		return nil, err
@@ -778,17 +863,39 @@ func (r *mutationResolver) AddMessage(ctx context.Context, input model.MessageIn
 
 	db.Model(&channel).Association("Messages").Append(&message)
 
-	sendMessageNotification(r.InstanceStreamObservers, &message, &channel, model.MutationTypeMessageAdded)
+	sendMessageNotice(&r.StreamObservers, &message, &channel, model.NoticeKindMessageAdded)
 
-	edge, err := createChannelMessagesEdge(&message)
-	if err != nil {
-		return nil, err
-	}
+	edge := createChannelMessagesEdge(&message)
 
 	channel.LastMessageAddedAt = &message.CreatedAt
 	channel.MessageCount++
 	if err := db.Save(&channel).Error; err != nil {
 		return nil, err
+	}
+
+	if channel.IsComments {
+		instance := model.Instance{}
+		if err := db.Find(&instance, channel.InstanceID).Error; err != nil {
+			return nil, err
+		}
+
+		instanceAuthor := model.InstanceUser{}
+		if err := db.Find(&instanceAuthor, instance.AuthorID).Error; err != nil {
+			return nil, err
+		}
+
+		instance.CommentsCount = channel.MessageCount
+		if err := db.Save(&instance).Error; err != nil {
+			return nil, err
+		}
+
+		if instanceAuthor.UserID != callerInstanceUser.UserID {
+			notification, err := createNotificationCommentAdded(instanceAuthor.UserID, &message)
+			if err != nil {
+				return nil, err
+			}
+			sendUserNotificationNotice(&r.StreamObservers, notification)
+		}
 	}
 
 	return edge, nil
@@ -830,12 +937,13 @@ func (r *mutationResolver) RemoveMessage(ctx context.Context, messageID uuid.UUI
 		return nil, err
 	}
 
-	sendMessageNotification(r.InstanceStreamObservers, &message, &channel, model.MutationTypeMessageRemoved)
-
-	edge, err := createChannelMessagesEdge(&message)
-	if err != nil {
+	if err := db.Delete(&model.Notification{}, "message_id = ?", messageID).Error; err != nil {
 		return nil, err
 	}
+
+	sendMessageNotice(&r.StreamObservers, &message, &channel, model.NoticeKindMessageRemoved)
+
+	edge := createChannelMessagesEdge(&message)
 	return edge, nil
 }
 
@@ -877,7 +985,7 @@ func (r *mutationResolver) AddRole(ctx context.Context, authorID uuid.UUID, role
 		// 	return nil, err
 		// }
 		// for _, message := range messages {
-		// 	sendMessageNotification(r.InstanceStreamObservers, &message, message.Channel, model.MutationTypeMessageRemoved)
+		// 	sendMessageNotification(r.StreamObservers, &message, message.Channel, model.InstanceMutationTypeMessageRemoved)
 		// }
 		// if err := db.Where("author_id = ?", authorID).Delete(&model.Message{}).Error; err != nil {
 		// 	return nil, err
@@ -898,13 +1006,13 @@ func (r *mutationResolver) AddRole(ctx context.Context, authorID uuid.UUID, role
 		return nil, err
 	}
 
-	refreshInstanceStreamRoles(r.InstanceStreamObservers, &instanceUser)
+	refreshInstanceStreamRoles(&r.StreamObservers, &instanceUser)
 
 	author := instanceUserToAuthor(&instanceUser)
-	sendAuthorNotification(r.InstanceStreamObservers, author, model.MutationTypeAuthorUpdated)
+	sendAuthorNotice(&r.StreamObservers, author, model.NoticeKindAuthorUpdated)
 
 	client := interfaces.GetPubSubClient()
-	go client.PublishAuthorEvent(ctx, model.MutationTypeAuthorUpdated, *author)
+	go client.PublishAuthorEvent(ctx, model.NoticeKindAuthorUpdated, *author)
 	return author, nil
 }
 
@@ -943,13 +1051,13 @@ func (r *mutationResolver) RemoveRole(ctx context.Context, authorID uuid.UUID, r
 		return nil, err
 	}
 
-	refreshInstanceStreamRoles(r.InstanceStreamObservers, &instanceUser)
+	refreshInstanceStreamRoles(&r.StreamObservers, &instanceUser)
 
 	author := instanceUserToAuthor(&instanceUser)
-	sendAuthorNotification(r.InstanceStreamObservers, author, model.MutationTypeAuthorUpdated)
+	sendAuthorNotice(&r.StreamObservers, author, model.NoticeKindAuthorUpdated)
 
 	client := interfaces.GetPubSubClient()
-	go client.PublishAuthorEvent(ctx, model.MutationTypeAuthorUpdated, *author)
+	go client.PublishAuthorEvent(ctx, model.NoticeKindAuthorUpdated, *author)
 
 	return author, nil
 }
@@ -1063,13 +1171,13 @@ func (r *mutationResolver) RedeemInvite(ctx context.Context, code string) (*mode
 		return nil, err
 	}
 
-	refreshInstanceStreamRoles(r.InstanceStreamObservers, callerInstanceUser)
+	refreshInstanceStreamRoles(&r.StreamObservers, callerInstanceUser)
 
 	author := instanceUserToAuthor(callerInstanceUser)
-	sendAuthorNotification(r.InstanceStreamObservers, author, model.MutationTypeAuthorUpdated)
+	sendAuthorNotice(&r.StreamObservers, author, model.NoticeKindAuthorUpdated)
 
 	client := interfaces.GetPubSubClient()
-	go client.PublishAuthorEvent(ctx, model.MutationTypeAuthorUpdated, *author)
+	go client.PublishAuthorEvent(ctx, model.NoticeKindAuthorUpdated, *author)
 
 	return &invite, nil
 }
@@ -1077,6 +1185,7 @@ func (r *mutationResolver) RedeemInvite(ctx context.Context, code string) (*mode
 // AddLike is the resolver for the addLike field.
 func (r *mutationResolver) AddLike(ctx context.Context, instanceID uuid.UUID) (*model.InstanceLikesEdge, error) {
 	// TODO consider using transaction here
+
 	db := interfaces.GetDatabase()
 
 	callerInstanceUser, err := getCallerInstanceUser(ctx, instanceID)
@@ -1104,12 +1213,24 @@ func (r *mutationResolver) AddLike(ctx context.Context, instanceID uuid.UUID) (*
 		return nil, err
 	}
 
-	edge, err := createInstanceLikesEdge(callerInstanceUser)
-	if err != nil {
+	instanceAuthor := model.InstanceUser{}
+	if err := db.Find(&instanceAuthor, instance.AuthorID).Error; err != nil {
 		return nil, err
 	}
 
-	sendLikeNotification(r.InstanceStreamObservers, edge, model.MutationTypeLikeAdded)
+	edge := createInstanceLikesEdge(callerInstanceUser)
+
+	log.Info().Msgf("instance author: %s", instanceAuthor.UserID)
+	log.Info().Msgf("caller: %s", callerInstanceUser.UserID)
+	if instanceAuthor.UserID != callerInstanceUser.UserID {
+		notification, err := createNotificationLikeAdded(instanceAuthor.UserID, callerInstanceUser)
+		if err != nil {
+			return nil, err
+		}
+		sendUserNotificationNotice(&r.StreamObservers, notification)
+	}
+
+	sendLikeNotice(&r.StreamObservers, edge, model.NoticeKindLikeAdded)
 
 	return edge, nil
 }
@@ -1142,26 +1263,57 @@ func (r *mutationResolver) RemoveLike(ctx context.Context, instanceID uuid.UUID)
 		return nil, err
 	}
 
-	edge, err := createInstanceLikesEdge(callerInstanceUser)
-	if err != nil {
-		return nil, err
-	}
+	edge := createInstanceLikesEdge(callerInstanceUser)
 
-	sendLikeNotification(r.InstanceStreamObservers, edge, model.MutationTypeLikeRemoved)
+	sendLikeNotice(&r.StreamObservers, edge, model.NoticeKindLikeRemoved)
 
 	return edge, nil
 }
 
+// Kind is the resolver for the kind field.
+func (r *notificationResolver) Kind(ctx context.Context, obj *model.Notification) (model.NotificationKind, error) {
+	return model.NotificationKind(obj.Kind), nil
+}
+
+// Author is the resolver for the author field.
+func (r *notificationResolver) Author(ctx context.Context, obj *model.Notification) (*model.Author, error) {
+	instanceUser := model.InstanceUser{}
+	if obj.Author == nil {
+		db := interfaces.GetDatabase()
+		if err := db.First(&instanceUser, obj.AuthorID).Error; err != nil {
+			return nil, err
+		}
+	} else {
+		instanceUser = *obj.Author
+	}
+
+	return instanceUserToAuthor(&instanceUser), nil
+}
+
 // User is the resolver for the user field.
-func (r *queryResolver) User(ctx context.Context, uid string) (*model.User, error) {
+func (r *queryResolver) User(ctx context.Context) (*model.User, error) {
 	db := interfaces.GetDatabase()
 	user := model.User{}
 
-	if err := db.FirstOrCreate(&user, "uid = ?", uid).Error; err != nil {
+	parsed := parseContext(ctx)
+	if parsed.Uid == "" {
+		return nil, errors.New("uid not found in context")
+	}
+
+	if err := db.FirstOrCreate(&user, "uid = ?", parsed.Uid).Error; err != nil {
 		return nil, err
 	}
 
 	return &user, nil
+}
+
+// Collection is the resolver for the collection field.
+func (r *queryResolver) Collection(ctx context.Context, tag model.TagKind) (*model.Collection, error) {
+	collectionModel := model.Collection{
+		Tag: tag.String(),
+	}
+
+	return &collectionModel, nil
 }
 
 // Instance is the resolver for the instance field.
@@ -1171,10 +1323,7 @@ func (r *queryResolver) Instance(ctx context.Context, id uuid.UUID) (*model.User
 		return nil, err
 	}
 
-	edge, err := createUserInstancesEdge(instanceUser, instanceUser.Instance)
-	if err != nil {
-		return nil, err
-	}
+	edge := createUserInstancesEdge(instanceUser, instanceUser.Instance)
 	return edge, nil
 }
 
@@ -1279,25 +1428,26 @@ func (r *queryResolver) CheckInvite(ctx context.Context, code string) (*model.In
 	return &invite, nil
 }
 
-// InstanceStream is the resolver for the instanceStream field.
-func (r *subscriptionResolver) InstanceStream(ctx context.Context, instanceID uuid.UUID) (<-chan *model.InstanceStreamNotification, error) {
+// Stream is the resolver for the stream field.
+func (r *subscriptionResolver) Stream(ctx context.Context, instanceID uuid.UUID) (<-chan *model.Notice, error) {
 	callerInstanceUser, err := getCallerInstanceUser(ctx, instanceID)
 	if err != nil {
 		return nil, err
 	}
 
-	stream := make(chan *model.InstanceStreamNotification, 1)
+	stream := make(chan *model.Notice, 1)
 	listenerId := uuid.New().String()
 	go func() {
 		<-ctx.Done()
-		r.InstanceStreamObservers.Delete(listenerId)
+		r.StreamObservers.Delete(listenerId)
 	}()
 
 	roles := append(callerInstanceUser.Roles, model.RoleAllUsers.String())
-	r.InstanceStreamObservers.Store(listenerId, &InstanceStreamObserver{
-		instanceId: instanceID,
-		roles:      roles,
-		stream:     stream,
+	r.StreamObservers.Store(listenerId, &StreamObserver{
+		UserId:     callerInstanceUser.UserID,
+		InstanceId: instanceID,
+		Roles:      roles,
+		Stream:     stream,
 	})
 
 	return stream, nil
@@ -1305,11 +1455,21 @@ func (r *subscriptionResolver) InstanceStream(ctx context.Context, instanceID uu
 
 // InstancesConnection is the resolver for the instancesConnection field.
 func (r *userResolver) InstancesConnection(ctx context.Context, obj *model.User, first *int, after *string) (*model.UserInstancesConnection, error) {
+	if first == nil || *first == 0 {
+		return &model.UserInstancesConnection{
+			Edges: make([]*model.UserInstancesEdge, 0),
+			PageInfo: &model.PageInfo{
+				HasNextPage:     false,
+				HasPreviousPage: false,
+			},
+		}, nil
+	}
+
 	db := interfaces.GetDatabase()
 	instanceUsers := []*model.InstanceUser{}
 
 	tx := db.
-		Joins("INNER JOIN instances ON instances.id = instance_users.instance_id AND instances.is_group = ?", false).
+		Joins("INNER JOIN instances ON instances.id = instance_users.instance_id").
 		Preload("Instance").Limit(*first + 1).
 		Order("created_at asc")
 
@@ -1333,10 +1493,7 @@ func (r *userResolver) InstancesConnection(ctx context.Context, obj *model.User,
 
 	edges := []*model.UserInstancesEdge{}
 	for i := 0; i < len(instanceUsers); i++ {
-		edge, err := createUserInstancesEdge(instanceUsers[i], instanceUsers[i].Instance)
-		if err != nil {
-			return nil, err
-		}
+		edge := createUserInstancesEdge(instanceUsers[i], instanceUsers[i].Instance)
 		edges = append(edges, edge)
 	}
 
@@ -1349,8 +1506,79 @@ func (r *userResolver) InstancesConnection(ctx context.Context, obj *model.User,
 	}, nil
 }
 
+// NotificationsConnection is the resolver for the notificationsConnection field.
+func (r *userResolver) NotificationsConnection(ctx context.Context, obj *model.User, last *int, before *string) (*model.UserNotificationsConnection, error) {
+	caller, err := upsertCaller(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	db := interfaces.GetDatabase()
+	unreadNotification := model.Notification{}
+	if err := db.Where("user_id = ? AND created_at > ?", caller.ID, caller.ReadNotificationsAt).Find(&unreadNotification).Error; err != nil {
+		return nil, err
+	}
+	hasUnread := unreadNotification.ID != uuid.Nil
+
+	if last == nil || *last == 0 {
+		return &model.UserNotificationsConnection{
+			Edges: make([]*model.UserNotificationsEdge, 0),
+			PageInfo: &model.PageInfo{
+				HasNextPage:     false,
+				HasPreviousPage: false,
+			},
+			HasUnread: hasUnread,
+		}, nil
+	}
+
+	notifications := []model.Notification{}
+
+	tx := db.Model(&model.Notification{}).Where("user_id = ?", obj.ID).Limit(*last + 1).Order("created_at desc")
+
+	if *before != "" {
+		createdAt, err := fromCursorHash(*before)
+		if err != nil {
+			return nil, err
+		}
+		tx = tx.Where("created_at < ?", createdAt)
+	}
+
+	tx.Preload("Author").Preload("Instance").Preload("Message").Find(&notifications)
+
+	hasPreviousPage := (len(notifications) == *last+1)
+	if len(notifications) > 0 && hasPreviousPage {
+		notifications = notifications[:len(notifications)-1]
+	}
+
+	edges := []*model.UserNotificationsEdge{}
+	for i := 0; i < len(notifications); i++ {
+		edge := createUserNotificationsEdge(&notifications[i])
+		edges = append(edges, edge)
+	}
+
+	if *before == "" {
+		now := time.Now()
+		caller.ReadNotificationsAt = &now
+		if err := db.Save(&caller).Error; err != nil {
+			return nil, err
+		}
+	}
+
+	return &model.UserNotificationsConnection{
+		Edges: edges,
+		PageInfo: &model.PageInfo{
+			HasPreviousPage: hasPreviousPage,
+			HasNextPage:     false, // TODO
+		},
+		HasUnread: hasUnread,
+	}, nil
+}
+
 // Channel returns ChannelResolver implementation.
 func (r *Resolver) Channel() ChannelResolver { return &channelResolver{r} }
+
+// Collection returns CollectionResolver implementation.
+func (r *Resolver) Collection() CollectionResolver { return &collectionResolver{r} }
 
 // Instance returns InstanceResolver implementation.
 func (r *Resolver) Instance() InstanceResolver { return &instanceResolver{r} }
@@ -1364,6 +1592,9 @@ func (r *Resolver) Message() MessageResolver { return &messageResolver{r} }
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
+// Notification returns NotificationResolver implementation.
+func (r *Resolver) Notification() NotificationResolver { return &notificationResolver{r} }
+
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
@@ -1374,10 +1605,12 @@ func (r *Resolver) Subscription() SubscriptionResolver { return &subscriptionRes
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
 type channelResolver struct{ *Resolver }
+type collectionResolver struct{ *Resolver }
 type instanceResolver struct{ *Resolver }
 type inviteResolver struct{ *Resolver }
 type messageResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
+type notificationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }

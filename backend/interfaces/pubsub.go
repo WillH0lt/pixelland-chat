@@ -21,7 +21,8 @@ type PubsubConfig struct {
 	ServiceAccountPath  string
 	AuthorEventsTopic   string
 	InstanceEventsTopic string
-	Active              bool
+	// UserEventsTopic     string
+	Active bool
 }
 
 type PubsubClient struct {
@@ -88,43 +89,58 @@ func createTopicIfNotExists(ctx context.Context, client *pubsub.Client, name str
 	return topic, nil
 }
 
-func (c *PubsubClient) PublishAuthorEvent(ctx context.Context, mutationType model.MutationType, author model.Author) error {
+// func (c *PubsubClient) PublishUserEvent(ctx context.Context, kind model.NoticeKind, user model.User) error {
+
+// 	if !c.config.Active {
+// 		log.Info().Msg("Not publishing user event because pubsub client is not active")
+// 		return nil
+// 	}
+
+// 	kindStr := string(kind)
+// 	if !strings.Contains(kindStr, "USER") {
+// 		return errors.New("Invalid notice kind, must be a user notice")
+// 	}
+
+// 	return c.publishPubsubEvent(ctx, kind, uuid.Nil.String(), user)
+// }
+
+func (c *PubsubClient) PublishAuthorEvent(ctx context.Context, kind model.NoticeKind, author model.Author) error {
 
 	if !c.config.Active {
 		log.Info().Msg("Not publishing author event because pubsub client is not active")
 		return nil
 	}
 
-	mutationTypeStr := string(mutationType)
-	if !strings.Contains(mutationTypeStr, "AUTHOR") {
+	kindStr := string(kind)
+	if !strings.Contains(kindStr, "AUTHOR") {
 		return errors.New("Invalid mutation type, must be author mutation")
 	}
 
-	return c.publishPubsubEvent(ctx, mutationType, author.InstanceID.String(), author)
+	return c.publishPubsubEvent(ctx, kind, author.InstanceID.String(), author)
 }
 
-func (c *PubsubClient) PublishInstanceEvent(ctx context.Context, mutationType model.MutationType, instance model.Instance) error {
+func (c *PubsubClient) PublishInstanceEvent(ctx context.Context, kind model.NoticeKind, instance model.Instance) error {
 
 	if !c.config.Active {
 		log.Info().Msg("Not publishing instance event because pubsub client is not active")
 		return nil
 	}
 
-	mutationTypeStr := string(mutationType)
-	if !strings.Contains(mutationTypeStr, "INSTANCE") {
+	kindStr := string(kind)
+	if !strings.Contains(kindStr, "INSTANCE") {
 		return errors.New("Invalid mutation type, must be instance mutation")
 	}
 
-	return c.publishPubsubEvent(ctx, mutationType, instance.ID.String(), instance)
+	return c.publishPubsubEvent(ctx, kind, instance.ID.String(), instance)
 }
 
-func (c *PubsubClient) publishPubsubEvent(ctx context.Context, mutationType model.MutationType, instanceID string, model interface{}) error {
-	mutationTypeStr := string(mutationType)
+func (c *PubsubClient) publishPubsubEvent(ctx context.Context, kind model.NoticeKind, instanceID string, model interface{}) error {
+	kindStr := string(kind)
 
 	var topicName string
-	if strings.Contains(mutationTypeStr, "INSTANCE") {
+	if strings.Contains(kindStr, "INSTANCE") {
 		topicName = c.config.InstanceEventsTopic
-	} else if strings.Contains(mutationTypeStr, "AUTHOR") {
+	} else if strings.Contains(kindStr, "AUTHOR") {
 		topicName = c.config.AuthorEventsTopic
 	} else {
 		return errors.New("Invalid mutation type")
@@ -145,7 +161,7 @@ func (c *PubsubClient) publishPubsubEvent(ctx context.Context, mutationType mode
 		Data: bytes,
 		Attributes: map[string]string{
 			"instanceId":   instanceID,
-			"mutationType": mutationTypeStr,
+			"mutationType": kindStr,
 		},
 	})
 

@@ -3,7 +3,13 @@ import { nextTick, reactive } from 'vue'
 
 import { useAddMessageMutation, useRemoveMessageMutation } from '@/graphql/mutations/message.gen'
 import { useChannelQuery } from '@/graphql/queries/channel.gen'
-import { Author, ChannelMessagesEdge, Message, MessageInput } from '@/graphql/types.gen'
+import {
+  Author,
+  ChannelMessagesConnection,
+  ChannelMessagesEdge,
+  Message,
+  MessageInput,
+} from '@/graphql/types.gen'
 import { useAuthorStore } from '@/store/author'
 import { useChannelStore } from '@/store/channel'
 import { useUserStore } from '@/store/user'
@@ -67,12 +73,11 @@ export const useMessageStore = defineStore('message', () => {
     const sub = onResult(result => {
       allLoading[channelId] = result.loading
       if (!result.data?.channel) return
-      const edges = result.data.channel.messagesConnection?.edges ?? []
-      handleMessagesAdded(edges)
-
-      const hasPreviousPage =
-        result.data.channel.messagesConnection?.pageInfo.hasPreviousPage ?? false
-      allHasPreviousPage[channelId] = hasPreviousPage
+      if (result.data.channel.messagesConnection) {
+        const connection = result.data.channel.messagesConnection
+        handleMessagesAdded(connection.edges)
+        allHasPreviousPage[channelId] = connection.pageInfo.hasPreviousPage
+      }
       sub.off()
     })
   }
@@ -122,7 +127,7 @@ export const useMessageStore = defineStore('message', () => {
     })
   }
 
-  function handleMessagesAdded(edges: ChannelMessagesEdge[]) {
+  function handleMessagesAdded(edges: readonly ChannelMessagesEdge[]) {
     if (!edges.length) return
     if (edges[0].node.author.userId === userStore.user.id) {
       removeUnsaved(allMessages, edges[0])
@@ -203,7 +208,7 @@ function getUnsaved(
 
 function appendEdges(
   allMessages: { [channelId: string]: ExtendedMessage[] },
-  edges: ChannelMessagesEdge[]
+  edges: readonly ChannelMessagesEdge[]
 ) {
   if (!edges.length) return
   if (!allMessages[edges[0].node.channelId]) {

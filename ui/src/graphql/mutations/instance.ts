@@ -1,6 +1,6 @@
 import gql from 'graphql-tag'
 
-import { UserInstancesEdgeFragment } from '@/graphql/fragments/fragments'
+import { InstanceFragment, UserInstancesEdgeFragment } from '@/graphql/fragments/fragments'
 
 export const addInstance = gql`
   mutation addInstance(
@@ -88,4 +88,40 @@ export const pinInstance = gql`
     }
   }
   ${UserInstancesEdgeFragment}
+`
+
+export const tagInstance = gql`
+  mutation tagInstance(
+    $instanceId: Uuid!
+    $input: TagInput!
+    $channelsFirst: Int = 0
+    $channelsAfter: String = ""
+    $likesFirst: Int = 0
+    $likesAfter: String = ""
+    $messagesLast: Int = 0
+    $messagesBefore: String = ""
+  ) {
+    tagInstance(instanceId: $instanceId, input: $input) {
+      ...InstanceFragment
+    }
+  }
+  ${InstanceFragment}
+`
+
+export const untagInstance = gql`
+  mutation untagInstance(
+    $instanceId: Uuid!
+    $input: TagInput!
+    $channelsFirst: Int = 0
+    $channelsAfter: String = ""
+    $likesFirst: Int = 0
+    $likesAfter: String = ""
+    $messagesLast: Int = 0
+    $messagesBefore: String = ""
+  ) {
+    untagInstance(instanceId: $instanceId, input: $input) {
+      ...InstanceFragment
+    }
+  }
+  ${InstanceFragment}
 `

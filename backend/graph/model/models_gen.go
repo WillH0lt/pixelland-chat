@@ -43,16 +43,15 @@ type ChannelReorderInput struct {
 	PrevChannelID *uuid.UUID `json:"prevChannelId"`
 }
 
-type Group struct {
-	ID                 uuid.UUID                  `json:"id"`
-	ChannelID          uuid.UUID                  `json:"channelId"`
-	CreatedAt          time.Time                  `json:"createdAt"`
-	Members            []*Author                  `json:"members"`
-	MessagesConnection *ChannelMessagesConnection `json:"messagesConnection"`
+type CollectionInstancesConnection struct {
+	PageInfo *PageInfo                  `json:"pageInfo"`
+	Edges    []*CollectionInstancesEdge `json:"edges"`
 }
 
-type GroupInput struct {
-	Invitees []uuid.UUID `json:"invitees"`
+type CollectionInstancesEdge struct {
+	Cursor   string    `json:"cursor"`
+	Node     *Instance `json:"node"`
+	TaggedAt time.Time `json:"taggedAt"`
 }
 
 type InstanceChannelsConnection struct {
@@ -96,17 +95,6 @@ type InstanceReorderInput struct {
 	PrevInstanceID *uuid.UUID `json:"prevInstanceId"`
 }
 
-type InstanceStreamNotification struct {
-	Mutation             MutationType          `json:"mutation"`
-	ChannelMessagesEdge  *ChannelMessagesEdge  `json:"channelMessagesEdge"`
-	UserInstancesEdge    *UserInstancesEdge    `json:"userInstancesEdge"`
-	InstanceChannelsEdge *InstanceChannelsEdge `json:"instanceChannelsEdge"`
-	InstanceLikesEdge    *InstanceLikesEdge    `json:"instanceLikesEdge"`
-	Instance             *Instance             `json:"instance"`
-	User                 *User                 `json:"user"`
-	Author               *Author               `json:"author"`
-}
-
 type InviteInput struct {
 	InstanceID  uuid.UUID  `json:"instanceId"`
 	ExpiresAt   *time.Time `json:"expiresAt"`
@@ -118,19 +106,25 @@ type MessageInput struct {
 	ChannelID uuid.UUID `json:"channelId"`
 }
 
+type Notice struct {
+	Kind                  NoticeKind             `json:"kind"`
+	ChannelMessagesEdge   *ChannelMessagesEdge   `json:"channelMessagesEdge"`
+	UserInstancesEdge     *UserInstancesEdge     `json:"userInstancesEdge"`
+	InstanceChannelsEdge  *InstanceChannelsEdge  `json:"instanceChannelsEdge"`
+	InstanceLikesEdge     *InstanceLikesEdge     `json:"instanceLikesEdge"`
+	UserNotificationsEdge *UserNotificationsEdge `json:"userNotificationsEdge"`
+	Instance              *Instance              `json:"instance"`
+	User                  *User                  `json:"user"`
+	Author                *Author                `json:"author"`
+}
+
 type PageInfo struct {
 	HasPreviousPage bool `json:"hasPreviousPage"`
 	HasNextPage     bool `json:"hasNextPage"`
 }
 
-type UserGroupsConnection struct {
-	PageInfo *PageInfo         `json:"pageInfo"`
-	Edges    []*UserGroupsEdge `json:"edges"`
-}
-
-type UserGroupsEdge struct {
-	Cursor string `json:"cursor"`
-	Node   *Group `json:"node"`
+type TagInput struct {
+	Tag TagKind `json:"tag"`
 }
 
 type UserInput struct {
@@ -151,6 +145,17 @@ type UserInstancesEdge struct {
 	LikedByMe    bool      `json:"likedByMe"`
 	Rank         string    `json:"rank"`
 	Pinned       bool      `json:"pinned"`
+}
+
+type UserNotificationsConnection struct {
+	PageInfo  *PageInfo                `json:"pageInfo"`
+	Edges     []*UserNotificationsEdge `json:"edges"`
+	HasUnread bool                     `json:"hasUnread"`
+}
+
+type UserNotificationsEdge struct {
+	Cursor string        `json:"cursor"`
+	Node   *Notification `json:"node"`
 }
 
 type Access string
@@ -194,62 +199,105 @@ func (e Access) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-type MutationType string
+type NoticeKind string
 
 const (
-	MutationTypeMessageAdded    MutationType = "MESSAGE_ADDED"
-	MutationTypeMessageRemoved  MutationType = "MESSAGE_REMOVED"
-	MutationTypeChannelAdded    MutationType = "CHANNEL_ADDED"
-	MutationTypeChannelUpdated  MutationType = "CHANNEL_UPDATED"
-	MutationTypeChannelRemoved  MutationType = "CHANNEL_REMOVED"
-	MutationTypeAuthorUpdated   MutationType = "AUTHOR_UPDATED"
-	MutationTypeUserUpdated     MutationType = "USER_UPDATED"
-	MutationTypeInstanceUpdated MutationType = "INSTANCE_UPDATED"
-	MutationTypeInstanceRemoved MutationType = "INSTANCE_REMOVED"
-	MutationTypeLikeAdded       MutationType = "LIKE_ADDED"
-	MutationTypeLikeRemoved     MutationType = "LIKE_REMOVED"
+	NoticeKindMessageAdded      NoticeKind = "MESSAGE_ADDED"
+	NoticeKindMessageRemoved    NoticeKind = "MESSAGE_REMOVED"
+	NoticeKindChannelAdded      NoticeKind = "CHANNEL_ADDED"
+	NoticeKindChannelUpdated    NoticeKind = "CHANNEL_UPDATED"
+	NoticeKindChannelRemoved    NoticeKind = "CHANNEL_REMOVED"
+	NoticeKindAuthorUpdated     NoticeKind = "AUTHOR_UPDATED"
+	NoticeKindUserUpdated       NoticeKind = "USER_UPDATED"
+	NoticeKindInstanceUpdated   NoticeKind = "INSTANCE_UPDATED"
+	NoticeKindInstanceRemoved   NoticeKind = "INSTANCE_REMOVED"
+	NoticeKindLikeAdded         NoticeKind = "LIKE_ADDED"
+	NoticeKindLikeRemoved       NoticeKind = "LIKE_REMOVED"
+	NoticeKindNotificationAdded NoticeKind = "NOTIFICATION_ADDED"
 )
 
-var AllMutationType = []MutationType{
-	MutationTypeMessageAdded,
-	MutationTypeMessageRemoved,
-	MutationTypeChannelAdded,
-	MutationTypeChannelUpdated,
-	MutationTypeChannelRemoved,
-	MutationTypeAuthorUpdated,
-	MutationTypeUserUpdated,
-	MutationTypeInstanceUpdated,
-	MutationTypeInstanceRemoved,
-	MutationTypeLikeAdded,
-	MutationTypeLikeRemoved,
+var AllNoticeKind = []NoticeKind{
+	NoticeKindMessageAdded,
+	NoticeKindMessageRemoved,
+	NoticeKindChannelAdded,
+	NoticeKindChannelUpdated,
+	NoticeKindChannelRemoved,
+	NoticeKindAuthorUpdated,
+	NoticeKindUserUpdated,
+	NoticeKindInstanceUpdated,
+	NoticeKindInstanceRemoved,
+	NoticeKindLikeAdded,
+	NoticeKindLikeRemoved,
+	NoticeKindNotificationAdded,
 }
 
-func (e MutationType) IsValid() bool {
+func (e NoticeKind) IsValid() bool {
 	switch e {
-	case MutationTypeMessageAdded, MutationTypeMessageRemoved, MutationTypeChannelAdded, MutationTypeChannelUpdated, MutationTypeChannelRemoved, MutationTypeAuthorUpdated, MutationTypeUserUpdated, MutationTypeInstanceUpdated, MutationTypeInstanceRemoved, MutationTypeLikeAdded, MutationTypeLikeRemoved:
+	case NoticeKindMessageAdded, NoticeKindMessageRemoved, NoticeKindChannelAdded, NoticeKindChannelUpdated, NoticeKindChannelRemoved, NoticeKindAuthorUpdated, NoticeKindUserUpdated, NoticeKindInstanceUpdated, NoticeKindInstanceRemoved, NoticeKindLikeAdded, NoticeKindLikeRemoved, NoticeKindNotificationAdded:
 		return true
 	}
 	return false
 }
 
-func (e MutationType) String() string {
+func (e NoticeKind) String() string {
 	return string(e)
 }
 
-func (e *MutationType) UnmarshalGQL(v interface{}) error {
+func (e *NoticeKind) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = MutationType(str)
+	*e = NoticeKind(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid MutationType", str)
+		return fmt.Errorf("%s is not a valid NoticeKind", str)
 	}
 	return nil
 }
 
-func (e MutationType) MarshalGQL(w io.Writer) {
+func (e NoticeKind) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type NotificationKind string
+
+const (
+	NotificationKindLikeAdded    NotificationKind = "LIKE_ADDED"
+	NotificationKindCommentAdded NotificationKind = "COMMENT_ADDED"
+)
+
+var AllNotificationKind = []NotificationKind{
+	NotificationKindLikeAdded,
+	NotificationKindCommentAdded,
+}
+
+func (e NotificationKind) IsValid() bool {
+	switch e {
+	case NotificationKindLikeAdded, NotificationKindCommentAdded:
+		return true
+	}
+	return false
+}
+
+func (e NotificationKind) String() string {
+	return string(e)
+}
+
+func (e *NotificationKind) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = NotificationKind(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid NotificationKind", str)
+	}
+	return nil
+}
+
+func (e NotificationKind) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -297,5 +345,44 @@ func (e *Role) UnmarshalGQL(v interface{}) error {
 }
 
 func (e Role) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type TagKind string
+
+const (
+	TagKindFeatured TagKind = "FEATURED"
+)
+
+var AllTagKind = []TagKind{
+	TagKindFeatured,
+}
+
+func (e TagKind) IsValid() bool {
+	switch e {
+	case TagKindFeatured:
+		return true
+	}
+	return false
+}
+
+func (e TagKind) String() string {
+	return string(e)
+}
+
+func (e *TagKind) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = TagKind(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid TagKind", str)
+	}
+	return nil
+}
+
+func (e TagKind) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

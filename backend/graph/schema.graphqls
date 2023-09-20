@@ -9,10 +9,10 @@ type User {
     first: Int = 50 @constraint(max: 50)
     after: String = ""
   ): UserInstancesConnection!
-  # groupsConnection(
-  #   first: Int = 50 @constraint(max: 50)
-  #   after: String = ""
-  # ): UserGroupsConnection!
+  notificationsConnection(
+    last: Int = 50 @constraint(max: 50)
+    before: String = ""
+  ): UserNotificationsConnection!
 }
 
 type Instance {
@@ -28,6 +28,7 @@ type Instance {
   showComments: Boolean!
   showLikes: Boolean!
   likesCount: Int!
+  commentsCount: Int!
   channelsConnection(
     first: Int = 50 @constraint(max: 50)
     after: String = ""
@@ -68,17 +69,6 @@ type Channel {
   readers: [Role!]!
 }
 
-type Group {
-  id: Uuid!
-  channelId: Uuid!
-  createdAt: Time!
-  members: [Author!]!
-  messagesConnection(
-    last: Int = 50 @constraint(max: 50)
-    before: String = ""
-  ): ChannelMessagesConnection!
-}
-
 type Message {
   id: Uuid!
   text: String!
@@ -97,6 +87,23 @@ type Author {
   bio: String!
 }
 
+type Notification {
+  id: Uuid!
+  createdAt: Time!
+  kind: NotificationKind!
+  author: Author!
+  instance: Instance
+  message: Message
+}
+
+type Collection {
+  tag: TagKind!
+  instancesConnection(
+    first: Int = 50 @constraint(max: 50)
+    after: String = ""
+  ): CollectionInstancesConnection!
+}
+
 # ==============================================
 # connections
 type UserInstancesConnection {
@@ -104,9 +111,16 @@ type UserInstancesConnection {
   edges: [UserInstancesEdge!]!
 }
 
-type UserGroupsConnection {
+type CollectionInstancesConnection {
   pageInfo: PageInfo!
-  edges: [UserGroupsEdge!]!
+  edges: [CollectionInstancesEdge!]!
+}
+
+type UserNotificationsConnection {
+  pageInfo: PageInfo!
+  edges: [UserNotificationsEdge!]!
+  hasUnread: Boolean!
+  # lastSeenAt: Time
 }
 
 type InstanceChannelsConnection {
@@ -135,9 +149,15 @@ type UserInstancesEdge {
   pinned: Boolean!
 }
 
-type UserGroupsEdge {
+type CollectionInstancesEdge {
   cursor: String!
-  node: Group!
+  node: Instance!
+  taggedAt: Time!
+}
+
+type UserNotificationsEdge {
+  cursor: String!
+  node: Notification!
 }
 
 type InstanceChannelsEdge {
@@ -157,13 +177,14 @@ type ChannelMessagesEdge {
 }
 
 # ==============================================
-# notifications
-type InstanceStreamNotification {
-  mutation: MutationType!
+# streams
+type Notice {
+  kind: NoticeKind!
   channelMessagesEdge: ChannelMessagesEdge
   userInstancesEdge: UserInstancesEdge
   instanceChannelsEdge: InstanceChannelsEdge
   instanceLikesEdge: InstanceLikesEdge
+  userNotificationsEdge: UserNotificationsEdge
   instance: Instance
   user: User
   author: Author
@@ -179,48 +200,52 @@ type PageInfo {
 # ==============================================
 # API
 type Query {
-  user(uid: String!): User! @auth(required: true)
-  instance(id: Uuid!): UserInstancesEdge! @auth(required: false)
-  channel(id: Uuid!): Channel! @auth(required: false)
-  invite(instanceId: Uuid!): Invite! @auth(required: false)
-  checkInvite(code: String!): Invite! @auth(required: false)
+  user: User! @auth(accessLevel: "user")
+  collection(tag: TagKind!): Collection! @auth(accessLevel: "guest")
+  instance(id: Uuid!): UserInstancesEdge! @auth(accessLevel: "guest")
+  channel(id: Uuid!): Channel! @auth(accessLevel: "guest")
+  invite(instanceId: Uuid!): Invite! @auth(accessLevel: "guest")
+  checkInvite(code: String!): Invite! @auth(accessLevel: "guest")
 }
 
 type Mutation {
   # user
-  updateUser(input: UserInput!): User! @auth(required: true)
+  updateUser(input: UserInput!): User! @auth(accessLevel: "user")
   # instance
-  addInstance(input: InstanceInput!): UserInstancesEdge! @auth(required: true)
-  updateInstance(instanceId: Uuid!, input: InstanceInput!): UserInstancesEdge! @auth(required: true)
-  removeInstance(instanceId: Uuid!): UserInstancesEdge! @auth(required: true)
+  addInstance(input: InstanceInput!): UserInstancesEdge! @auth(accessLevel: "user")
+  updateInstance(instanceId: Uuid!, input: InstanceInput!): UserInstancesEdge!
+    @auth(accessLevel: "user")
+  removeInstance(instanceId: Uuid!): UserInstancesEdge! @auth(accessLevel: "user")
   reorderInstance(instanceId: Uuid!, input: InstanceReorderInput!): UserInstancesEdge!
-    @auth(required: true)
-  pinInstance(instanceId: Uuid!, input: InstancePinInput!): UserInstancesEdge! @auth(required: true)
-  # private instance
-  addGroup(input: GroupInput!): Instance! @auth(required: true)
+    @auth(accessLevel: "user")
+  pinInstance(instanceId: Uuid!, input: InstancePinInput!): UserInstancesEdge!
+    @auth(accessLevel: "user")
+  tagInstance(instanceId: Uuid!, input: TagInput!): Instance! @auth(accessLevel: "admin")
+  untagInstance(instanceId: Uuid!, input: TagInput!): Instance! @auth(accessLevel: "admin")
   # channel
-  addChannel(input: ChannelInput!): InstanceChannelsEdge! @auth(required: true)
-  updateChannel(channelId: Uuid!, input: ChannelInput!): InstanceChannelsEdge! @auth(required: true)
+  addChannel(input: ChannelInput!): InstanceChannelsEdge! @auth(accessLevel: "user")
+  updateChannel(channelId: Uuid!, input: ChannelInput!): InstanceChannelsEdge!
+    @auth(accessLevel: "user")
   reorderChannel(channelId: Uuid!, input: ChannelReorderInput!): InstanceChannelsEdge!
-    @auth(required: true)
-  removeChannel(channelId: Uuid!): InstanceChannelsEdge! @auth(required: true)
+    @auth(accessLevel: "user")
+  removeChannel(channelId: Uuid!): InstanceChannelsEdge! @auth(accessLevel: "user")
   # message
-  addMessage(input: MessageInput!): ChannelMessagesEdge! @auth(required: true)
-  removeMessage(messageId: Uuid!): ChannelMessagesEdge! @auth(required: true)
+  addMessage(input: MessageInput!): ChannelMessagesEdge! @auth(accessLevel: "user")
+  removeMessage(messageId: Uuid!): ChannelMessagesEdge! @auth(accessLevel: "user")
   # author
-  addRole(authorId: Uuid!, role: Role!): Author! @auth(required: true)
-  removeRole(authorId: Uuid!, role: Role!): Author! @auth(required: true)
+  addRole(authorId: Uuid!, role: Role!): Author! @auth(accessLevel: "user")
+  removeRole(authorId: Uuid!, role: Role!): Author! @auth(accessLevel: "user")
   # invite
-  addInvite(input: InviteInput!): Invite! @auth(required: true)
-  removeInvite(inviteId: Uuid!): Invite! @auth(required: true)
-  redeemInvite(code: String!): Invite! @auth(required: true)
+  addInvite(input: InviteInput!): Invite! @auth(accessLevel: "user")
+  removeInvite(inviteId: Uuid!): Invite! @auth(accessLevel: "user")
+  redeemInvite(code: String!): Invite! @auth(accessLevel: "user")
   # like
-  addLike(instanceId: Uuid!): InstanceLikesEdge! @auth(required: true)
-  removeLike(instanceId: Uuid!): InstanceLikesEdge! @auth(required: true)
+  addLike(instanceId: Uuid!): InstanceLikesEdge! @auth(accessLevel: "user")
+  removeLike(instanceId: Uuid!): InstanceLikesEdge! @auth(accessLevel: "user")
 }
 
 type Subscription {
-  instanceStream(instanceId: Uuid!): InstanceStreamNotification! @auth(required: false)
+  stream(instanceId: Uuid!): Notice! @auth(accessLevel: "guest")
 }
 
 # ==============================================
@@ -235,10 +260,6 @@ input InstanceInput {
   showChat: Boolean!
   showComments: Boolean!
   showLikes: Boolean!
-}
-
-input GroupInput {
-  invitees: [Uuid!]!
 }
 
 input InstanceReorderInput {
@@ -278,6 +299,10 @@ input InviteInput {
   redemptions: Int
 }
 
+input TagInput {
+  tag: TagKind!
+}
+
 # ==============================================
 # enum
 enum Access {
@@ -293,7 +318,7 @@ enum Role {
   ALL_USERS
 }
 
-enum MutationType {
+enum NoticeKind {
   MESSAGE_ADDED
   MESSAGE_REMOVED
   CHANNEL_ADDED
@@ -305,6 +330,16 @@ enum MutationType {
   INSTANCE_REMOVED
   LIKE_ADDED
   LIKE_REMOVED
+  NOTIFICATION_ADDED
+}
+
+enum NotificationKind {
+  LIKE_ADDED
+  COMMENT_ADDED
+}
+
+enum TagKind {
+  FEATURED
 }
 
 # ==============================================
@@ -318,4 +353,5 @@ directive @constraint(
   min: Float = 0
   max: Float = 50
 ) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
-directive @auth(required: Boolean) on FIELD_DEFINITION
+
+directive @auth(accessLevel: String!) on FIELD_DEFINITION
