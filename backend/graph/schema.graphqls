@@ -2,6 +2,7 @@
 # base types
 type User {
   id: Uuid!
+  uid: String!
   name: String!
   avatar: String!
   bio: String!

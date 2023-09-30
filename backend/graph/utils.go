@@ -132,7 +132,8 @@ func getCallerInstanceUser(ctx context.Context, instanceId uuid.UUID) (*model.In
 	db := interfaces.GetDatabase()
 
 	instance := model.Instance{}
-	if err := db.Where(model.Instance{ID: instanceId}).First(&instance).Error; err != nil {
+	instance.ID = instanceId
+	if err := db.Where(instance).First(&instance).Error; err != nil {
 		return nil, err
 	}
 

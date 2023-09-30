@@ -5,12 +5,17 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
-	"gorm.io/gorm"
 )
 
+type Base struct {
+	ID        uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time `gorm:"index"`
+}
+
 type User struct {
-	gorm.Model
-	ID                  uuid.UUID       `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	Base
 	UID                 string          `json:"uid"`
 	Name                string          `json:"name"`
 	Avatar              string          `json:"avatar"`
@@ -21,8 +26,7 @@ type User struct {
 }
 
 type Instance struct {
-	gorm.Model
-	ID          uuid.UUID     `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	Base
 	Name        string        `json:"name"`
 	Description string        `json:"description"`
 	AuthorID    uuid.UUID     `json:"authorId" gorm:"type:uuid"`
@@ -44,8 +48,7 @@ type Instance struct {
 }
 
 type Channel struct {
-	gorm.Model
-	ID                 uuid.UUID      `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	Base
 	AuthorID           uuid.UUID      `json:"authorId" gorm:"type:uuid"`
 	Author             *InstanceUser  ``
 	Rank               string         `json:"rank"`
@@ -62,8 +65,7 @@ type Channel struct {
 }
 
 type Message struct {
-	gorm.Model
-	ID        uuid.UUID     `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	Base
 	Text      string        `json:"text"`
 	AuthorID  uuid.UUID     `json:"authorId" gorm:"type:uuid"`
 	Author    *InstanceUser ``
@@ -72,8 +74,7 @@ type Message struct {
 }
 
 type InstanceUser struct {
-	gorm.Model
-	ID         uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	Base
 	InstanceID uuid.UUID `json:"instanceId" gorm:"type:uuid"`
 	Instance   *Instance
 	UserID     uuid.UUID `json:"userId" gorm:"type:uuid"`
@@ -89,8 +90,7 @@ type InstanceUser struct {
 }
 
 type Invite struct {
-	gorm.Model
-	ID          uuid.UUID     `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	Base
 	InstanceID  uuid.UUID     `json:"instanceId" gorm:"type:uuid"`
 	Instance    *Instance     ``
 	AuthorID    uuid.UUID     `json:"authorId" gorm:"type:uuid"`
@@ -101,8 +101,7 @@ type Invite struct {
 }
 
 type Notification struct {
-	gorm.Model
-	ID         uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	Base
 	Kind       string    `json:"kind"`
 	UserID     uuid.UUID `json:"userId" gorm:"type:uuid"`
 	User       *User
@@ -115,8 +114,7 @@ type Notification struct {
 }
 
 type Tag struct {
-	gorm.Model
-	ID         uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	Base
 	Kind       string    `json:"kind"`
 	InstanceID uuid.UUID `json:"instanceId" gorm:"type:uuid"`
 	Instance   *Instance `gorm:"foreignKey:InstanceID"`
@@ -126,6 +124,6 @@ type Tag struct {
 
 // abstract - only used so gql-generate can create resolver
 type Collection struct {
-	gorm.Model
+	Base
 	Tag string `json:"tag"`
 }

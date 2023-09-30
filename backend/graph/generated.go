@@ -239,6 +239,7 @@ type ComplexityRoot struct {
 		InstancesConnection     func(childComplexity int, first *int, after *string) int
 		Name                    func(childComplexity int) int
 		NotificationsConnection func(childComplexity int, last *int, before *string) int
+		UID                     func(childComplexity int) int
 	}
 
 	UserInstancesConnection struct {
@@ -1344,6 +1345,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.NotificationsConnection(childComplexity, args["last"].(*int), args["before"].(*string)), true
+
+	case "User.uid":
+		if e.complexity.User.UID == nil {
+			break
+		}
+
+		return e.complexity.User.UID(childComplexity), true
 
 	case "UserInstancesConnection.edges":
 		if e.complexity.UserInstancesConnection.Edges == nil {
@@ -5742,6 +5750,8 @@ func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_User_id(ctx, field)
+			case "uid":
+				return ec.fieldContext_User_uid(ctx, field)
 			case "name":
 				return ec.fieldContext_User_name(ctx, field)
 			case "avatar":
@@ -8022,6 +8032,8 @@ func (ec *executionContext) fieldContext_Notice_user(ctx context.Context, field 
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_User_id(ctx, field)
+			case "uid":
+				return ec.fieldContext_User_uid(ctx, field)
 			case "name":
 				return ec.fieldContext_User_name(ctx, field)
 			case "avatar":
@@ -8567,6 +8579,8 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_User_id(ctx, field)
+			case "uid":
+				return ec.fieldContext_User_uid(ctx, field)
 			case "name":
 				return ec.fieldContext_User_name(ctx, field)
 			case "avatar":
@@ -9344,6 +9358,50 @@ func (ec *executionContext) fieldContext_User_id(ctx context.Context, field grap
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Uuid does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_uid(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_uid(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_uid(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -14105,6 +14163,13 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 		case "id":
 
 			out.Values[i] = ec._User_id(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "uid":
+
+			out.Values[i] = ec._User_uid(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)

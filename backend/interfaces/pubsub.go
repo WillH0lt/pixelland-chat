@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"cloud.google.com/go/pubsub"
+	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 	"github.com/wwwillw/pixelland-chat/graph/model"
 	"golang.org/x/oauth2/google"
@@ -21,8 +22,9 @@ type PubsubConfig struct {
 	ServiceAccountPath  string
 	AuthorEventsTopic   string
 	InstanceEventsTopic string
-	// UserEventsTopic     string
-	Active bool
+	UserEventsTopic     string
+	Active              bool
+	PubsubProjectId     string
 }
 
 type PubsubClient struct {
@@ -42,27 +44,32 @@ func InitPubSubClient(ctx context.Context, config PubsubConfig) error {
 		return nil
 	}
 
-	var credentials *google.Credentials
-	if _, err := os.Stat(config.ServiceAccountPath); err == nil {
-		bytes, err := ioutil.ReadFile(config.ServiceAccountPath)
-		if err != nil {
-			return err
-		}
+	projectId := config.PubsubProjectId
+	if projectId == "" {
+		var credentials *google.Credentials
+		if _, err := os.Stat(config.ServiceAccountPath); err == nil {
+			bytes, err := ioutil.ReadFile(config.ServiceAccountPath)
+			if err != nil {
+				return err
+			}
 
-		credentials, err = google.CredentialsFromJSON(ctx, bytes, compute.ComputeScope)
-		if err != nil {
+			credentials, err = google.CredentialsFromJSON(ctx, bytes, compute.ComputeScope)
+			if err != nil {
+				return err
+			}
+		} else if errors.Is(err, os.ErrNotExist) {
+			credentials, err = google.FindDefaultCredentials(ctx, compute.ComputeScope)
+			if err != nil {
+				return err
+			}
+		} else {
 			return err
 		}
-	} else if errors.Is(err, os.ErrNotExist) {
-		credentials, err = google.FindDefaultCredentials(ctx, compute.ComputeScope)
-		if err != nil {
-			return err
-		}
-	} else {
-		return err
+		projectId = credentials.ProjectID
 	}
 
-	client, err := pubsub.NewClient(ctx, credentials.ProjectID)
+	log.Info().Msgf("Initializing pubsub client for project %s", projectId)
+	client, err := pubsub.NewClient(ctx, projectId)
 	if err != nil {
 		return err
 	}
@@ -89,20 +96,20 @@ func createTopicIfNotExists(ctx context.Context, client *pubsub.Client, name str
 	return topic, nil
 }
 
-// func (c *PubsubClient) PublishUserEvent(ctx context.Context, kind model.NoticeKind, user model.User) error {
+func (c *PubsubClient) PublishUserEvent(ctx context.Context, kind model.NoticeKind, user model.User) error {
 
-// 	if !c.config.Active {
-// 		log.Info().Msg("Not publishing user event because pubsub client is not active")
-// 		return nil
-// 	}
+	if !c.config.Active {
+		log.Info().Msg("Not publishing user event because pubsub client is not active")
+		return nil
+	}
 
-// 	kindStr := string(kind)
-// 	if !strings.Contains(kindStr, "USER") {
-// 		return errors.New("Invalid notice kind, must be a user notice")
-// 	}
+	kindStr := string(kind)
+	if !strings.Contains(kindStr, "USER") {
+		return errors.New("Invalid notice kind, must be a user notice")
+	}
 
-// 	return c.publishPubsubEvent(ctx, kind, uuid.Nil.String(), user)
-// }
+	return c.publishPubsubEvent(ctx, kind, uuid.Nil.String(), user)
+}
 
 func (c *PubsubClient) PublishAuthorEvent(ctx context.Context, kind model.NoticeKind, author model.Author) error {
 
@@ -142,6 +149,8 @@ func (c *PubsubClient) publishPubsubEvent(ctx context.Context, kind model.Notice
 		topicName = c.config.InstanceEventsTopic
 	} else if strings.Contains(kindStr, "AUTHOR") {
 		topicName = c.config.AuthorEventsTopic
+	} else if strings.Contains(kindStr, "USER") {
+		topicName = c.config.UserEventsTopic
 	} else {
 		return errors.New("Invalid mutation type")
 	}
@@ -156,12 +165,13 @@ func (c *PubsubClient) publishPubsubEvent(ctx context.Context, kind model.Notice
 		return err
 	}
 
-	log.Info().Msgf("Publishing instance event: %s", instanceID)
+	log.Info().Msgf("Publishing pubsub event: %s", instanceID)
 	res := topic.Publish(ctx, &pubsub.Message{
 		Data: bytes,
 		Attributes: map[string]string{
 			"instanceId":   instanceID,
 			"mutationType": kindStr,
+			"token":        ctx.Value("token").(string),
 		},
 	})
 

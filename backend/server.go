@@ -33,11 +33,13 @@ type Specification struct {
 	SqlDbName           string `default:"pixellandchat" split_words:"true"`
 	SqlSslMode          string `default:"disable" split_words:"true"`
 	SeedDb              bool   `default:"false" split_words:"true"`
-	PubsubActive        bool   `default:"false" split_words:"true"`
+	PubsubActive        bool   `default:"true" split_words:"true"`
 	ServiceAccountPath  string `default:"/etc/credentials/pixelland-admin-service-account.json" split_words:"true"`
 	EnforceAuth         bool   `default:"false" split_words:"true"`
 	AuthorEventsTopic   string `default:"author_events" split_words:"true"`
 	InstanceEventsTopic string `default:"instance_events" split_words:"true"`
+	UserEventsTopic     string `default:"user_events" split_words:"true"`
+	PubsubProjectId     string `default:"" split_words:"true"`
 }
 
 func init() {
@@ -104,7 +106,9 @@ func run(args *cli.Context) error {
 		ServiceAccountPath:  s.ServiceAccountPath,
 		AuthorEventsTopic:   s.AuthorEventsTopic,
 		InstanceEventsTopic: s.InstanceEventsTopic,
+		UserEventsTopic:     s.UserEventsTopic,
 		Active:              s.PubsubActive,
+		PubsubProjectId:     s.PubsubProjectId,
 	}
 	if err := interfaces.InitPubSubClient(ctx, pubsubConfig); err != nil {
 		log.Fatal().Err(err).Msg("Failed to initialize pubsub client")

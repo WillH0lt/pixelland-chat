@@ -472,6 +472,7 @@ export type User = {
   readonly instancesConnection: UserInstancesConnection;
   readonly name: Scalars['String'];
   readonly notificationsConnection: UserNotificationsConnection;
+  readonly uid: Scalars['String'];
 };
 
 

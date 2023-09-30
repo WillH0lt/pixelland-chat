@@ -328,8 +328,8 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UserInput
 
 		sendInstanceUserNotice(&r.StreamObservers, caller, model.NoticeKindUserUpdated)
 
-		// client := interfaces.GetPubSubClient()
-		// go client.PublishUserEvent(ctx, model.NoticeKindUserUpdated, *caller)
+		client := interfaces.GetPubSubClient()
+		go client.PublishUserEvent(ctx, model.NoticeKindUserUpdated, *caller)
 	}
 
 	return caller, nil
@@ -444,7 +444,8 @@ func (r *mutationResolver) UpdateInstance(ctx context.Context, instanceID uuid.U
 	sendInstanceNotice(&r.StreamObservers, &instance, model.NoticeKindInstanceUpdated)
 
 	client := interfaces.GetPubSubClient()
-	go client.PublishInstanceEvent(ctx, model.NoticeKindInstanceUpdated, instance)
+	log.Info().Msgf("PublishInstanceEvent: %+v", instance)
+	client.PublishInstanceEvent(ctx, model.NoticeKindInstanceUpdated, instance)
 
 	edge := createUserInstancesEdge(callerInstanceUser, &instance)
 	return edge, nil
@@ -463,9 +464,8 @@ func (r *mutationResolver) RemoveInstance(ctx context.Context, instanceID uuid.U
 
 	db := interfaces.GetDatabase()
 
-	instance := model.Instance{
-		ID: instanceID,
-	}
+	instance := model.Instance{}
+	instance.ID = instanceID
 	if err := db.Delete(&instance, instance).Error; err != nil {
 		return nil, err
 	}
