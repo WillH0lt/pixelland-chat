@@ -197,6 +197,7 @@ export const UserFragment = gql`
     name
     avatar
     bio
+    uid
     instancesConnection(first: $instancesFirst, after: $instancesAfter) {
       edges {
         ...UserInstancesEdgeFragment

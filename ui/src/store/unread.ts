@@ -1,4 +1,4 @@
-import { acceptHMRUpdate, defineStore } from 'pinia'
+import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -91,7 +91,7 @@ export const useUnreadStore = defineStore('unread', () => {
     // never viewed
     const lastViewed = channelLastViewed.value[channel.id]
     if (!lastViewed) {
-      return true
+      return false
     }
     // no messages loaded yet
     const messages = messageStore.getMessages(channel.id)
@@ -127,7 +127,3 @@ export const useUnreadStore = defineStore('unread', () => {
     instanceHasUnread,
   }
 })
-
-if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useUnreadStore, import.meta.hot))
-}

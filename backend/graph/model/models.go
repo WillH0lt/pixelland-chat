@@ -30,7 +30,7 @@ type Instance struct {
 	Name        string        `json:"name"`
 	Description string        `json:"description"`
 	AuthorID    uuid.UUID     `json:"authorId" gorm:"type:uuid"`
-	Author      *InstanceUser ``
+	Author      *InstanceUser `gorm:"constraint:OnDelete:CASCADE;"`
 	ReadAccess  string        `json:"readAccess"`
 	Icon        string        `json:"icon"`
 	// IsGroup          bool            ``
@@ -40,9 +40,9 @@ type Instance struct {
 	ShowLikes        bool            `json:"showLikes"`
 	LikesCount       int             `json:"likesCount"`
 	CommentsCount    int             `json:"commentsCount"`
-	Channels         []*Channel      ``
-	Users            []*InstanceUser ``
-	Invites          []*Invite       ``
+	Channels         []*Channel      `gorm:"constraint:OnDelete:CASCADE;"`
+	Users            []*InstanceUser `gorm:"constraint:OnDelete:CASCADE;"`
+	Invites          []*Invite       `gorm:"constraint:OnDelete:CASCADE;"`
 	PrimaryChannelID uuid.UUID       `gorm:"type:uuid"`
 	PrimaryChannel   *Channel        ``
 }
@@ -55,7 +55,7 @@ type Channel struct {
 	Name               string         `json:"name"`
 	InstanceID         uuid.UUID      `json:"instanceId" gorm:"type:uuid"`
 	Instance           *Instance      ``
-	Messages           []*Message     ``
+	Messages           []*Message     `gorm:"constraint:OnDelete:CASCADE;"`
 	Publishers         pq.StringArray `json:"publishers" gorm:"type:text[]"`
 	Readers            pq.StringArray `json:"readers" gorm:"type:text[]"`
 	LastMessageAddedAt *time.Time     `json:"lastMessagedAddedAt"`

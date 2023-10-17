@@ -25,11 +25,9 @@
         >
           {{ user.name + (user.roles.includes(Role.Banned) ? ' (banned)' : '') }}
         </a>
-        <!-- <img
-          v-if="user.roles.includes(Role.Member)"
-          class="pixelated -translate-y-1/3 ml-1 h-4"
-          src="/img/edit.png"
-        /> -->
+        <ElementHoverText v-if="user.roles.includes(Role.Member)" text="Editor" :side="SIDE.RIGHT">
+          <img class="pixelated -translate-y-1/3 ml-1 h-4" src="/img/pencil.png" />
+        </ElementHoverText>
         <div class="text-gray-light ml-1 min-w-fit">{{ message.timeSince }}</div>
       </div>
       <ChannelText
@@ -78,6 +76,8 @@ import { useMessageStore } from '@/store/message'
 import { ExtendedAuthor } from '@/types/ExtendedAuthor'
 import { ExtendedMessage } from '@/types/ExtendedMessage'
 import { SIDE } from '@/types/SideEnum'
+
+import ElementHoverText from './ElementHoverText.vue'
 
 const props = defineProps<{
   message: ExtendedMessage

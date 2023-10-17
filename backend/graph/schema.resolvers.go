@@ -182,7 +182,7 @@ func (r *instanceResolver) ChannelsConnection(ctx context.Context, obj *model.In
 	tx := db.Model(&obj).Limit(*first + 1).Order("rank asc")
 
 	roles := append(callerInstanceUser.Roles, model.RoleAllUsers.String())
-	tx = tx.Where("readers && ?", pq.Array(roles))
+	tx = tx.Where("deleted_at is NULL").Where("readers && ?", pq.Array(roles))
 
 	if *after != "" {
 		rank, err := fromCursorHash(*after)
@@ -329,7 +329,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UserInput
 		sendInstanceUserNotice(&r.StreamObservers, caller, model.NoticeKindUserUpdated)
 
 		client := interfaces.GetPubSubClient()
-		go client.PublishUserEvent(ctx, model.NoticeKindUserUpdated, *caller)
+		client.PublishUserEvent(ctx, model.NoticeKindUserUpdated, *caller)
 	}
 
 	return caller, nil
@@ -470,13 +470,13 @@ func (r *mutationResolver) RemoveInstance(ctx context.Context, instanceID uuid.U
 		return nil, err
 	}
 
-	if err := db.Delete(&model.InstanceUser{}, "instance_id = ?", instanceID).Error; err != nil {
-		return nil, err
-	}
+	// if err := db.Delete(&model.InstanceUser{}, "instance_id = ?", instanceID).Error; err != nil {
+	// 	return nil, err
+	// }
 
-	if err := db.Delete(&model.Invite{}, "instance_id = ?", instanceID).Error; err != nil {
-		return nil, err
-	}
+	// if err := db.Delete(&model.Invite{}, "instance_id = ?", instanceID).Error; err != nil {
+	// 	return nil, err
+	// }
 
 	if err := db.Delete(&model.Notification{}, "instance_id = ?", instanceID).Error; err != nil {
 		return nil, err
@@ -991,6 +991,13 @@ func (r *mutationResolver) AddRole(ctx context.Context, authorID uuid.UUID, role
 		// 	return nil, err
 		// }
 
+	} else if role == model.RoleMember {
+		if err := assertIsModerator(*callerInstanceUser); err != nil {
+			return nil, err
+		}
+		if err := assertIsNotBanned(instanceUser); err != nil {
+			return nil, err
+		}
 	} else {
 		return nil, fmt.Errorf("role %s is not allowed to be added", role)
 	}
@@ -1037,7 +1044,7 @@ func (r *mutationResolver) RemoveRole(ctx context.Context, authorID uuid.UUID, r
 		if err := assertIsAdmin(*callerInstanceUser); err != nil {
 			return nil, err
 		}
-	} else if role == model.RoleBanned {
+	} else if role == model.RoleBanned || role == model.RoleMember {
 		if err := assertIsModerator(*callerInstanceUser); err != nil {
 			return nil, err
 		}
