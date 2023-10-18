@@ -3,10 +3,10 @@ import { ref } from 'vue'
 
 import { useAddLikeMutation, useRemoveLikeMutation } from '@/graphql/mutations/likes.gen'
 import { useInstanceQuery } from '@/graphql/queries/instance.gen'
-import { Author, InstanceLikesConnection, InstanceLikesEdge } from '@/graphql/types.gen'
+import { InstanceLikesConnection, InstanceLikesEdge } from '@/graphql/types.gen'
 import { useAuthorStore } from '@/store/author'
 import { ExtendedLike } from '@/types/ExtendedLike'
-import { timeSince } from '@/utils'
+import { extendAuthor, timeSince } from '@/utils'
 
 export const useLikeStore = defineStore('like', () => {
   const authorStore = useAuthorStore()
@@ -129,11 +129,12 @@ export const useLikeStore = defineStore('like', () => {
 })
 
 function extendLike(edge: InstanceLikesEdge): ExtendedLike {
+  const author = extendAuthor(edge.node)
   const likedAtDate = new Date(edge.likedAt)
   const likedAtTimeSince = timeSince(likedAtDate)
 
   return {
-    ...edge.node,
+    ...author,
     likedAtDate,
     likedAtTimeSince,
   }

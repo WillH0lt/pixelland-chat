@@ -38,6 +38,11 @@ type Instance {
     first: Int = 50 @constraint(max: 50)
     after: String = ""
   ): InstanceLikesConnection!
+  authorsConnection(
+    roles: [Role!]!
+    first: Int = 50 @constraint(max: 50)
+    after: String = ""
+  ): InstanceAuthorsConnection!
 }
 
 type Invite {
@@ -86,6 +91,7 @@ type Author {
   name: String!
   avatar: String!
   bio: String!
+  createdAt: Time!
 }
 
 type Notification {
@@ -134,6 +140,11 @@ type InstanceLikesConnection {
   edges: [InstanceLikesEdge!]!
 }
 
+type InstanceAuthorsConnection {
+  pageInfo: PageInfo!
+  edges: [InstanceAuthorsEdge!]!
+}
+
 type ChannelMessagesConnection {
   pageInfo: PageInfo!
   edges: [ChannelMessagesEdge!]!
@@ -169,6 +180,11 @@ type InstanceChannelsEdge {
 type InstanceLikesEdge {
   cursor: String!
   likedAt: Time!
+  node: Author!
+}
+
+type InstanceAuthorsEdge {
+  cursor: String!
   node: Author!
 }
 

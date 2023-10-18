@@ -9,14 +9,14 @@ export type AddInviteMutationVariables = Types.Exact<{
 }>;
 
 
-export type AddInviteMutation = { __typename?: 'Mutation', addInvite: { __typename?: 'Invite', id: any, instanceId: any, code: string, createdAt: any, expiresAt?: any | null, redemptions?: number | null, author: { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role> } } };
+export type AddInviteMutation = { __typename?: 'Mutation', addInvite: { __typename?: 'Invite', id: any, instanceId: any, code: string, createdAt: any, expiresAt?: any | null, redemptions?: number | null, author: { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role>, createdAt: any } } };
 
 export type RedeemInviteMutationVariables = Types.Exact<{
   code: Types.Scalars['String'];
 }>;
 
 
-export type RedeemInviteMutation = { __typename?: 'Mutation', redeemInvite: { __typename?: 'Invite', id: any, instanceId: any, code: string, createdAt: any, expiresAt?: any | null, redemptions?: number | null, author: { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role> } } };
+export type RedeemInviteMutation = { __typename?: 'Mutation', redeemInvite: { __typename?: 'Invite', id: any, instanceId: any, code: string, createdAt: any, expiresAt?: any | null, redemptions?: number | null, author: { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role>, createdAt: any } } };
 
 export declare const addInvite: import("graphql").DocumentNode;
 export declare const redeemInvite: import("graphql").DocumentNode;

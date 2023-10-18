@@ -62,6 +62,12 @@ export const routes = [
         path: '/instances/:instanceId/likes/',
         component: () => import('./components/LikeView.vue'),
       },
+      {
+        name: 'authors',
+        path: '/instances/:instanceId/authors/',
+        query: { roles: null },
+        component: () => import('./components/AuthorsView.vue'),
+      },
     ],
   },
 ]

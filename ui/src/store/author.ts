@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { computed, reactive } from 'vue'
+import { computed, reactive, ref } from 'vue'
 
 import { NULL_UUID } from '@/constants'
 import { useAddRoleMutation, useRemoveRoleMutation } from '@/graphql/mutations/author.gen'
@@ -8,7 +8,7 @@ import { useChannelStore } from '@/store/channel'
 import { useInstanceStore } from '@/store/instance'
 import { useUserStore } from '@/store/user'
 import { ExtendedAuthor } from '@/types/ExtendedAuthor'
-import { generateAvatar } from '@/utils'
+import { extendAuthor } from '@/utils'
 
 export const useAuthorStore = defineStore('author', () => {
   const channelStore = useChannelStore()
@@ -34,6 +34,7 @@ export const useAuthorStore = defineStore('author', () => {
         avatar: userStore.user.avatar,
         name: userStore.user.name,
         bio: userStore.user.bio,
+        createdAt: new Date().toISOString(),
       })
     )
   })
@@ -123,11 +124,3 @@ export const useAuthorStore = defineStore('author', () => {
     handleAuthorsAdded,
   }
 })
-
-function extendAuthor(author: Author): ExtendedAuthor {
-  return {
-    ...author,
-    avatar: author.avatar || generateAvatar(),
-    // accessedAtDate: new Date(author.accessedAt),
-  }
-}

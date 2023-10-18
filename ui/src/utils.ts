@@ -1,6 +1,9 @@
+import { SERVER_START_DATE } from '@/constants'
 import { Access, Role } from '@/graphql/types.gen'
 import { InstanceInput } from '@/graphql/types.gen'
+import { Author } from '@/graphql/types.gen'
 import { useDialogStore } from '@/store/dialog'
+import { ExtendedAuthor } from '@/types/ExtendedAuthor'
 import { ExtendedInstance } from '@/types/ExtendedInstance'
 
 export function handleLinkClicks(
@@ -143,5 +146,20 @@ export function createInstanceInput(): InstanceInput {
     showChat: true,
     showComments: true,
     showLikes: true,
+  }
+}
+
+export function extendAuthor(author: Author): ExtendedAuthor {
+  const createdAtDate = new Date(author.createdAt)
+  let createdAtTimeSince = timeSince(createdAtDate)
+  if (createdAtDate.getTime() < SERVER_START_DATE.getTime()) {
+    createdAtTimeSince = 'before time'
+  }
+
+  return {
+    ...author,
+    avatar: author.avatar || generateAvatar(),
+    createdAtDate,
+    createdAtTimeSince,
   }
 }

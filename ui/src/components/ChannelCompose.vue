@@ -116,7 +116,12 @@ const messagePlaceholder = computed(() => {
   }
 
   const role = getMostPermissiveRole(channel.value.publishers as Role[])
-  const roleString = role === Role.Moderator ? 'mod' : role.toLowerCase()
+  let roleString = role.toLowerCase()
+  if (role === Role.Moderator) {
+    roleString = 'mod'
+  } else if (role === Role.Member) {
+    roleString = 'editor'
+  }
   return `Only ${roleString}s can post here.`
 })
 

@@ -365,6 +365,15 @@ func createInstanceLikesEdge(instanceUser *model.InstanceUser) *model.InstanceLi
 	}
 }
 
+func createInstanceAuthorsEdge(instanceUser *model.InstanceUser) *model.InstanceAuthorsEdge {
+	cursor := toCursorHash(*&instanceUser.CreatedAt)
+
+	return &model.InstanceAuthorsEdge{
+		Cursor: cursor,
+		Node:   instanceUserToAuthor(instanceUser),
+	}
+}
+
 func createChannelMessagesEdge(message *model.Message) *model.ChannelMessagesEdge {
 	cursor := toCursorHash(message.CreatedAt)
 
@@ -459,6 +468,7 @@ func instanceUserToAuthor(instanceUser *model.InstanceUser) *model.Author {
 		Avatar:     instanceUser.Avatar,
 		Bio:        instanceUser.Bio,
 		Roles:      stringsToRoles(instanceUser.Roles),
+		CreatedAt:  instanceUser.CreatedAt,
 	}
 }
 

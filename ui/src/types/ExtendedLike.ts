@@ -1,8 +1,9 @@
-import { Author } from '@/graphql/types.gen'
+// import { Author } from '@/graphql/types.gen'
+import { ExtendedAuthor } from './ExtendedAuthor'
 
 interface Extension {
   likedAtDate?: Date
   likedAtTimeSince?: string
 }
 
-export type ExtendedLike = Author & Extension
+export type ExtendedLike = ExtendedAuthor & Extension

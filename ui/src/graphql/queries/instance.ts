@@ -9,6 +9,9 @@ export const instance = gql`
     $channelsAfter: String = ""
     $likesFirst: Int = 0
     $likesAfter: String = ""
+    $authorsFirst: Int = 0
+    $authorsAfter: String = ""
+    $authorsRoles: [Role!] = []
     $messagesLast: Int = 0
     $messagesBefore: String = ""
   ) {

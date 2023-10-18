@@ -62,6 +62,7 @@ type ComplexityRoot struct {
 	Author struct {
 		Avatar     func(childComplexity int) int
 		Bio        func(childComplexity int) int
+		CreatedAt  func(childComplexity int) int
 		ID         func(childComplexity int) int
 		InstanceID func(childComplexity int) int
 		Name       func(childComplexity int) int
@@ -113,6 +114,7 @@ type ComplexityRoot struct {
 
 	Instance struct {
 		Author             func(childComplexity int) int
+		AuthorsConnection  func(childComplexity int, roles []model.Role, first *int, after *string) int
 		ChannelsConnection func(childComplexity int, first *int, after *string) int
 		CommentsCount      func(childComplexity int) int
 		CreatedAt          func(childComplexity int) int
@@ -127,6 +129,16 @@ type ComplexityRoot struct {
 		ShowChat           func(childComplexity int) int
 		ShowComments       func(childComplexity int) int
 		ShowLikes          func(childComplexity int) int
+	}
+
+	InstanceAuthorsConnection struct {
+		Edges    func(childComplexity int) int
+		PageInfo func(childComplexity int) int
+	}
+
+	InstanceAuthorsEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
 	}
 
 	InstanceChannelsConnection struct {
@@ -283,6 +295,7 @@ type InstanceResolver interface {
 
 	ChannelsConnection(ctx context.Context, obj *model.Instance, first *int, after *string) (*model.InstanceChannelsConnection, error)
 	LikesConnection(ctx context.Context, obj *model.Instance, first *int, after *string) (*model.InstanceLikesConnection, error)
+	AuthorsConnection(ctx context.Context, obj *model.Instance, roles []model.Role, first *int, after *string) (*model.InstanceAuthorsConnection, error)
 }
 type InviteResolver interface {
 	Author(ctx context.Context, obj *model.Invite) (*model.Author, error)
@@ -361,6 +374,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Author.Bio(childComplexity), true
+
+	case "Author.createdAt":
+		if e.complexity.Author.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Author.CreatedAt(childComplexity), true
 
 	case "Author.id":
 		if e.complexity.Author.ID == nil {
@@ -582,6 +602,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Instance.Author(childComplexity), true
 
+	case "Instance.authorsConnection":
+		if e.complexity.Instance.AuthorsConnection == nil {
+			break
+		}
+
+		args, err := ec.field_Instance_authorsConnection_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Instance.AuthorsConnection(childComplexity, args["roles"].([]model.Role), args["first"].(*int), args["after"].(*string)), true
+
 	case "Instance.channelsConnection":
 		if e.complexity.Instance.ChannelsConnection == nil {
 			break
@@ -689,6 +721,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Instance.ShowLikes(childComplexity), true
+
+	case "InstanceAuthorsConnection.edges":
+		if e.complexity.InstanceAuthorsConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.InstanceAuthorsConnection.Edges(childComplexity), true
+
+	case "InstanceAuthorsConnection.pageInfo":
+		if e.complexity.InstanceAuthorsConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.InstanceAuthorsConnection.PageInfo(childComplexity), true
+
+	case "InstanceAuthorsEdge.cursor":
+		if e.complexity.InstanceAuthorsEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.InstanceAuthorsEdge.Cursor(childComplexity), true
+
+	case "InstanceAuthorsEdge.node":
+		if e.complexity.InstanceAuthorsEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.InstanceAuthorsEdge.Node(childComplexity), true
 
 	case "InstanceChannelsConnection.edges":
 		if e.complexity.InstanceChannelsConnection.Edges == nil {
@@ -1687,6 +1747,62 @@ func (ec *executionContext) field_Collection_instancesConnection_args(ctx contex
 		}
 	}
 	args["after"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Instance_authorsConnection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 []model.Role
+	if tmp, ok := rawArgs["roles"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("roles"))
+		arg0, err = ec.unmarshalNRole2ᚕgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐRoleᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["roles"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOInt2ᚖint(ctx, tmp) }
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			min, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 0)
+			if err != nil {
+				return nil, err
+			}
+			max, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 50)
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.Constraint == nil {
+				return nil, errors.New("directive constraint is not implemented")
+			}
+			return ec.directives.Constraint(ctx, rawArgs, directive0, min, max)
+		}
+
+		tmp, err = directive1(ctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if data, ok := tmp.(*int); ok {
+			arg1 = data
+		} else if tmp == nil {
+			arg1 = nil
+		} else {
+			return nil, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be *int`, tmp))
+		}
+	}
+	args["first"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["after"] = arg2
 	return args, nil
 }
 
@@ -2720,6 +2836,50 @@ func (ec *executionContext) fieldContext_Author_bio(ctx context.Context, field g
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Author_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Author) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Author_createdAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Author_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Author",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3831,6 +3991,8 @@ func (ec *executionContext) fieldContext_CollectionInstancesEdge_node(ctx contex
 				return ec.fieldContext_Instance_channelsConnection(ctx, field)
 			case "likesConnection":
 				return ec.fieldContext_Instance_likesConnection(ctx, field)
+			case "authorsConnection":
+				return ec.fieldContext_Instance_authorsConnection(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Instance", field.Name)
 		},
@@ -4023,6 +4185,8 @@ func (ec *executionContext) fieldContext_Instance_author(ctx context.Context, fi
 				return ec.fieldContext_Author_avatar(ctx, field)
 			case "bio":
 				return ec.fieldContext_Author_bio(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Author_createdAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
 		},
@@ -4592,6 +4756,273 @@ func (ec *executionContext) fieldContext_Instance_likesConnection(ctx context.Co
 	return fc, nil
 }
 
+func (ec *executionContext) _Instance_authorsConnection(ctx context.Context, field graphql.CollectedField, obj *model.Instance) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Instance_authorsConnection(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Instance().AuthorsConnection(rctx, obj, fc.Args["roles"].([]model.Role), fc.Args["first"].(*int), fc.Args["after"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.InstanceAuthorsConnection)
+	fc.Result = res
+	return ec.marshalNInstanceAuthorsConnection2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceAuthorsConnection(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Instance_authorsConnection(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Instance",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "pageInfo":
+				return ec.fieldContext_InstanceAuthorsConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_InstanceAuthorsConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type InstanceAuthorsConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Instance_authorsConnection_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _InstanceAuthorsConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.InstanceAuthorsConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_InstanceAuthorsConnection_pageInfo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.PageInfo)
+	fc.Result = res
+	return ec.marshalNPageInfo2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_InstanceAuthorsConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "InstanceAuthorsConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "hasPreviousPage":
+				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
+			case "hasNextPage":
+				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _InstanceAuthorsConnection_edges(ctx context.Context, field graphql.CollectedField, obj *model.InstanceAuthorsConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_InstanceAuthorsConnection_edges(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Edges, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.InstanceAuthorsEdge)
+	fc.Result = res
+	return ec.marshalNInstanceAuthorsEdge2ᚕᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceAuthorsEdgeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_InstanceAuthorsConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "InstanceAuthorsConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cursor":
+				return ec.fieldContext_InstanceAuthorsEdge_cursor(ctx, field)
+			case "node":
+				return ec.fieldContext_InstanceAuthorsEdge_node(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type InstanceAuthorsEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _InstanceAuthorsEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *model.InstanceAuthorsEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_InstanceAuthorsEdge_cursor(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cursor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_InstanceAuthorsEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "InstanceAuthorsEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _InstanceAuthorsEdge_node(ctx context.Context, field graphql.CollectedField, obj *model.InstanceAuthorsEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_InstanceAuthorsEdge_node(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Node, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Author)
+	fc.Result = res
+	return ec.marshalNAuthor2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐAuthor(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_InstanceAuthorsEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "InstanceAuthorsEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Author_id(ctx, field)
+			case "userId":
+				return ec.fieldContext_Author_userId(ctx, field)
+			case "instanceId":
+				return ec.fieldContext_Author_instanceId(ctx, field)
+			case "roles":
+				return ec.fieldContext_Author_roles(ctx, field)
+			case "name":
+				return ec.fieldContext_Author_name(ctx, field)
+			case "avatar":
+				return ec.fieldContext_Author_avatar(ctx, field)
+			case "bio":
+				return ec.fieldContext_Author_bio(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Author_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _InstanceChannelsConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.InstanceChannelsConnection) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_InstanceChannelsConnection_pageInfo(ctx, field)
 	if err != nil {
@@ -5051,6 +5482,8 @@ func (ec *executionContext) fieldContext_InstanceLikesEdge_node(ctx context.Cont
 				return ec.fieldContext_Author_avatar(ctx, field)
 			case "bio":
 				return ec.fieldContext_Author_bio(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Author_createdAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
 		},
@@ -5212,6 +5645,8 @@ func (ec *executionContext) fieldContext_Invite_instance(ctx context.Context, fi
 				return ec.fieldContext_Instance_channelsConnection(ctx, field)
 			case "likesConnection":
 				return ec.fieldContext_Instance_likesConnection(ctx, field)
+			case "authorsConnection":
+				return ec.fieldContext_Instance_authorsConnection(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Instance", field.Name)
 		},
@@ -5272,6 +5707,8 @@ func (ec *executionContext) fieldContext_Invite_author(ctx context.Context, fiel
 				return ec.fieldContext_Author_avatar(ctx, field)
 			case "bio":
 				return ec.fieldContext_Author_bio(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Author_createdAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
 		},
@@ -5590,6 +6027,8 @@ func (ec *executionContext) fieldContext_Message_author(ctx context.Context, fie
 				return ec.fieldContext_Author_avatar(ctx, field)
 			case "bio":
 				return ec.fieldContext_Author_bio(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Author_createdAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
 		},
@@ -6338,6 +6777,8 @@ func (ec *executionContext) fieldContext_Mutation_tagInstance(ctx context.Contex
 				return ec.fieldContext_Instance_channelsConnection(ctx, field)
 			case "likesConnection":
 				return ec.fieldContext_Instance_likesConnection(ctx, field)
+			case "authorsConnection":
+				return ec.fieldContext_Instance_authorsConnection(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Instance", field.Name)
 		},
@@ -6449,6 +6890,8 @@ func (ec *executionContext) fieldContext_Mutation_untagInstance(ctx context.Cont
 				return ec.fieldContext_Instance_channelsConnection(ctx, field)
 			case "likesConnection":
 				return ec.fieldContext_Instance_likesConnection(ctx, field)
+			case "authorsConnection":
+				return ec.fieldContext_Instance_authorsConnection(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Instance", field.Name)
 		},
@@ -7054,6 +7497,8 @@ func (ec *executionContext) fieldContext_Mutation_addRole(ctx context.Context, f
 				return ec.fieldContext_Author_avatar(ctx, field)
 			case "bio":
 				return ec.fieldContext_Author_bio(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Author_createdAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
 		},
@@ -7149,6 +7594,8 @@ func (ec *executionContext) fieldContext_Mutation_removeRole(ctx context.Context
 				return ec.fieldContext_Author_avatar(ctx, field)
 			case "bio":
 				return ec.fieldContext_Author_bio(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Author_createdAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
 		},
@@ -7987,6 +8434,8 @@ func (ec *executionContext) fieldContext_Notice_instance(ctx context.Context, fi
 				return ec.fieldContext_Instance_channelsConnection(ctx, field)
 			case "likesConnection":
 				return ec.fieldContext_Instance_likesConnection(ctx, field)
+			case "authorsConnection":
+				return ec.fieldContext_Instance_authorsConnection(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Instance", field.Name)
 		},
@@ -8101,6 +8550,8 @@ func (ec *executionContext) fieldContext_Notice_author(ctx context.Context, fiel
 				return ec.fieldContext_Author_avatar(ctx, field)
 			case "bio":
 				return ec.fieldContext_Author_bio(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Author_createdAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
 		},
@@ -8293,6 +8744,8 @@ func (ec *executionContext) fieldContext_Notification_author(ctx context.Context
 				return ec.fieldContext_Author_avatar(ctx, field)
 			case "bio":
 				return ec.fieldContext_Author_bio(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Author_createdAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
 		},
@@ -8366,6 +8819,8 @@ func (ec *executionContext) fieldContext_Notification_instance(ctx context.Conte
 				return ec.fieldContext_Instance_channelsConnection(ctx, field)
 			case "likesConnection":
 				return ec.fieldContext_Instance_likesConnection(ctx, field)
+			case "authorsConnection":
+				return ec.fieldContext_Instance_authorsConnection(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Instance", field.Name)
 		},
@@ -9884,6 +10339,8 @@ func (ec *executionContext) fieldContext_UserInstancesEdge_node(ctx context.Cont
 				return ec.fieldContext_Instance_channelsConnection(ctx, field)
 			case "likesConnection":
 				return ec.fieldContext_Instance_likesConnection(ctx, field)
+			case "authorsConnection":
+				return ec.fieldContext_Instance_authorsConnection(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Instance", field.Name)
 		},
@@ -9944,6 +10401,8 @@ func (ec *executionContext) fieldContext_UserInstancesEdge_instanceUser(ctx cont
 				return ec.fieldContext_Author_avatar(ctx, field)
 			case "bio":
 				return ec.fieldContext_Author_bio(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Author_createdAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
 		},
@@ -12711,6 +13170,13 @@ func (ec *executionContext) _Author(ctx context.Context, sel ast.SelectionSet, o
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "createdAt":
+
+			out.Values[i] = ec._Author_createdAt(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -13245,6 +13711,96 @@ func (ec *executionContext) _Instance(ctx context.Context, sel ast.SelectionSet,
 				return innerFunc(ctx)
 
 			})
+		case "authorsConnection":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Instance_authorsConnection(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var instanceAuthorsConnectionImplementors = []string{"InstanceAuthorsConnection"}
+
+func (ec *executionContext) _InstanceAuthorsConnection(ctx context.Context, sel ast.SelectionSet, obj *model.InstanceAuthorsConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, instanceAuthorsConnectionImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("InstanceAuthorsConnection")
+		case "pageInfo":
+
+			out.Values[i] = ec._InstanceAuthorsConnection_pageInfo(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "edges":
+
+			out.Values[i] = ec._InstanceAuthorsConnection_edges(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var instanceAuthorsEdgeImplementors = []string{"InstanceAuthorsEdge"}
+
+func (ec *executionContext) _InstanceAuthorsEdge(ctx context.Context, sel ast.SelectionSet, obj *model.InstanceAuthorsEdge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, instanceAuthorsEdgeImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("InstanceAuthorsEdge")
+		case "cursor":
+
+			out.Values[i] = ec._InstanceAuthorsEdge_cursor(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "node":
+
+			out.Values[i] = ec._InstanceAuthorsEdge_node(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -14968,6 +15524,74 @@ func (ec *executionContext) marshalNInstance2ᚖgithubᚗcomᚋwwwillwᚋpixella
 		return graphql.Null
 	}
 	return ec._Instance(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNInstanceAuthorsConnection2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceAuthorsConnection(ctx context.Context, sel ast.SelectionSet, v model.InstanceAuthorsConnection) graphql.Marshaler {
+	return ec._InstanceAuthorsConnection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNInstanceAuthorsConnection2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceAuthorsConnection(ctx context.Context, sel ast.SelectionSet, v *model.InstanceAuthorsConnection) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._InstanceAuthorsConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNInstanceAuthorsEdge2ᚕᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceAuthorsEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.InstanceAuthorsEdge) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNInstanceAuthorsEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceAuthorsEdge(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNInstanceAuthorsEdge2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceAuthorsEdge(ctx context.Context, sel ast.SelectionSet, v *model.InstanceAuthorsEdge) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._InstanceAuthorsEdge(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNInstanceChannelsConnection2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstanceChannelsConnection(ctx context.Context, sel ast.SelectionSet, v model.InstanceChannelsConnection) graphql.Marshaler {

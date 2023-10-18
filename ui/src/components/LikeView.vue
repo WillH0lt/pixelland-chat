@@ -7,11 +7,13 @@
       <div class="text-center text-2xl mb-1">Liked By</div>
     </ElementHeader>
     <div ref="scrollerRef" class="overflow-auto flex-1" @scroll="handleScroll">
-      <LikePerson
+      <AuthorRow
         v-for="like in likes"
         :key="like.id"
         :id="like.id"
-        :like="like"
+        :author="like"
+        verb="Liked"
+        :timeSince="like.likedAtTimeSince"
         @show-profile="showProfile"
       />
       <div v-if="likeStore.hasNextPage" class="flex justify-center items-center w-full h-14">
@@ -35,11 +37,10 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
+import AuthorRow from '@/components/AuthorsRow.vue'
 import ChannelProfile from '@/components/ChannelProfile.vue'
 import ElementHeader from '@/components/ElementHeader.vue'
 import ElementLoadingIcon from '@/components/ElementLoadingIcon.vue'
-import LikePerson from '@/components/LikePerson.vue'
-import { Author } from '@/graphql/types.gen'
 import { useAuthorStore } from '@/store/author'
 import { useLikeStore } from '@/store/like'
 import { ExtendedLike } from '@/types/ExtendedLike'

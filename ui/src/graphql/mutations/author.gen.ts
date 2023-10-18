@@ -10,7 +10,7 @@ export type AddRoleMutationVariables = Types.Exact<{
 }>;
 
 
-export type AddRoleMutation = { __typename?: 'Mutation', addRole: { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role> } };
+export type AddRoleMutation = { __typename?: 'Mutation', addRole: { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role>, createdAt: any } };
 
 export type RemoveRoleMutationVariables = Types.Exact<{
   authorId: Types.Scalars['Uuid'];
@@ -18,7 +18,7 @@ export type RemoveRoleMutationVariables = Types.Exact<{
 }>;
 
 
-export type RemoveRoleMutation = { __typename?: 'Mutation', removeRole: { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role> } };
+export type RemoveRoleMutation = { __typename?: 'Mutation', removeRole: { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role>, createdAt: any } };
 
 export declare const addRole: import("graphql").DocumentNode;
 export declare const removeRole: import("graphql").DocumentNode;

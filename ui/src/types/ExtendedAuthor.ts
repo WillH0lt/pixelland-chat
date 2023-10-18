@@ -1,7 +1,8 @@
 import { Author } from '@/graphql/types.gen'
 
 interface Extension {
-  // accessedAtDate: Date
+  createdAtDate: Date
+  createdAtTimeSince: string
   likedAtDate?: Date
   likedAtTimeSince?: string
 }

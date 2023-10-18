@@ -9,6 +9,9 @@ export const addInstance = gql`
     $channelsAfter: String = ""
     $likesFirst: Int = 0
     $likesAfter: String = ""
+    $authorsFirst: Int = 0
+    $authorsAfter: String = ""
+    $authorsRoles: [Role!] = []
     $messagesLast: Int = 0
     $messagesBefore: String = ""
   ) {
@@ -27,6 +30,9 @@ export const updateInstance = gql`
     $channelsAfter: String = ""
     $likesFirst: Int = 0
     $likesAfter: String = ""
+    $authorsFirst: Int = 0
+    $authorsAfter: String = ""
+    $authorsRoles: [Role!] = []
     $messagesLast: Int = 0
     $messagesBefore: String = ""
   ) {
@@ -44,6 +50,9 @@ export const removeInstance = gql`
     $channelsAfter: String = ""
     $likesFirst: Int = 0
     $likesAfter: String = ""
+    $authorsFirst: Int = 0
+    $authorsAfter: String = ""
+    $authorsRoles: [Role!] = []
     $messagesLast: Int = 0
     $messagesBefore: String = ""
   ) {
@@ -62,6 +71,9 @@ export const reorderInstance = gql`
     $channelsAfter: String = ""
     $likesFirst: Int = 0
     $likesAfter: String = ""
+    $authorsFirst: Int = 0
+    $authorsAfter: String = ""
+    $authorsRoles: [Role!] = []
     $messagesLast: Int = 0
     $messagesBefore: String = ""
   ) {
@@ -80,6 +92,9 @@ export const pinInstance = gql`
     $channelsAfter: String = ""
     $likesFirst: Int = 0
     $likesAfter: String = ""
+    $authorsFirst: Int = 0
+    $authorsAfter: String = ""
+    $authorsRoles: [Role!] = []
     $messagesLast: Int = 0
     $messagesBefore: String = ""
   ) {
@@ -98,6 +113,9 @@ export const tagInstance = gql`
     $channelsAfter: String = ""
     $likesFirst: Int = 0
     $likesAfter: String = ""
+    $authorsFirst: Int = 0
+    $authorsAfter: String = ""
+    $authorsRoles: [Role!] = []
     $messagesLast: Int = 0
     $messagesBefore: String = ""
   ) {
@@ -116,6 +134,9 @@ export const untagInstance = gql`
     $channelsAfter: String = ""
     $likesFirst: Int = 0
     $likesAfter: String = ""
+    $authorsFirst: Int = 0
+    $authorsAfter: String = ""
+    $authorsRoles: [Role!] = []
     $messagesLast: Int = 0
     $messagesBefore: String = ""
   ) {

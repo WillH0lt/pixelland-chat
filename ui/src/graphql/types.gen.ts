@@ -24,6 +24,7 @@ export type Author = {
   readonly __typename?: 'Author';
   readonly avatar: Scalars['String'];
   readonly bio: Scalars['String'];
+  readonly createdAt: Scalars['Time'];
   readonly id: Scalars['Uuid'];
   readonly instanceId: Scalars['Uuid'];
   readonly name: Scalars['String'];
@@ -106,6 +107,7 @@ export type CollectionInstancesEdge = {
 export type Instance = {
   readonly __typename?: 'Instance';
   readonly author: Author;
+  readonly authorsConnection: InstanceAuthorsConnection;
   readonly channelsConnection: InstanceChannelsConnection;
   readonly commentsCount: Scalars['Int'];
   readonly createdAt: Scalars['Time'];
@@ -123,6 +125,13 @@ export type Instance = {
 };
 
 
+export type InstanceAuthorsConnectionArgs = {
+  after?: InputMaybe<Scalars['String']>;
+  first?: InputMaybe<Scalars['Int']>;
+  roles: ReadonlyArray<Role>;
+};
+
+
 export type InstanceChannelsConnectionArgs = {
   after?: InputMaybe<Scalars['String']>;
   first?: InputMaybe<Scalars['Int']>;
@@ -132,6 +141,18 @@ export type InstanceChannelsConnectionArgs = {
 export type InstanceLikesConnectionArgs = {
   after?: InputMaybe<Scalars['String']>;
   first?: InputMaybe<Scalars['Int']>;
+};
+
+export type InstanceAuthorsConnection = {
+  readonly __typename?: 'InstanceAuthorsConnection';
+  readonly edges: ReadonlyArray<InstanceAuthorsEdge>;
+  readonly pageInfo: PageInfo;
+};
+
+export type InstanceAuthorsEdge = {
+  readonly __typename?: 'InstanceAuthorsEdge';
+  readonly cursor: Scalars['String'];
+  readonly node: Author;
 };
 
 export type InstanceChannelsConnection = {

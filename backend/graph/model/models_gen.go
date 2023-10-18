@@ -19,6 +19,7 @@ type Author struct {
 	Name       string    `json:"name"`
 	Avatar     string    `json:"avatar"`
 	Bio        string    `json:"bio"`
+	CreatedAt  time.Time `json:"createdAt"`
 }
 
 type ChannelInput struct {
@@ -52,6 +53,16 @@ type CollectionInstancesEdge struct {
 	Cursor   string    `json:"cursor"`
 	Node     *Instance `json:"node"`
 	TaggedAt time.Time `json:"taggedAt"`
+}
+
+type InstanceAuthorsConnection struct {
+	PageInfo *PageInfo              `json:"pageInfo"`
+	Edges    []*InstanceAuthorsEdge `json:"edges"`
+}
+
+type InstanceAuthorsEdge struct {
+	Cursor string  `json:"cursor"`
+	Node   *Author `json:"node"`
 }
 
 type InstanceChannelsConnection struct {

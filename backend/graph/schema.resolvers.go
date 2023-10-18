@@ -266,6 +266,63 @@ func (r *instanceResolver) LikesConnection(ctx context.Context, obj *model.Insta
 	}, nil
 }
 
+// AuthorsConnection is the resolver for the authorsConnection field.
+func (r *instanceResolver) AuthorsConnection(ctx context.Context, obj *model.Instance, roles []model.Role, first *int, after *string) (*model.InstanceAuthorsConnection, error) {
+	if first == nil || *first == 0 || len(roles) == 0 {
+		return &model.InstanceAuthorsConnection{
+			Edges: make([]*model.InstanceAuthorsEdge, 0),
+			PageInfo: &model.PageInfo{
+				HasNextPage:     false,
+				HasPreviousPage: false,
+			},
+		}, nil
+	}
+
+	db := interfaces.GetDatabase()
+	instanceUsers := []model.InstanceUser{}
+
+	tx := db.Model(&obj).Limit(*first + 1).Order("created_at desc")
+	tx = tx.Where("roles && ?", pq.Array(roles))
+
+	// hide banned users
+	if !contains(rolesToStrings(roles), model.RoleBanned.String()) {
+		tx = tx.Where("Not(roles @> ?)", pq.Array([]string{model.RoleBanned.String()}))
+	}
+
+	if *after != "" {
+		created_at, err := fromCursorHash(*after)
+		if err != nil {
+			return nil, err
+		}
+		tx = tx.Where("created_at < ?", created_at)
+	}
+
+	tx = tx.Where("deleted_at is NULL")
+
+	if err := tx.Association("Users").Find(&instanceUsers); err != nil {
+		return nil, err
+	}
+
+	hasNextPage := (len(instanceUsers) == *first+1)
+	if len(instanceUsers) > 0 && hasNextPage {
+		instanceUsers = instanceUsers[:len(instanceUsers)-1]
+	}
+
+	edges := []*model.InstanceAuthorsEdge{}
+	for i := 0; i < len(instanceUsers); i++ {
+		edge := createInstanceAuthorsEdge(&instanceUsers[i])
+		edges = append(edges, edge)
+	}
+
+	return &model.InstanceAuthorsConnection{
+		Edges: edges,
+		PageInfo: &model.PageInfo{
+			HasNextPage:     hasNextPage,
+			HasPreviousPage: false, // TODO
+		},
+	}, nil
+}
+
 // Author is the resolver for the author field.
 func (r *inviteResolver) Author(ctx context.Context, obj *model.Invite) (*model.Author, error) {
 	instanceUser := model.InstanceUser{}

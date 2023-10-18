@@ -4,6 +4,7 @@
       class="border-b-black border-b-4 border-solid bg-gray-darkest"
       @close="$emit('close')"
     >
+      <div class="text-center text-2xl mb-1">{{ title }}</div>
     </ElementHeader>
     <div ref="scrollerRef" class="overflow-auto flex-1" @scroll="handleScroll">
       <AuthorsRow
@@ -13,12 +14,12 @@
         :author="author"
         @show-profile="showProfile"
       />
-      <div v-if="authorStore.hasNextPage" class="flex justify-center items-center w-full h-14">
+      <div v-if="hasNextPage" class="flex justify-center items-center w-full h-14">
         <ElementLoadingIcon class="scale-50 invert" />
       </div>
       <ChannelProfile
-        v-if="profileAnchor"
-        :user="authorStore.getUser(profileAnchor.id)"
+        v-if="profileAnchor && profileAuthor"
+        :user="profileAuthor"
         @close="profileAnchor = null"
         class="absolute left-16 w-72 bg-gray-darkest"
         :style="{
@@ -38,18 +39,29 @@ import AuthorsRow from '@/components/AuthorsRow.vue'
 import ChannelProfile from '@/components/ChannelProfile.vue'
 import ElementHeader from '@/components/ElementHeader.vue'
 import ElementLoadingIcon from '@/components/ElementLoadingIcon.vue'
-import { useAuthorStore } from '@/store/author'
+import { useInstanceQuery } from '@/graphql/queries/instance.gen'
+import { InstanceAuthorsConnection, Role } from '@/graphql/types.gen'
 import { ExtendedAuthor } from '@/types/ExtendedAuthor'
+import { extendAuthor } from '@/utils'
 
 const router = useRouter()
-const authorStore = useAuthorStore()
 
-const authors = computed(() => {
-  return authorStore.getAuthors()
-})
+const roles = router.currentRoute.value.query.roles as Role[]
+const authors = ref<ExtendedAuthor[]>([])
+const hasNextPage = ref(false)
+const cursor = ref('')
+const loading = ref(false)
 
-const loading = computed(() => {
-  return authorStore.loading
+const title = computed(() => {
+  if (roles.length === 1) {
+    if (roles[0] === Role.Member) {
+      return 'Editors'
+    } else if (roles[0] === Role.Banned) {
+      return 'Banned'
+    }
+  }
+
+  return ''
 })
 
 const instanceId = computed(() => {
@@ -68,7 +80,7 @@ onMounted(() => {
 
   observer.observe(scrollerRef.value)
 
-  authorStore.fetchAuthors(instanceId.value)
+  fetchAuthors()
 })
 
 onUnmounted(() => {
@@ -77,9 +89,9 @@ onUnmounted(() => {
 
 // if initial load doesn't fill the screen, load more messages
 watch(loading, async loading => {
-  if (!loading && authorStore.hasNextPage) {
+  if (!loading && hasNextPage.value) {
     if (isScrolledToBottom()) {
-      authorStore.fetchAuthors(instanceId.value)
+      fetchAuthors()
     }
   }
 })
@@ -90,8 +102,8 @@ function isScrolledToBottom() {
 }
 
 function handleScroll() {
-  if (isScrolledToBottom() && authorStore.hasNextPage && !authorStore.loading) {
-    authorStore.fetchAuthors(instanceId.value)
+  if (isScrolledToBottom() && hasNextPage.value && !loading.value) {
+    fetchAuthors()
   }
 }
 
@@ -109,5 +121,44 @@ function showProfile(author: ExtendedAuthor) {
     scrollerRect.top + scrollerRef.value.clientHeight - profileHeight.value
   )
   profileAnchor.value = author
+}
+const profileAuthor = computed(() => {
+  if (!profileAnchor.value) return null
+  for (const author of authors.value) {
+    if (author.id === profileAnchor.value.id) {
+      return author
+    }
+  }
+  return null
+})
+
+async function fetchAuthors() {
+  loading.value = true
+  const { onResult, onError } = useInstanceQuery({
+    id: instanceId.value,
+    authorsRoles: roles,
+    authorsFirst: 50,
+    authorsAfter: cursor.value,
+  })
+
+  const authorsConnection = await new Promise<InstanceAuthorsConnection>((resolve, reject) => {
+    onError(error => {
+      reject(error.message)
+    })
+    onResult(result => {
+      if (result.error) {
+        reject(result.error.message)
+      }
+      resolve(result.data.instance.node.authorsConnection)
+    })
+  })
+
+  hasNextPage.value = authorsConnection.pageInfo.hasNextPage
+  if (authorsConnection.edges.length > 0) {
+    cursor.value = authorsConnection.edges[authorsConnection.edges.length - 1].cursor
+  }
+
+  authors.value = authors.value.concat(authorsConnection.edges.map(edge => extendAuthor(edge.node)))
+  loading.value = false
 }
 </script>

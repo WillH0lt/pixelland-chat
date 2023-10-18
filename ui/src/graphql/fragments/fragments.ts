@@ -16,6 +16,7 @@ export const AuthorFragment = gql`
     avatar
     bio
     roles
+    createdAt
   }
 `
 
@@ -123,6 +124,16 @@ export const InstanceLikesEdgeFragment = gql`
   ${AuthorFragment}
 `
 
+export const InstanceAuthorsEdgeFragment = gql`
+  fragment InstanceAuthorsEdgeFragment on InstanceAuthorsEdge {
+    cursor
+    node {
+      ...AuthorFragment
+    }
+  }
+  ${AuthorFragment}
+`
+
 export const UserNotificationsEdgeFragment = gql`
   fragment UserNotificationsEdgeFragment on UserNotificationsEdge {
     cursor
@@ -166,11 +177,20 @@ export const InstanceFragment = gql`
         ...PageInfoFragment
       }
     }
+    authorsConnection(first: $authorsFirst, after: $authorsAfter, roles: $authorsRoles) {
+      edges {
+        ...InstanceAuthorsEdgeFragment
+      }
+      pageInfo {
+        ...PageInfoFragment
+      }
+    }
   }
   ${AuthorFragment}
   ${ChannelFragment}
   ${InstanceLikesEdgeFragment}
   ${InstanceChannelsEdgeFragment}
+  ${InstanceAuthorsEdgeFragment}
   ${PageInfoFragment}
 `
 

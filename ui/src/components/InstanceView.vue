@@ -10,7 +10,7 @@
       <div class="flex-1 flex flex-col">
         <InstanceAuthor
           v-if="instance.showAuthor"
-          :author="instance.author"
+          :author="instanceAuthor"
           :time-since="instance.timeSince"
         />
         <InstanceDescription :instance="instance" />
@@ -43,15 +43,15 @@ import InstanceBanned from '@/components/InstanceBanned.vue'
 import InstanceChannels from '@/components/InstanceChannels.vue'
 import InstanceComments from '@/components/InstanceComments.vue'
 import InstanceDescription from '@/components/InstanceDescription.vue'
-import InstanceEmpty from '@/components/InstanceEmpty.vue'
 import InstanceGutter from '@/components/InstanceGutter.vue'
 import InstanceLikes from '@/components/InstanceLikes.vue'
-import { TagKind } from '@/graphql/types.gen'
+import { Role, TagKind } from '@/graphql/types.gen'
 import { useAppStore } from '@/store/app'
 import { useAuthorStore } from '@/store/author'
 import { useChannelStore } from '@/store/channel'
 import { useInstanceStore } from '@/store/instance'
 import { DropdownItem } from '@/types/DropdownItem'
+import { extendAuthor } from '@/utils'
 
 const router = useRouter()
 const appStore = useAppStore()
@@ -61,10 +61,12 @@ const instanceStore = useInstanceStore()
 
 const commentsChannel = computed(() => channelStore.getCommentsChannel(instanceStore.instance.id))
 const instance = computed(() => instanceStore.instance)
+const instanceAuthor = computed(() => extendAuthor(instanceStore.instance.author))
 
 const instanceDropdownItems = ref<DropdownItem[]>([])
 watchEffect(() => {
   instanceDropdownItems.value = []
+
   if (appStore.isLoggedIn) {
     instanceDropdownItems.value.push({
       text: `${instanceStore.instance.mutablePinned ? 'Unp' : 'P'}in ${appStore.nounCapitalized}`,
@@ -76,7 +78,27 @@ watchEffect(() => {
       },
     })
   }
+  instanceDropdownItems.value.push({
+    text: `View Editors`,
+    onClicked: () => {
+      router.push({
+        name: 'authors',
+        params: { instanceId: instanceStore.instance.id },
+        query: { roles: [Role.Member] },
+      })
+    },
+  })
   if (authorStore.isModerator) {
+    instanceDropdownItems.value.push({
+      text: `View Banned`,
+      onClicked: () => {
+        router.push({
+          name: 'authors',
+          params: { instanceId: instanceStore.instance.id },
+          query: { roles: [Role.Banned] },
+        })
+      },
+    })
     instanceDropdownItems.value.push({
       text: 'Add Channel',
       onClicked: () => {
