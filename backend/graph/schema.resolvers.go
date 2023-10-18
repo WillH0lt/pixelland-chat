@@ -35,7 +35,7 @@ func (r *channelResolver) MessagesConnection(ctx context.Context, obj *model.Cha
 	db := interfaces.GetDatabase()
 	messages := []model.Message{}
 
-	tx := db.Model(&obj).Limit(*last + 1).Order("created_at desc")
+	tx := db.Model(&obj).Limit(*last + 1).Order("created_at desc").Where("deleted_at is NULL")
 
 	if *before != "" {
 		createdAt, err := fromCursorHash(*before)
@@ -1477,6 +1477,7 @@ func (r *userResolver) InstancesConnection(ctx context.Context, obj *model.User,
 
 	tx := db.
 		Joins("INNER JOIN instances ON instances.id = instance_users.instance_id").
+		Where("instances.deleted_at is null").
 		Preload("Instance").Limit(*first + 1).
 		Order("created_at asc")
 
@@ -1522,7 +1523,7 @@ func (r *userResolver) NotificationsConnection(ctx context.Context, obj *model.U
 
 	db := interfaces.GetDatabase()
 	unreadNotification := model.Notification{}
-	if err := db.Where("user_id = ? AND created_at > ?", caller.ID, caller.ReadNotificationsAt).Find(&unreadNotification).Error; err != nil {
+	if err := db.Where("user_id = ? AND created_at > ? AND deleted_at is null", caller.ID, caller.ReadNotificationsAt).Find(&unreadNotification).Error; err != nil {
 		return nil, err
 	}
 	hasUnread := unreadNotification.ID != uuid.Nil
