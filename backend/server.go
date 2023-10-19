@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"math/rand"
 	"net/http"
 	"os"
 	"strings"
@@ -43,7 +42,6 @@ type Specification struct {
 }
 
 func init() {
-	rand.Seed(time.Now().UnixNano())
 	if os.Getenv("CHAT_DEBUG") == "false" {
 		zerolog.LevelFieldName = "severity"
 		zerolog.TimestampFieldName = "timestamp"
@@ -109,6 +107,7 @@ func run(args *cli.Context) error {
 		UserEventsTopic:     s.UserEventsTopic,
 		Active:              s.PubsubActive,
 		PubsubProjectId:     s.PubsubProjectId,
+		IsProd:              !s.Debug,
 	}
 	if err := interfaces.InitPubSubClient(ctx, pubsubConfig); err != nil {
 		log.Fatal().Err(err).Msg("Failed to initialize pubsub client")

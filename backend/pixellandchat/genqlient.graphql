@@ -1,0 +1,496 @@
+# ====================
+# fragments
+
+fragment PageInfoFragment on PageInfo {
+  hasNextPage
+  hasPreviousPage
+}
+
+fragment AuthorFragment on Author {
+  id
+  userId
+  instanceId
+  name
+  avatar
+  bio
+  roles
+  createdAt
+}
+
+fragment InviteFragment on Invite {
+  id
+  instanceId
+  code
+  createdAt
+  expiresAt
+  redemptions
+  author {
+    ...AuthorFragment
+  }
+}
+
+fragment MessageFragment on Message {
+  id
+  author {
+    ...AuthorFragment
+  }
+  text
+  createdAt
+  channelId
+}
+
+fragment NotificationFragment on Notification {
+  id
+  kind
+  author {
+    ...AuthorFragment
+  }
+  instance {
+    ...InstanceFragment
+  }
+  message {
+    ...MessageFragment
+  }
+  createdAt
+}
+
+fragment ChannelMessagesEdgeFragment on ChannelMessagesEdge {
+  cursor
+  node {
+    ...MessageFragment
+  }
+}
+
+fragment ChannelFragment on Channel {
+  id
+  name
+  rank
+  instanceId
+  readers
+  publishers
+  createdAt
+  updatedAt
+  lastMessageAddedAt
+  messageCount
+  isCategory
+  isComments
+  messagesConnection(last: $messagesLast, before: $messagesBefore) {
+    edges {
+      ...ChannelMessagesEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
+    }
+  }
+}
+
+fragment InstanceChannelsEdgeFragment on InstanceChannelsEdge {
+  cursor
+  node {
+    ...ChannelFragment
+  }
+}
+
+fragment InstanceLikesEdgeFragment on InstanceLikesEdge {
+  cursor
+  likedAt
+  node {
+    ...AuthorFragment
+  }
+}
+
+fragment InstanceAuthorsEdgeFragment on InstanceAuthorsEdge {
+  cursor
+  node {
+    ...AuthorFragment
+  }
+}
+
+fragment UserNotificationsEdgeFragment on UserNotificationsEdge {
+  cursor
+  node {
+    ...NotificationFragment
+  }
+}
+
+fragment InstanceFragment on Instance {
+  id
+  name
+  author {
+    ...AuthorFragment
+  }
+  readAccess
+  icon
+  createdAt
+  description
+  showAuthor
+  showChat
+  showLikes
+  showComments
+  likesCount
+  commentsCount
+  likesConnection(first: $likesFirst, after: $likesAfter) {
+    edges {
+      ...InstanceLikesEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
+    }
+  }
+  channelsConnection(first: $channelsFirst, after: $channelsAfter) {
+    edges {
+      ...InstanceChannelsEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
+    }
+  }
+  authorsConnection(first: $authorsFirst, after: $authorsAfter, roles: $authorsRoles) {
+    edges {
+      ...InstanceAuthorsEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
+    }
+  }
+}
+
+fragment UserInstancesEdgeFragment on UserInstancesEdge {
+  cursor
+  node {
+    ...InstanceFragment
+  }
+  instanceUser {
+    ...AuthorFragment
+  }
+  rank
+  pinned
+  likedByMe
+}
+
+fragment UserFragment on User {
+  id
+  name
+  avatar
+  bio
+  uid
+  instancesConnection(first: $instancesFirst, after: $instancesAfter) {
+    edges {
+      ...UserInstancesEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
+    }
+  }
+  notificationsConnection(last: $notificationsLast, before: $notificationsBefore) {
+    edges {
+      ...UserNotificationsEdgeFragment
+    }
+    pageInfo {
+      ...PageInfoFragment
+    }
+    hasUnread
+  }
+}
+
+# ====================
+# queries
+
+query Channel($id: Uuid!, $messagesLast: Int = 0, $messagesBefore: String = "") {
+  channel(id: $id) {
+    ...ChannelFragment
+  }
+}
+
+query Instance(
+  $id: Uuid!
+  $channelsFirst: Int = 0
+  $channelsAfter: String = ""
+  $likesFirst: Int = 0
+  $likesAfter: String = ""
+  $authorsFirst: Int = 0
+  $authorsAfter: String = ""
+  $authorsRoles: [Role!] = []
+  $messagesLast: Int = 0
+  $messagesBefore: String = ""
+) {
+  instance(id: $id) {
+    ...UserInstancesEdgeFragment
+  }
+}
+
+query Invite($instanceId: Uuid!) {
+  invite(instanceId: $instanceId) {
+    ...InviteFragment
+  }
+}
+
+query CheckInvite(
+  $code: String!
+  $channelsFirst: Int = 0
+  $channelsAfter: String = ""
+  $likesFirst: Int = 0
+  $likesAfter: String = ""
+  $authorsFirst: Int = 0
+  $authorsAfter: String = ""
+  $authorsRoles: [Role!] = []
+  $messagesLast: Int = 0
+  $messagesBefore: String = ""
+) {
+  checkInvite(code: $code) {
+    instance {
+      ...InstanceFragment
+    }
+    ...InviteFragment
+  }
+}
+
+query User(
+  $instancesFirst: Int = 0
+  $instancesAfter: String = ""
+  $channelsFirst: Int = 0
+  $channelsAfter: String = ""
+  $likesFirst: Int = 0
+  $likesAfter: String = ""
+  $authorsFirst: Int = 0
+  $authorsAfter: String = ""
+  $authorsRoles: [Role!] = []
+  $messagesLast: Int = 0
+  $messagesBefore: String = ""
+  $notificationsLast: Int = 0
+  $notificationsBefore: String = ""
+) {
+  user {
+    ...UserFragment
+  }
+}
+
+# ====================
+# mutations
+
+mutation AddRole($authorId: Uuid!, $role: Role!) {
+  addRole(authorId: $authorId, role: $role) {
+    ...AuthorFragment
+  }
+}
+
+mutation RemoveRole($authorId: Uuid!, $role: Role!) {
+  removeRole(authorId: $authorId, role: $role) {
+    ...AuthorFragment
+  }
+}
+
+mutation AddChannel($input: ChannelInput!, $messagesLast: Int = 0, $messagesBefore: String = "") {
+  addChannel(input: $input) {
+    ...InstanceChannelsEdgeFragment
+  }
+}
+
+mutation UpdateChannel(
+  $input: ChannelInput!
+  $channelId: Uuid!
+  $messagesLast: Int = 0
+  $messagesBefore: String = ""
+) {
+  updateChannel(input: $input, channelId: $channelId) {
+    ...InstanceChannelsEdgeFragment
+  }
+}
+
+mutation ReorderChannel(
+  $input: ChannelReorderInput!
+  $channelId: Uuid!
+  $messagesLast: Int = 0
+  $messagesBefore: String = ""
+) {
+  reorderChannel(input: $input, channelId: $channelId) {
+    ...InstanceChannelsEdgeFragment
+  }
+}
+
+mutation RemoveChannel($channelId: Uuid!, $messagesLast: Int = 0, $messagesBefore: String = "") {
+  removeChannel(channelId: $channelId) {
+    ...InstanceChannelsEdgeFragment
+  }
+}
+
+mutation AddInstance(
+  $input: InstanceInput!
+  $channelsFirst: Int = 0
+  $channelsAfter: String = ""
+  $likesFirst: Int = 0
+  $likesAfter: String = ""
+  $authorsFirst: Int = 0
+  $authorsAfter: String = ""
+  $authorsRoles: [Role!] = []
+  $messagesLast: Int = 0
+  $messagesBefore: String = ""
+) {
+  addInstance(input: $input) {
+    ...UserInstancesEdgeFragment
+  }
+}
+
+mutation UpdateInstance(
+  $instanceId: Uuid!
+  $input: InstanceInput!
+  $channelsFirst: Int = 0
+  $channelsAfter: String = ""
+  $likesFirst: Int = 0
+  $likesAfter: String = ""
+  $authorsFirst: Int = 0
+  $authorsAfter: String = ""
+  $authorsRoles: [Role!] = []
+  $messagesLast: Int = 0
+  $messagesBefore: String = ""
+) {
+  updateInstance(instanceId: $instanceId, input: $input) {
+    ...UserInstancesEdgeFragment
+  }
+}
+
+mutation RemoveInstance(
+  $instanceId: Uuid!
+  $channelsFirst: Int = 0
+  $channelsAfter: String = ""
+  $likesFirst: Int = 0
+  $likesAfter: String = ""
+  $authorsFirst: Int = 0
+  $authorsAfter: String = ""
+  $authorsRoles: [Role!] = []
+  $messagesLast: Int = 0
+  $messagesBefore: String = ""
+) {
+  removeInstance(instanceId: $instanceId) {
+    ...UserInstancesEdgeFragment
+  }
+}
+
+mutation ReorderInstance(
+  $input: InstanceReorderInput!
+  $instanceId: Uuid!
+  $channelsFirst: Int = 0
+  $channelsAfter: String = ""
+  $likesFirst: Int = 0
+  $likesAfter: String = ""
+  $authorsFirst: Int = 0
+  $authorsAfter: String = ""
+  $authorsRoles: [Role!] = []
+  $messagesLast: Int = 0
+  $messagesBefore: String = ""
+) {
+  reorderInstance(input: $input, instanceId: $instanceId) {
+    ...UserInstancesEdgeFragment
+  }
+}
+
+mutation PinInstance(
+  $input: InstancePinInput!
+  $instanceId: Uuid!
+  $channelsFirst: Int = 0
+  $channelsAfter: String = ""
+  $likesFirst: Int = 0
+  $likesAfter: String = ""
+  $authorsFirst: Int = 0
+  $authorsAfter: String = ""
+  $authorsRoles: [Role!] = []
+  $messagesLast: Int = 0
+  $messagesBefore: String = ""
+) {
+  pinInstance(input: $input, instanceId: $instanceId) {
+    ...UserInstancesEdgeFragment
+  }
+}
+
+mutation TagInstance(
+  $instanceId: Uuid!
+  $input: TagInput!
+  $channelsFirst: Int = 0
+  $channelsAfter: String = ""
+  $likesFirst: Int = 0
+  $likesAfter: String = ""
+  $authorsFirst: Int = 0
+  $authorsAfter: String = ""
+  $authorsRoles: [Role!] = []
+  $messagesLast: Int = 0
+  $messagesBefore: String = ""
+) {
+  tagInstance(instanceId: $instanceId, input: $input) {
+    ...InstanceFragment
+  }
+}
+
+mutation UntagInstance(
+  $instanceId: Uuid!
+  $input: TagInput!
+  $channelsFirst: Int = 0
+  $channelsAfter: String = ""
+  $likesFirst: Int = 0
+  $likesAfter: String = ""
+  $authorsFirst: Int = 0
+  $authorsAfter: String = ""
+  $authorsRoles: [Role!] = []
+  $messagesLast: Int = 0
+  $messagesBefore: String = ""
+) {
+  untagInstance(instanceId: $instanceId, input: $input) {
+    ...InstanceFragment
+  }
+}
+
+mutation AddInvite($input: InviteInput!) {
+  addInvite(input: $input) {
+    ...InviteFragment
+  }
+}
+
+mutation RedeemInvite($code: String!) {
+  redeemInvite(code: $code) {
+    ...InviteFragment
+  }
+}
+
+mutation AddLike($instanceId: Uuid!) {
+  addLike(instanceId: $instanceId) {
+    ...InstanceLikesEdgeFragment
+  }
+}
+
+mutation RemoveLike($instanceId: Uuid!) {
+  removeLike(instanceId: $instanceId) {
+    ...InstanceLikesEdgeFragment
+  }
+}
+
+mutation AddMessage($input: MessageInput!) {
+  addMessage(input: $input) {
+    ...ChannelMessagesEdgeFragment
+  }
+}
+
+mutation RemoveMessage($messageId: Uuid!) {
+  removeMessage(messageId: $messageId) {
+    ...ChannelMessagesEdgeFragment
+  }
+}
+
+mutation UpdateUser(
+  $input: UserInput!
+  $instancesFirst: Int
+  $instancesAfter: String
+  $channelsFirst: Int = 0
+  $channelsAfter: String = ""
+  $likesFirst: Int = 0
+  $likesAfter: String = ""
+  $authorsFirst: Int = 0
+  $authorsAfter: String = ""
+  $authorsRoles: [Role!] = []
+  $messagesLast: Int = 0
+  $messagesBefore: String = ""
+  $notificationsLast: Int = 0
+  $notificationsBefore: String = ""
+) {
+  updateUser(input: $input) {
+    ...UserFragment
+  }
+}

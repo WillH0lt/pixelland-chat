@@ -1,0 +1,12 @@
+# to run: genqlient .\pixellandchat\genqlient.yaml
+
+schema: ./../graph/schema.graphqls
+operations:
+  - ./genqlient.graphql
+generated: ./client.gen.go
+optional: pointer
+bindings:
+  Time:
+    type: time.Time
+  Uuid:
+    type: github.com/google/uuid.UUID

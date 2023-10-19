@@ -8,7 +8,7 @@ import (
 )
 
 type Base struct {
-	ID        uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	ID        uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()" copier:"Id"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt *time.Time `gorm:"index"`
@@ -29,7 +29,7 @@ type Instance struct {
 	Base
 	Name        string        `json:"name"`
 	Description string        `json:"description"`
-	AuthorID    uuid.UUID     `json:"authorId" gorm:"type:uuid"`
+	AuthorID    uuid.UUID     `json:"authorId" gorm:"type:uuid" copier:"AuthorID"`
 	Author      *InstanceUser `gorm:"constraint:OnDelete:CASCADE;"`
 	ReadAccess  string        `json:"readAccess"`
 	Icon        string        `json:"icon"`
@@ -53,7 +53,7 @@ type Channel struct {
 	Author             *InstanceUser  ``
 	Rank               string         `json:"rank"`
 	Name               string         `json:"name"`
-	InstanceID         uuid.UUID      `json:"instanceId" gorm:"type:uuid"`
+	InstanceID         uuid.UUID      `json:"instanceId" gorm:"type:uuid" copier:"InstanceId"`
 	Instance           *Instance      ``
 	Messages           []*Message     `gorm:"constraint:OnDelete:CASCADE;"`
 	Publishers         pq.StringArray `json:"publishers" gorm:"type:text[]"`
@@ -67,17 +67,17 @@ type Channel struct {
 type Message struct {
 	Base
 	Text      string        `json:"text"`
-	AuthorID  uuid.UUID     `json:"authorId" gorm:"type:uuid"`
+	AuthorID  uuid.UUID     `json:"authorId" gorm:"type:uuid" copier:"AuthorId"`
 	Author    *InstanceUser ``
-	ChannelID uuid.UUID     `json:"channelId" gorm:"type:uuid"`
+	ChannelID uuid.UUID     `json:"channelId" gorm:"type:uuid" copier:"ChannelId"`
 	Channel   *Channel      ``
 }
 
 type InstanceUser struct {
 	Base
-	InstanceID uuid.UUID `json:"instanceId" gorm:"type:uuid"`
+	InstanceID uuid.UUID `json:"instanceId" gorm:"type:uuid" copier:"InstanceId"`
 	Instance   *Instance
-	UserID     uuid.UUID `json:"userId" gorm:"type:uuid"`
+	UserID     uuid.UUID `json:"userId" gorm:"type:uuid" copier:"UserId"`
 	User       *User
 	Name       string         `json:"name"`
 	Avatar     string         `json:"avatar"`
@@ -91,9 +91,9 @@ type InstanceUser struct {
 
 type Invite struct {
 	Base
-	InstanceID  uuid.UUID     `json:"instanceId" gorm:"type:uuid"`
+	InstanceID  uuid.UUID     `json:"instanceId" gorm:"type:uuid" copier:"InstanceId"`
 	Instance    *Instance     ``
-	AuthorID    uuid.UUID     `json:"authorId" gorm:"type:uuid"`
+	AuthorID    uuid.UUID     `json:"authorId" gorm:"type:uuid" copier:"AuthorId"`
 	Author      *InstanceUser `gorm:"foreignKey:AuthorID"`
 	Code        string        `json:"code"`
 	ExpiresAt   *time.Time    `json:"expiresAt"`
@@ -103,13 +103,13 @@ type Invite struct {
 type Notification struct {
 	Base
 	Kind       string    `json:"kind"`
-	UserID     uuid.UUID `json:"userId" gorm:"type:uuid"`
+	UserID     uuid.UUID `json:"userId" gorm:"type:uuid" copier:"UserID"`
 	User       *User
-	AuthorID   uuid.UUID     `json:"authorId" gorm:"type:uuid"`
+	AuthorID   uuid.UUID     `json:"authorId" gorm:"type:uuid" copier:"AuthorId"`
 	Author     *InstanceUser ``
-	InstanceID *uuid.UUID    `json:"instanceId" gorm:"type:uuid"`
+	InstanceID *uuid.UUID    `json:"instanceId" gorm:"type:uuid" copier:"InstanceID"`
 	Instance   *Instance     ``
-	MessageID  *uuid.UUID    `json:"messageId" gorm:"type:uuid"`
+	MessageID  *uuid.UUID    `json:"messageId" gorm:"type:uuid" copier:"MessageID"`
 	Message    *Message      ``
 }
 

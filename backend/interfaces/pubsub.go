@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -12,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 	"github.com/wwwillw/pixelland-chat/graph/model"
+	pixellandchat "github.com/wwwillw/pixelland-chat/pixellandchat"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/compute/v1"
 )
@@ -24,12 +24,18 @@ type PubsubConfig struct {
 	InstanceEventsTopic string
 	UserEventsTopic     string
 	Active              bool
+	IsProd              bool
 	PubsubProjectId     string
 }
 
 type PubsubClient struct {
 	client *pubsub.Client
 	config PubsubConfig
+}
+
+type PubsubData struct {
+	Token   string
+	Payload []byte
 }
 
 func InitPubSubClient(ctx context.Context, config PubsubConfig) error {
@@ -48,7 +54,7 @@ func InitPubSubClient(ctx context.Context, config PubsubConfig) error {
 	if projectId == "" {
 		var credentials *google.Credentials
 		if _, err := os.Stat(config.ServiceAccountPath); err == nil {
-			bytes, err := ioutil.ReadFile(config.ServiceAccountPath)
+			bytes, err := os.ReadFile(config.ServiceAccountPath)
 			if err != nil {
 				return err
 			}
@@ -78,25 +84,11 @@ func InitPubSubClient(ctx context.Context, config PubsubConfig) error {
 	return nil
 }
 
-func createTopicIfNotExists(ctx context.Context, client *pubsub.Client, name string) (*pubsub.Topic, error) {
-	topic := client.Topic(name)
-	ok, err := topic.Exists(ctx)
-	if err != nil {
-		log.Err(err)
-		return nil, err
-	}
-	if ok {
-		return topic, nil
-	}
-	topic, err = client.CreateTopic(ctx, name)
-	if err != nil {
-		log.Err(err).Msg("Failed to create the topic")
-		return nil, err
-	}
-	return topic, nil
+func GetPubSubClient() *PubsubClient {
+	return pubsubClient
 }
 
-func (c *PubsubClient) PublishUserEvent(ctx context.Context, kind model.NoticeKind, user model.User) error {
+func (c *PubsubClient) PublishUserEvent(ctx context.Context, kind model.NoticeKind, user pixellandchat.UserFragment) error {
 
 	if !c.config.Active {
 		log.Info().Msg("Not publishing user event because pubsub client is not active")
@@ -108,10 +100,10 @@ func (c *PubsubClient) PublishUserEvent(ctx context.Context, kind model.NoticeKi
 		return errors.New("Invalid notice kind, must be a user notice")
 	}
 
-	return c.publishPubsubEvent(ctx, kind, uuid.Nil.String(), user)
+	return c.publishPubsubEvent(ctx, kindStr, uuid.Nil, user)
 }
 
-func (c *PubsubClient) PublishAuthorEvent(ctx context.Context, kind model.NoticeKind, author model.Author) error {
+func (c *PubsubClient) PublishAuthorEvent(ctx context.Context, kind model.NoticeKind, author pixellandchat.AuthorFragment) error {
 
 	if !c.config.Active {
 		log.Info().Msg("Not publishing author event because pubsub client is not active")
@@ -120,13 +112,15 @@ func (c *PubsubClient) PublishAuthorEvent(ctx context.Context, kind model.Notice
 
 	kindStr := string(kind)
 	if !strings.Contains(kindStr, "AUTHOR") {
-		return errors.New("Invalid mutation type, must be author mutation")
+		msg := "Invalid mutation type, must be author mutation"
+		log.Error().Msg(msg)
+		return errors.New(msg)
 	}
 
-	return c.publishPubsubEvent(ctx, kind, author.InstanceID.String(), author)
+	return c.publishPubsubEvent(ctx, kindStr, author.InstanceId, author)
 }
 
-func (c *PubsubClient) PublishInstanceEvent(ctx context.Context, kind model.NoticeKind, instance model.Instance) error {
+func (c *PubsubClient) PublishInstanceEvent(ctx context.Context, kind model.NoticeKind, instance pixellandchat.InstanceFragment) error {
 
 	if !c.config.Active {
 		log.Info().Msg("Not publishing instance event because pubsub client is not active")
@@ -138,10 +132,10 @@ func (c *PubsubClient) PublishInstanceEvent(ctx context.Context, kind model.Noti
 		return errors.New("Invalid mutation type, must be instance mutation")
 	}
 
-	return c.publishPubsubEvent(ctx, kind, instance.ID.String(), instance)
+	return c.publishPubsubEvent(ctx, kindStr, instance.Id, instance)
 }
 
-func (c *PubsubClient) publishPubsubEvent(ctx context.Context, kind model.NoticeKind, instanceID string, model interface{}) error {
+func (c *PubsubClient) publishPubsubEvent(ctx context.Context, kind string, instanceID uuid.UUID, model interface{}) error {
 	kindStr := string(kind)
 
 	var topicName string
@@ -155,23 +149,32 @@ func (c *PubsubClient) publishPubsubEvent(ctx context.Context, kind model.Notice
 		return errors.New("Invalid mutation type")
 	}
 
-	topic, err := createTopicIfNotExists(ctx, c.client, topicName)
+	topic, err := getTopic(ctx, c.client, topicName, !c.config.IsProd)
 	if err != nil {
 		return err
 	}
 
-	bytes, err := json.Marshal(model)
+	payloadBytes, err := json.Marshal(model)
 	if err != nil {
 		return err
 	}
 
-	log.Info().Msgf("Publishing pubsub event: %s", instanceID)
+	pubsubData := PubsubData{
+		Token:   ctx.Value("token").(string),
+		Payload: payloadBytes,
+	}
+
+	dataBytes, err := json.Marshal(pubsubData)
+	if err != nil {
+		return err
+	}
+
+	log.Info().Msgf("Publishing pubsub event: %s", instanceID.String())
 	res := topic.Publish(ctx, &pubsub.Message{
-		Data: bytes,
+		Data: dataBytes,
 		Attributes: map[string]string{
-			"instanceId":   instanceID,
+			"instanceId":   instanceID.String(),
 			"mutationType": kindStr,
-			"token":        ctx.Value("token").(string),
 		},
 	})
 
@@ -183,6 +186,23 @@ func (c *PubsubClient) publishPubsubEvent(ctx context.Context, kind model.Notice
 	return nil
 }
 
-func GetPubSubClient() *PubsubClient {
-	return pubsubClient
+func getTopic(ctx context.Context, client *pubsub.Client, name string, createIfNotExists bool) (*pubsub.Topic, error) {
+	topic := client.Topic(name)
+
+	if createIfNotExists {
+		ok, err := topic.Exists(ctx)
+		if err != nil {
+			log.Err(err)
+			return nil, err
+		}
+		if ok {
+			return topic, nil
+		}
+		topic, err = client.CreateTopic(ctx, name)
+		if err != nil {
+			log.Err(err).Msg("Failed to create the topic")
+			return nil, err
+		}
+	}
+	return topic, nil
 }

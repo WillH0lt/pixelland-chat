@@ -12,10 +12,12 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jinzhu/copier"
 	"github.com/lib/pq"
 	"github.com/rs/zerolog/log"
 	"github.com/wwwillw/pixelland-chat/graph/model"
 	"github.com/wwwillw/pixelland-chat/interfaces"
+	"github.com/wwwillw/pixelland-chat/pixellandchat"
 	"github.com/xissy/lexorank"
 	"gorm.io/gorm"
 )
@@ -386,7 +388,9 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UserInput
 		sendInstanceUserNotice(&r.StreamObservers, caller, model.NoticeKindUserUpdated)
 
 		client := interfaces.GetPubSubClient()
-		client.PublishUserEvent(ctx, model.NoticeKindUserUpdated, *caller)
+		userFragment := pixellandchat.UserFragment{}
+		copier.Copy(&userFragment, caller)
+		client.PublishUserEvent(ctx, model.NoticeKindUserUpdated, userFragment)
 	}
 
 	return caller, nil
@@ -501,8 +505,9 @@ func (r *mutationResolver) UpdateInstance(ctx context.Context, instanceID uuid.U
 	sendInstanceNotice(&r.StreamObservers, &instance, model.NoticeKindInstanceUpdated)
 
 	client := interfaces.GetPubSubClient()
-	log.Info().Msgf("PublishInstanceEvent: %+v", instance)
-	client.PublishInstanceEvent(ctx, model.NoticeKindInstanceUpdated, instance)
+	instanceFragment := pixellandchat.InstanceFragment{}
+	copier.Copy(&instanceFragment, instance)
+	client.PublishInstanceEvent(ctx, model.NoticeKindInstanceUpdated, instanceFragment)
 
 	edge := createUserInstancesEdge(callerInstanceUser, &instance)
 	return edge, nil
@@ -1076,7 +1081,9 @@ func (r *mutationResolver) AddRole(ctx context.Context, authorID uuid.UUID, role
 	sendAuthorNotice(&r.StreamObservers, author, model.NoticeKindAuthorUpdated)
 
 	client := interfaces.GetPubSubClient()
-	go client.PublishAuthorEvent(ctx, model.NoticeKindAuthorUpdated, *author)
+	authorFragment := pixellandchat.AuthorFragment{}
+	copier.Copy(&authorFragment, author)
+	client.PublishAuthorEvent(ctx, model.NoticeKindAuthorUpdated, authorFragment)
 	return author, nil
 }
 
@@ -1121,7 +1128,9 @@ func (r *mutationResolver) RemoveRole(ctx context.Context, authorID uuid.UUID, r
 	sendAuthorNotice(&r.StreamObservers, author, model.NoticeKindAuthorUpdated)
 
 	client := interfaces.GetPubSubClient()
-	go client.PublishAuthorEvent(ctx, model.NoticeKindAuthorUpdated, *author)
+	authorFragment := pixellandchat.AuthorFragment{}
+	copier.Copy(&authorFragment, author)
+	client.PublishAuthorEvent(ctx, model.NoticeKindAuthorUpdated, authorFragment)
 
 	return author, nil
 }
@@ -1241,7 +1250,9 @@ func (r *mutationResolver) RedeemInvite(ctx context.Context, code string) (*mode
 	sendAuthorNotice(&r.StreamObservers, author, model.NoticeKindAuthorUpdated)
 
 	client := interfaces.GetPubSubClient()
-	go client.PublishAuthorEvent(ctx, model.NoticeKindAuthorUpdated, *author)
+	authorFragment := pixellandchat.AuthorFragment{}
+	copier.Copy(&authorFragment, author)
+	go client.PublishAuthorEvent(ctx, model.NoticeKindAuthorUpdated, authorFragment)
 
 	return &invite, nil
 }
@@ -1284,8 +1295,6 @@ func (r *mutationResolver) AddLike(ctx context.Context, instanceID uuid.UUID) (*
 
 	edge := createInstanceLikesEdge(callerInstanceUser)
 
-	log.Info().Msgf("instance author: %s", instanceAuthor.UserID)
-	log.Info().Msgf("caller: %s", callerInstanceUser.UserID)
 	if instanceAuthor.UserID != callerInstanceUser.UserID {
 		notification, err := createNotificationLikeAdded(instanceAuthor.UserID, callerInstanceUser)
 		if err != nil {

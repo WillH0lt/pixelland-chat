@@ -139,10 +139,12 @@ func getCallerInstanceUser(ctx context.Context, instanceId uuid.UUID) (*model.In
 
 	uid := ctx.Value("uid").(string)
 	if uid == "" {
-		return &model.InstanceUser{
-			InstanceID: instanceId,
-			Instance:   &instance,
-		}, nil
+		instanceUser := model.InstanceUser{}
+		instanceUser.InstanceID = instanceId
+		instanceUser.Instance = &instance
+		instanceUser.CreatedAt = time.Now()
+
+		return &instanceUser, nil
 	}
 
 	user, err := upsertCaller(ctx)
