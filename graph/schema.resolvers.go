@@ -23,8 +23,8 @@ import (
 )
 
 // MessagesConnection is the resolver for the messagesConnection field.
-func (r *channelResolver) MessagesConnection(ctx context.Context, obj *model.Channel, last *int, before *string) (*model.ChannelMessagesConnection, error) {
-	if last == nil || *last == 0 {
+func (r *channelResolver) MessagesConnection(ctx context.Context, obj *model.Channel, last int, before string) (*model.ChannelMessagesConnection, error) {
+	if last == 0 {
 		return &model.ChannelMessagesConnection{
 			Edges: make([]*model.ChannelMessagesEdge, 0),
 			PageInfo: &model.PageInfo{
@@ -37,10 +37,10 @@ func (r *channelResolver) MessagesConnection(ctx context.Context, obj *model.Cha
 	db := interfaces.GetDatabase()
 	messages := []model.Message{}
 
-	tx := db.Model(&obj).Limit(*last + 1).Order("created_at desc").Where("deleted_at is NULL")
+	tx := db.Model(&obj).Limit(last + 1).Order("created_at desc").Where("deleted_at is NULL")
 
-	if *before != "" {
-		createdAt, err := fromCursorHash(*before)
+	if before != "" {
+		createdAt, err := fromCursorHash(before)
 		if err != nil {
 			return nil, err
 		}
@@ -49,7 +49,7 @@ func (r *channelResolver) MessagesConnection(ctx context.Context, obj *model.Cha
 
 	tx.Preload("Author").Association("Messages").Find(&messages)
 
-	hasPreviousPage := (len(messages) == *last+1)
+	hasPreviousPage := (len(messages) == last+1)
 	if len(messages) > 0 && hasPreviousPage {
 		messages = messages[:len(messages)-1]
 	}
@@ -85,8 +85,8 @@ func (r *collectionResolver) Tag(ctx context.Context, obj *model.Collection) (mo
 }
 
 // InstancesConnection is the resolver for the instancesConnection field.
-func (r *collectionResolver) InstancesConnection(ctx context.Context, obj *model.Collection, first *int, after *string) (*model.CollectionInstancesConnection, error) {
-	if first == nil || *first == 0 {
+func (r *collectionResolver) InstancesConnection(ctx context.Context, obj *model.Collection, first int, after string) (*model.CollectionInstancesConnection, error) {
+	if first == 0 {
 		return &model.CollectionInstancesConnection{
 			Edges: make([]*model.CollectionInstancesEdge, 0),
 			PageInfo: &model.PageInfo{
@@ -99,10 +99,10 @@ func (r *collectionResolver) InstancesConnection(ctx context.Context, obj *model
 	db := interfaces.GetDatabase()
 
 	tags := []model.Tag{}
-	tx := db.Model(&model.Tag{}).Limit(*first + 1).Order("created_at desc")
+	tx := db.Model(&model.Tag{}).Limit(first + 1).Order("created_at desc")
 
-	if *after != "" {
-		createdAt, err := fromCursorHash(*after)
+	if after != "" {
+		createdAt, err := fromCursorHash(after)
 		if err != nil {
 			return nil, err
 		}
@@ -111,7 +111,7 @@ func (r *collectionResolver) InstancesConnection(ctx context.Context, obj *model
 
 	tx.Preload("Instance").Find(&tags)
 
-	hasNextPage := (len(tags) == *first+1)
+	hasNextPage := (len(tags) == first+1)
 	if len(tags) > 0 && hasNextPage {
 		tags = tags[:len(tags)-1]
 	}
@@ -152,8 +152,8 @@ func (r *instanceResolver) ReadAccess(ctx context.Context, obj *model.Instance) 
 }
 
 // ChannelsConnection is the resolver for the channelsConnection field.
-func (r *instanceResolver) ChannelsConnection(ctx context.Context, obj *model.Instance, first *int, after *string) (*model.InstanceChannelsConnection, error) {
-	if first == nil || *first == 0 {
+func (r *instanceResolver) ChannelsConnection(ctx context.Context, obj *model.Instance, first int, after string) (*model.InstanceChannelsConnection, error) {
+	if first == 0 {
 		return &model.InstanceChannelsConnection{
 			Edges: make([]*model.InstanceChannelsEdge, 0),
 			PageInfo: &model.PageInfo{
@@ -181,13 +181,13 @@ func (r *instanceResolver) ChannelsConnection(ctx context.Context, obj *model.In
 	db := interfaces.GetDatabase()
 	channels := []model.Channel{}
 
-	tx := db.Model(&obj).Limit(*first + 1).Order("rank asc")
+	tx := db.Model(&obj).Limit(first + 1).Order("rank asc")
 
 	roles := append(callerInstanceUser.Roles, model.RoleAllUsers.String())
 	tx = tx.Where("deleted_at is NULL").Where("readers && ?", pq.Array(roles))
 
-	if *after != "" {
-		rank, err := fromCursorHash(*after)
+	if after != "" {
+		rank, err := fromCursorHash(after)
 		if err != nil {
 			return nil, err
 		}
@@ -198,7 +198,7 @@ func (r *instanceResolver) ChannelsConnection(ctx context.Context, obj *model.In
 		return nil, err
 	}
 
-	hasNextPage := (len(channels) == *first+1)
+	hasNextPage := (len(channels) == first+1)
 	if len(channels) > 0 && hasNextPage {
 		channels = channels[:len(channels)-1]
 	}
@@ -219,8 +219,8 @@ func (r *instanceResolver) ChannelsConnection(ctx context.Context, obj *model.In
 }
 
 // LikesConnection is the resolver for the likesConnection field.
-func (r *instanceResolver) LikesConnection(ctx context.Context, obj *model.Instance, first *int, after *string) (*model.InstanceLikesConnection, error) {
-	if first == nil || *first == 0 {
+func (r *instanceResolver) LikesConnection(ctx context.Context, obj *model.Instance, first int, after string) (*model.InstanceLikesConnection, error) {
+	if first == 0 {
 		return &model.InstanceLikesConnection{
 			Edges: make([]*model.InstanceLikesEdge, 0),
 			PageInfo: &model.PageInfo{
@@ -233,11 +233,11 @@ func (r *instanceResolver) LikesConnection(ctx context.Context, obj *model.Insta
 	db := interfaces.GetDatabase()
 	instanceUsers := []model.InstanceUser{}
 
-	tx := db.Model(&obj).Limit(*first + 1).Order("created_at asc")
+	tx := db.Model(&obj).Limit(first + 1).Order("created_at asc")
 	tx = tx.Where("liked_by_me = ?", true)
 
-	if *after != "" {
-		likedAt, err := fromCursorHash(*after)
+	if after != "" {
+		likedAt, err := fromCursorHash(after)
 		if err != nil {
 			return nil, err
 		}
@@ -248,7 +248,7 @@ func (r *instanceResolver) LikesConnection(ctx context.Context, obj *model.Insta
 		return nil, err
 	}
 
-	hasNextPage := (len(instanceUsers) == *first+1)
+	hasNextPage := (len(instanceUsers) == first+1)
 	if len(instanceUsers) > 0 && hasNextPage {
 		instanceUsers = instanceUsers[:len(instanceUsers)-1]
 	}
@@ -269,8 +269,8 @@ func (r *instanceResolver) LikesConnection(ctx context.Context, obj *model.Insta
 }
 
 // AuthorsConnection is the resolver for the authorsConnection field.
-func (r *instanceResolver) AuthorsConnection(ctx context.Context, obj *model.Instance, roles []model.Role, first *int, after *string) (*model.InstanceAuthorsConnection, error) {
-	if first == nil || *first == 0 || len(roles) == 0 {
+func (r *instanceResolver) AuthorsConnection(ctx context.Context, obj *model.Instance, roles []model.Role, first int, after string) (*model.InstanceAuthorsConnection, error) {
+	if first == 0 || len(roles) == 0 {
 		return &model.InstanceAuthorsConnection{
 			Edges: make([]*model.InstanceAuthorsEdge, 0),
 			PageInfo: &model.PageInfo{
@@ -283,7 +283,7 @@ func (r *instanceResolver) AuthorsConnection(ctx context.Context, obj *model.Ins
 	db := interfaces.GetDatabase()
 	instanceUsers := []model.InstanceUser{}
 
-	tx := db.Model(&obj).Limit(*first + 1).Order("created_at desc")
+	tx := db.Model(&obj).Limit(first + 1).Order("created_at desc")
 	tx = tx.Where("roles && ?", pq.Array(roles))
 
 	// hide banned users
@@ -291,8 +291,8 @@ func (r *instanceResolver) AuthorsConnection(ctx context.Context, obj *model.Ins
 		tx = tx.Where("Not(roles @> ?)", pq.Array([]string{model.RoleBanned.String()}))
 	}
 
-	if *after != "" {
-		created_at, err := fromCursorHash(*after)
+	if after != "" {
+		created_at, err := fromCursorHash(after)
 		if err != nil {
 			return nil, err
 		}
@@ -305,7 +305,7 @@ func (r *instanceResolver) AuthorsConnection(ctx context.Context, obj *model.Ins
 		return nil, err
 	}
 
-	hasNextPage := (len(instanceUsers) == *first+1)
+	hasNextPage := (len(instanceUsers) == first+1)
 	if len(instanceUsers) > 0 && hasNextPage {
 		instanceUsers = instanceUsers[:len(instanceUsers)-1]
 	}
@@ -1527,8 +1527,8 @@ func (r *subscriptionResolver) Stream(ctx context.Context, instanceID uuid.UUID)
 }
 
 // InstancesConnection is the resolver for the instancesConnection field.
-func (r *userResolver) InstancesConnection(ctx context.Context, obj *model.User, first *int, after *string) (*model.UserInstancesConnection, error) {
-	if first == nil || *first == 0 {
+func (r *userResolver) InstancesConnection(ctx context.Context, obj *model.User, first int, after string) (*model.UserInstancesConnection, error) {
+	if first == 0 {
 		return &model.UserInstancesConnection{
 			Edges: make([]*model.UserInstancesEdge, 0),
 			PageInfo: &model.PageInfo{
@@ -1544,11 +1544,11 @@ func (r *userResolver) InstancesConnection(ctx context.Context, obj *model.User,
 	tx := db.
 		Joins("INNER JOIN instances ON instances.id = instance_users.instance_id").
 		Where("instances.deleted_at is null").
-		Preload("Instance").Limit(*first + 1).
+		Preload("Instance").Limit(first + 1).
 		Order("created_at asc")
 
-	if *after != "" {
-		created_at, err := fromCursorHash(*after)
+	if after != "" {
+		created_at, err := fromCursorHash(after)
 		if err != nil {
 			return nil, err
 		}
@@ -1560,7 +1560,7 @@ func (r *userResolver) InstancesConnection(ctx context.Context, obj *model.User,
 	}
 	log.Info().Msgf("instanceUsers: %+v", instanceUsers)
 
-	hasNextPage := (len(instanceUsers) == *first+1)
+	hasNextPage := (len(instanceUsers) == first+1)
 	if len(instanceUsers) > 0 && hasNextPage {
 		instanceUsers = instanceUsers[:len(instanceUsers)-1]
 	}
@@ -1581,7 +1581,7 @@ func (r *userResolver) InstancesConnection(ctx context.Context, obj *model.User,
 }
 
 // NotificationsConnection is the resolver for the notificationsConnection field.
-func (r *userResolver) NotificationsConnection(ctx context.Context, obj *model.User, last *int, before *string) (*model.UserNotificationsConnection, error) {
+func (r *userResolver) NotificationsConnection(ctx context.Context, obj *model.User, last int, before string) (*model.UserNotificationsConnection, error) {
 	caller, err := upsertCaller(ctx)
 	if err != nil {
 		return nil, err
@@ -1594,7 +1594,7 @@ func (r *userResolver) NotificationsConnection(ctx context.Context, obj *model.U
 	}
 	hasUnread := unreadNotification.ID != uuid.Nil
 
-	if last == nil || *last == 0 {
+	if last == 0 {
 		return &model.UserNotificationsConnection{
 			Edges: make([]*model.UserNotificationsEdge, 0),
 			PageInfo: &model.PageInfo{
@@ -1607,10 +1607,10 @@ func (r *userResolver) NotificationsConnection(ctx context.Context, obj *model.U
 
 	notifications := []model.Notification{}
 
-	tx := db.Model(&model.Notification{}).Where("user_id = ?", obj.ID).Limit(*last + 1).Order("created_at desc")
+	tx := db.Model(&model.Notification{}).Where("user_id = ?", obj.ID).Limit(last + 1).Order("created_at desc")
 
-	if *before != "" {
-		createdAt, err := fromCursorHash(*before)
+	if before != "" {
+		createdAt, err := fromCursorHash(before)
 		if err != nil {
 			return nil, err
 		}
@@ -1619,7 +1619,7 @@ func (r *userResolver) NotificationsConnection(ctx context.Context, obj *model.U
 
 	tx.Preload("Author").Preload("Instance").Preload("Message").Find(&notifications)
 
-	hasPreviousPage := (len(notifications) == *last+1)
+	hasPreviousPage := (len(notifications) == last+1)
 	if len(notifications) > 0 && hasPreviousPage {
 		notifications = notifications[:len(notifications)-1]
 	}
@@ -1630,7 +1630,7 @@ func (r *userResolver) NotificationsConnection(ctx context.Context, obj *model.U
 		edges = append(edges, edge)
 	}
 
-	if *before == "" {
+	if before == "" {
 		now := time.Now()
 		caller.ReadNotificationsAt = &now
 		if err := db.Save(&caller).Error; err != nil {

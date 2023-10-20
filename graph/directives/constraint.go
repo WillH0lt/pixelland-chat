@@ -8,7 +8,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
-func ConstraintDirective(ctx context.Context, obj interface{}, next graphql.Resolver, min *float64, max *float64) (interface{}, error) {
+func ConstraintDirective(ctx context.Context, obj interface{}, next graphql.Resolver, min float64, max float64) (interface{}, error) {
 
 	args := obj.(map[string]interface{})
 	fieldName := *graphql.GetPathContext(ctx).Field
@@ -17,7 +17,7 @@ func ConstraintDirective(ctx context.Context, obj interface{}, next graphql.Reso
 	switch val.(type) {
 	case int64, int32, int16, int8, int:
 		i := val.(int64)
-		if i < int64(*min) || i > int64(*max) {
+		if i < int64(min) || i > int64(max) {
 			return nil, fmt.Errorf("integer value out of range")
 		}
 	case json.Number:
@@ -25,12 +25,12 @@ func ConstraintDirective(ctx context.Context, obj interface{}, next graphql.Reso
 		if err != nil {
 			return nil, fmt.Errorf("cant convert number to float")
 		}
-		if i < float64(*min) || i > float64(*max) {
+		if i < float64(min) || i > float64(max) {
 			return nil, fmt.Errorf("number value out of range")
 		}
 	case string:
 		s := val.(string)
-		if len(s) < int(*min) || len(s) > int(*max) {
+		if len(s) < int(min) || len(s) > int(max) {
 			return nil, fmt.Errorf("text length out of range")
 		}
 	default:

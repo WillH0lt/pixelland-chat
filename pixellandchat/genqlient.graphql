@@ -145,7 +145,11 @@ fragment InstanceFragment on Instance {
       ...PageInfoFragment
     }
   }
-  authorsConnection(first: $authorsFirst, after: $authorsAfter, roles: $authorsRoles) {
+  authorsConnection(
+    first: $authorsFirst
+    after: $authorsAfter
+    roles: $authorsRoles
+  ) {
     edges {
       ...InstanceAuthorsEdgeFragment
     }
@@ -182,7 +186,10 @@ fragment UserFragment on User {
       ...PageInfoFragment
     }
   }
-  notificationsConnection(last: $notificationsLast, before: $notificationsBefore) {
+  notificationsConnection(
+    last: $notificationsLast
+    before: $notificationsBefore
+  ) {
     edges {
       ...UserNotificationsEdgeFragment
     }
@@ -196,7 +203,7 @@ fragment UserFragment on User {
 # ====================
 # queries
 
-query Channel($id: Uuid!, $messagesLast: Int = 0, $messagesBefore: String = "") {
+query Channel($id: Uuid!, $messagesLast: Int!, $messagesBefore: String!) {
   channel(id: $id) {
     ...ChannelFragment
   }
@@ -204,15 +211,15 @@ query Channel($id: Uuid!, $messagesLast: Int = 0, $messagesBefore: String = "") 
 
 query Instance(
   $id: Uuid!
-  $channelsFirst: Int = 0
-  $channelsAfter: String = ""
-  $likesFirst: Int = 0
-  $likesAfter: String = ""
-  $authorsFirst: Int = 0
-  $authorsAfter: String = ""
-  $authorsRoles: [Role!] = []
-  $messagesLast: Int = 0
-  $messagesBefore: String = ""
+  $channelsFirst: Int!
+  $channelsAfter: String!
+  $likesFirst: Int!
+  $likesAfter: String!
+  $authorsFirst: Int!
+  $authorsAfter: String!
+  $authorsRoles: [Role!]!
+  $messagesLast: Int!
+  $messagesBefore: String!
 ) {
   instance(id: $id) {
     ...UserInstancesEdgeFragment
@@ -227,15 +234,15 @@ query Invite($instanceId: Uuid!) {
 
 query CheckInvite(
   $code: String!
-  $channelsFirst: Int = 0
-  $channelsAfter: String = ""
-  $likesFirst: Int = 0
-  $likesAfter: String = ""
-  $authorsFirst: Int = 0
-  $authorsAfter: String = ""
-  $authorsRoles: [Role!] = []
-  $messagesLast: Int = 0
-  $messagesBefore: String = ""
+  $channelsFirst: Int!
+  $channelsAfter: String!
+  $likesFirst: Int!
+  $likesAfter: String!
+  $authorsFirst: Int!
+  $authorsAfter: String!
+  $authorsRoles: [Role!]!
+  $messagesLast: Int!
+  $messagesBefore: String!
 ) {
   checkInvite(code: $code) {
     instance {
@@ -246,19 +253,19 @@ query CheckInvite(
 }
 
 query User(
-  $instancesFirst: Int = 0
-  $instancesAfter: String = ""
-  $channelsFirst: Int = 0
-  $channelsAfter: String = ""
-  $likesFirst: Int = 0
-  $likesAfter: String = ""
-  $authorsFirst: Int = 0
-  $authorsAfter: String = ""
-  $authorsRoles: [Role!] = []
-  $messagesLast: Int = 0
-  $messagesBefore: String = ""
-  $notificationsLast: Int = 0
-  $notificationsBefore: String = ""
+  $instancesFirst: Int!
+  $instancesAfter: String!
+  $channelsFirst: Int!
+  $channelsAfter: String!
+  $likesFirst: Int!
+  $likesAfter: String!
+  $authorsFirst: Int!
+  $authorsAfter: String!
+  $authorsRoles: [Role!]!
+  $messagesLast: Int!
+  $messagesBefore: String!
+  $notificationsLast: Int!
+  $notificationsBefore: String!
 ) {
   user {
     ...UserFragment
@@ -280,7 +287,11 @@ mutation RemoveRole($authorId: Uuid!, $role: Role!) {
   }
 }
 
-mutation AddChannel($input: ChannelInput!, $messagesLast: Int = 0, $messagesBefore: String = "") {
+mutation AddChannel(
+  $input: ChannelInput!
+  $messagesLast: Int!
+  $messagesBefore: String!
+) {
   addChannel(input: $input) {
     ...InstanceChannelsEdgeFragment
   }
@@ -289,8 +300,8 @@ mutation AddChannel($input: ChannelInput!, $messagesLast: Int = 0, $messagesBefo
 mutation UpdateChannel(
   $input: ChannelInput!
   $channelId: Uuid!
-  $messagesLast: Int = 0
-  $messagesBefore: String = ""
+  $messagesLast: Int!
+  $messagesBefore: String!
 ) {
   updateChannel(input: $input, channelId: $channelId) {
     ...InstanceChannelsEdgeFragment
@@ -300,15 +311,19 @@ mutation UpdateChannel(
 mutation ReorderChannel(
   $input: ChannelReorderInput!
   $channelId: Uuid!
-  $messagesLast: Int = 0
-  $messagesBefore: String = ""
+  $messagesLast: Int!
+  $messagesBefore: String!
 ) {
   reorderChannel(input: $input, channelId: $channelId) {
     ...InstanceChannelsEdgeFragment
   }
 }
 
-mutation RemoveChannel($channelId: Uuid!, $messagesLast: Int = 0, $messagesBefore: String = "") {
+mutation RemoveChannel(
+  $channelId: Uuid!
+  $messagesLast: Int!
+  $messagesBefore: String!
+) {
   removeChannel(channelId: $channelId) {
     ...InstanceChannelsEdgeFragment
   }
@@ -316,15 +331,15 @@ mutation RemoveChannel($channelId: Uuid!, $messagesLast: Int = 0, $messagesBefor
 
 mutation AddInstance(
   $input: InstanceInput!
-  $channelsFirst: Int = 0
-  $channelsAfter: String = ""
-  $likesFirst: Int = 0
-  $likesAfter: String = ""
-  $authorsFirst: Int = 0
-  $authorsAfter: String = ""
+  $channelsFirst: Int!
+  $channelsAfter: String!
+  $likesFirst: Int!
+  $likesAfter: String!
+  $authorsFirst: Int!
+  $authorsAfter: String!
   $authorsRoles: [Role!] = []
-  $messagesLast: Int = 0
-  $messagesBefore: String = ""
+  $messagesLast: Int!
+  $messagesBefore: String!
 ) {
   addInstance(input: $input) {
     ...UserInstancesEdgeFragment
@@ -334,15 +349,15 @@ mutation AddInstance(
 mutation UpdateInstance(
   $instanceId: Uuid!
   $input: InstanceInput!
-  $channelsFirst: Int = 0
-  $channelsAfter: String = ""
-  $likesFirst: Int = 0
-  $likesAfter: String = ""
-  $authorsFirst: Int = 0
-  $authorsAfter: String = ""
+  $channelsFirst: Int!
+  $channelsAfter: String!
+  $likesFirst: Int!
+  $likesAfter: String!
+  $authorsFirst: Int!
+  $authorsAfter: String!
   $authorsRoles: [Role!] = []
-  $messagesLast: Int = 0
-  $messagesBefore: String = ""
+  $messagesLast: Int!
+  $messagesBefore: String!
 ) {
   updateInstance(instanceId: $instanceId, input: $input) {
     ...UserInstancesEdgeFragment
@@ -351,15 +366,15 @@ mutation UpdateInstance(
 
 mutation RemoveInstance(
   $instanceId: Uuid!
-  $channelsFirst: Int = 0
-  $channelsAfter: String = ""
-  $likesFirst: Int = 0
-  $likesAfter: String = ""
-  $authorsFirst: Int = 0
-  $authorsAfter: String = ""
+  $channelsFirst: Int!
+  $channelsAfter: String!
+  $likesFirst: Int!
+  $likesAfter: String!
+  $authorsFirst: Int!
+  $authorsAfter: String!
   $authorsRoles: [Role!] = []
-  $messagesLast: Int = 0
-  $messagesBefore: String = ""
+  $messagesLast: Int!
+  $messagesBefore: String!
 ) {
   removeInstance(instanceId: $instanceId) {
     ...UserInstancesEdgeFragment
@@ -369,15 +384,15 @@ mutation RemoveInstance(
 mutation ReorderInstance(
   $input: InstanceReorderInput!
   $instanceId: Uuid!
-  $channelsFirst: Int = 0
-  $channelsAfter: String = ""
-  $likesFirst: Int = 0
-  $likesAfter: String = ""
-  $authorsFirst: Int = 0
-  $authorsAfter: String = ""
+  $channelsFirst: Int!
+  $channelsAfter: String!
+  $likesFirst: Int!
+  $likesAfter: String!
+  $authorsFirst: Int!
+  $authorsAfter: String!
   $authorsRoles: [Role!] = []
-  $messagesLast: Int = 0
-  $messagesBefore: String = ""
+  $messagesLast: Int!
+  $messagesBefore: String!
 ) {
   reorderInstance(input: $input, instanceId: $instanceId) {
     ...UserInstancesEdgeFragment
@@ -387,15 +402,15 @@ mutation ReorderInstance(
 mutation PinInstance(
   $input: InstancePinInput!
   $instanceId: Uuid!
-  $channelsFirst: Int = 0
-  $channelsAfter: String = ""
-  $likesFirst: Int = 0
-  $likesAfter: String = ""
-  $authorsFirst: Int = 0
-  $authorsAfter: String = ""
+  $channelsFirst: Int!
+  $channelsAfter: String!
+  $likesFirst: Int!
+  $likesAfter: String!
+  $authorsFirst: Int!
+  $authorsAfter: String!
   $authorsRoles: [Role!] = []
-  $messagesLast: Int = 0
-  $messagesBefore: String = ""
+  $messagesLast: Int!
+  $messagesBefore: String!
 ) {
   pinInstance(input: $input, instanceId: $instanceId) {
     ...UserInstancesEdgeFragment
@@ -405,15 +420,15 @@ mutation PinInstance(
 mutation TagInstance(
   $instanceId: Uuid!
   $input: TagInput!
-  $channelsFirst: Int = 0
-  $channelsAfter: String = ""
-  $likesFirst: Int = 0
-  $likesAfter: String = ""
-  $authorsFirst: Int = 0
-  $authorsAfter: String = ""
+  $channelsFirst: Int!
+  $channelsAfter: String!
+  $likesFirst: Int!
+  $likesAfter: String!
+  $authorsFirst: Int!
+  $authorsAfter: String!
   $authorsRoles: [Role!] = []
-  $messagesLast: Int = 0
-  $messagesBefore: String = ""
+  $messagesLast: Int!
+  $messagesBefore: String!
 ) {
   tagInstance(instanceId: $instanceId, input: $input) {
     ...InstanceFragment
@@ -423,15 +438,15 @@ mutation TagInstance(
 mutation UntagInstance(
   $instanceId: Uuid!
   $input: TagInput!
-  $channelsFirst: Int = 0
-  $channelsAfter: String = ""
-  $likesFirst: Int = 0
-  $likesAfter: String = ""
-  $authorsFirst: Int = 0
-  $authorsAfter: String = ""
+  $channelsFirst: Int!
+  $channelsAfter: String!
+  $likesFirst: Int!
+  $likesAfter: String!
+  $authorsFirst: Int!
+  $authorsAfter: String!
   $authorsRoles: [Role!] = []
-  $messagesLast: Int = 0
-  $messagesBefore: String = ""
+  $messagesLast: Int!
+  $messagesBefore: String!
 ) {
   untagInstance(instanceId: $instanceId, input: $input) {
     ...InstanceFragment
@@ -476,19 +491,19 @@ mutation RemoveMessage($messageId: Uuid!) {
 
 mutation UpdateUser(
   $input: UserInput!
-  $instancesFirst: Int
-  $instancesAfter: String
-  $channelsFirst: Int = 0
-  $channelsAfter: String = ""
-  $likesFirst: Int = 0
-  $likesAfter: String = ""
-  $authorsFirst: Int = 0
-  $authorsAfter: String = ""
+  $instancesFirst: Int!
+  $instancesAfter: String!
+  $channelsFirst: Int!
+  $channelsAfter: String!
+  $likesFirst: Int!
+  $likesAfter: String!
+  $authorsFirst: Int!
+  $authorsAfter: String!
   $authorsRoles: [Role!] = []
-  $messagesLast: Int = 0
-  $messagesBefore: String = ""
-  $notificationsLast: Int = 0
-  $notificationsBefore: String = ""
+  $messagesLast: Int!
+  $messagesBefore: String!
+  $notificationsLast: Int!
+  $notificationsBefore: String!
 ) {
   updateUser(input: $input) {
     ...UserFragment

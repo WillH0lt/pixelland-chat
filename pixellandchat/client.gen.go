@@ -5466,62 +5466,62 @@ func (v *UserUser) __premarshalJSON() (*__premarshalUserUser, error) {
 // __AddChannelInput is used internally by genqlient
 type __AddChannelInput struct {
 	Input          ChannelInput `json:"input"`
-	MessagesLast   *int         `json:"messagesLast"`
-	MessagesBefore *string      `json:"messagesBefore"`
+	MessagesLast   int          `json:"messagesLast"`
+	MessagesBefore string       `json:"messagesBefore"`
 }
 
 // GetInput returns __AddChannelInput.Input, and is useful for accessing the field via an interface.
 func (v *__AddChannelInput) GetInput() ChannelInput { return v.Input }
 
 // GetMessagesLast returns __AddChannelInput.MessagesLast, and is useful for accessing the field via an interface.
-func (v *__AddChannelInput) GetMessagesLast() *int { return v.MessagesLast }
+func (v *__AddChannelInput) GetMessagesLast() int { return v.MessagesLast }
 
 // GetMessagesBefore returns __AddChannelInput.MessagesBefore, and is useful for accessing the field via an interface.
-func (v *__AddChannelInput) GetMessagesBefore() *string { return v.MessagesBefore }
+func (v *__AddChannelInput) GetMessagesBefore() string { return v.MessagesBefore }
 
 // __AddInstanceInput is used internally by genqlient
 type __AddInstanceInput struct {
 	Input          InstanceInput `json:"input"`
-	ChannelsFirst  *int          `json:"channelsFirst"`
-	ChannelsAfter  *string       `json:"channelsAfter"`
-	LikesFirst     *int          `json:"likesFirst"`
-	LikesAfter     *string       `json:"likesAfter"`
-	AuthorsFirst   *int          `json:"authorsFirst"`
-	AuthorsAfter   *string       `json:"authorsAfter"`
+	ChannelsFirst  int           `json:"channelsFirst"`
+	ChannelsAfter  string        `json:"channelsAfter"`
+	LikesFirst     int           `json:"likesFirst"`
+	LikesAfter     string        `json:"likesAfter"`
+	AuthorsFirst   int           `json:"authorsFirst"`
+	AuthorsAfter   string        `json:"authorsAfter"`
 	AuthorsRoles   []Role        `json:"authorsRoles"`
-	MessagesLast   *int          `json:"messagesLast"`
-	MessagesBefore *string       `json:"messagesBefore"`
+	MessagesLast   int           `json:"messagesLast"`
+	MessagesBefore string        `json:"messagesBefore"`
 }
 
 // GetInput returns __AddInstanceInput.Input, and is useful for accessing the field via an interface.
 func (v *__AddInstanceInput) GetInput() InstanceInput { return v.Input }
 
 // GetChannelsFirst returns __AddInstanceInput.ChannelsFirst, and is useful for accessing the field via an interface.
-func (v *__AddInstanceInput) GetChannelsFirst() *int { return v.ChannelsFirst }
+func (v *__AddInstanceInput) GetChannelsFirst() int { return v.ChannelsFirst }
 
 // GetChannelsAfter returns __AddInstanceInput.ChannelsAfter, and is useful for accessing the field via an interface.
-func (v *__AddInstanceInput) GetChannelsAfter() *string { return v.ChannelsAfter }
+func (v *__AddInstanceInput) GetChannelsAfter() string { return v.ChannelsAfter }
 
 // GetLikesFirst returns __AddInstanceInput.LikesFirst, and is useful for accessing the field via an interface.
-func (v *__AddInstanceInput) GetLikesFirst() *int { return v.LikesFirst }
+func (v *__AddInstanceInput) GetLikesFirst() int { return v.LikesFirst }
 
 // GetLikesAfter returns __AddInstanceInput.LikesAfter, and is useful for accessing the field via an interface.
-func (v *__AddInstanceInput) GetLikesAfter() *string { return v.LikesAfter }
+func (v *__AddInstanceInput) GetLikesAfter() string { return v.LikesAfter }
 
 // GetAuthorsFirst returns __AddInstanceInput.AuthorsFirst, and is useful for accessing the field via an interface.
-func (v *__AddInstanceInput) GetAuthorsFirst() *int { return v.AuthorsFirst }
+func (v *__AddInstanceInput) GetAuthorsFirst() int { return v.AuthorsFirst }
 
 // GetAuthorsAfter returns __AddInstanceInput.AuthorsAfter, and is useful for accessing the field via an interface.
-func (v *__AddInstanceInput) GetAuthorsAfter() *string { return v.AuthorsAfter }
+func (v *__AddInstanceInput) GetAuthorsAfter() string { return v.AuthorsAfter }
 
 // GetAuthorsRoles returns __AddInstanceInput.AuthorsRoles, and is useful for accessing the field via an interface.
 func (v *__AddInstanceInput) GetAuthorsRoles() []Role { return v.AuthorsRoles }
 
 // GetMessagesLast returns __AddInstanceInput.MessagesLast, and is useful for accessing the field via an interface.
-func (v *__AddInstanceInput) GetMessagesLast() *int { return v.MessagesLast }
+func (v *__AddInstanceInput) GetMessagesLast() int { return v.MessagesLast }
 
 // GetMessagesBefore returns __AddInstanceInput.MessagesBefore, and is useful for accessing the field via an interface.
-func (v *__AddInstanceInput) GetMessagesBefore() *string { return v.MessagesBefore }
+func (v *__AddInstanceInput) GetMessagesBefore() string { return v.MessagesBefore }
 
 // __AddInviteInput is used internally by genqlient
 type __AddInviteInput struct {
@@ -5562,106 +5562,106 @@ func (v *__AddRoleInput) GetRole() Role { return v.Role }
 // __ChannelInput is used internally by genqlient
 type __ChannelInput struct {
 	Id             uuid.UUID `json:"id"`
-	MessagesLast   *int      `json:"messagesLast"`
-	MessagesBefore *string   `json:"messagesBefore"`
+	MessagesLast   int       `json:"messagesLast"`
+	MessagesBefore string    `json:"messagesBefore"`
 }
 
 // GetId returns __ChannelInput.Id, and is useful for accessing the field via an interface.
 func (v *__ChannelInput) GetId() uuid.UUID { return v.Id }
 
 // GetMessagesLast returns __ChannelInput.MessagesLast, and is useful for accessing the field via an interface.
-func (v *__ChannelInput) GetMessagesLast() *int { return v.MessagesLast }
+func (v *__ChannelInput) GetMessagesLast() int { return v.MessagesLast }
 
 // GetMessagesBefore returns __ChannelInput.MessagesBefore, and is useful for accessing the field via an interface.
-func (v *__ChannelInput) GetMessagesBefore() *string { return v.MessagesBefore }
+func (v *__ChannelInput) GetMessagesBefore() string { return v.MessagesBefore }
 
 // __CheckInviteInput is used internally by genqlient
 type __CheckInviteInput struct {
-	Code           string  `json:"code"`
-	ChannelsFirst  *int    `json:"channelsFirst"`
-	ChannelsAfter  *string `json:"channelsAfter"`
-	LikesFirst     *int    `json:"likesFirst"`
-	LikesAfter     *string `json:"likesAfter"`
-	AuthorsFirst   *int    `json:"authorsFirst"`
-	AuthorsAfter   *string `json:"authorsAfter"`
-	AuthorsRoles   []Role  `json:"authorsRoles"`
-	MessagesLast   *int    `json:"messagesLast"`
-	MessagesBefore *string `json:"messagesBefore"`
+	Code           string `json:"code"`
+	ChannelsFirst  int    `json:"channelsFirst"`
+	ChannelsAfter  string `json:"channelsAfter"`
+	LikesFirst     int    `json:"likesFirst"`
+	LikesAfter     string `json:"likesAfter"`
+	AuthorsFirst   int    `json:"authorsFirst"`
+	AuthorsAfter   string `json:"authorsAfter"`
+	AuthorsRoles   []Role `json:"authorsRoles"`
+	MessagesLast   int    `json:"messagesLast"`
+	MessagesBefore string `json:"messagesBefore"`
 }
 
 // GetCode returns __CheckInviteInput.Code, and is useful for accessing the field via an interface.
 func (v *__CheckInviteInput) GetCode() string { return v.Code }
 
 // GetChannelsFirst returns __CheckInviteInput.ChannelsFirst, and is useful for accessing the field via an interface.
-func (v *__CheckInviteInput) GetChannelsFirst() *int { return v.ChannelsFirst }
+func (v *__CheckInviteInput) GetChannelsFirst() int { return v.ChannelsFirst }
 
 // GetChannelsAfter returns __CheckInviteInput.ChannelsAfter, and is useful for accessing the field via an interface.
-func (v *__CheckInviteInput) GetChannelsAfter() *string { return v.ChannelsAfter }
+func (v *__CheckInviteInput) GetChannelsAfter() string { return v.ChannelsAfter }
 
 // GetLikesFirst returns __CheckInviteInput.LikesFirst, and is useful for accessing the field via an interface.
-func (v *__CheckInviteInput) GetLikesFirst() *int { return v.LikesFirst }
+func (v *__CheckInviteInput) GetLikesFirst() int { return v.LikesFirst }
 
 // GetLikesAfter returns __CheckInviteInput.LikesAfter, and is useful for accessing the field via an interface.
-func (v *__CheckInviteInput) GetLikesAfter() *string { return v.LikesAfter }
+func (v *__CheckInviteInput) GetLikesAfter() string { return v.LikesAfter }
 
 // GetAuthorsFirst returns __CheckInviteInput.AuthorsFirst, and is useful for accessing the field via an interface.
-func (v *__CheckInviteInput) GetAuthorsFirst() *int { return v.AuthorsFirst }
+func (v *__CheckInviteInput) GetAuthorsFirst() int { return v.AuthorsFirst }
 
 // GetAuthorsAfter returns __CheckInviteInput.AuthorsAfter, and is useful for accessing the field via an interface.
-func (v *__CheckInviteInput) GetAuthorsAfter() *string { return v.AuthorsAfter }
+func (v *__CheckInviteInput) GetAuthorsAfter() string { return v.AuthorsAfter }
 
 // GetAuthorsRoles returns __CheckInviteInput.AuthorsRoles, and is useful for accessing the field via an interface.
 func (v *__CheckInviteInput) GetAuthorsRoles() []Role { return v.AuthorsRoles }
 
 // GetMessagesLast returns __CheckInviteInput.MessagesLast, and is useful for accessing the field via an interface.
-func (v *__CheckInviteInput) GetMessagesLast() *int { return v.MessagesLast }
+func (v *__CheckInviteInput) GetMessagesLast() int { return v.MessagesLast }
 
 // GetMessagesBefore returns __CheckInviteInput.MessagesBefore, and is useful for accessing the field via an interface.
-func (v *__CheckInviteInput) GetMessagesBefore() *string { return v.MessagesBefore }
+func (v *__CheckInviteInput) GetMessagesBefore() string { return v.MessagesBefore }
 
 // __InstanceInput is used internally by genqlient
 type __InstanceInput struct {
 	Id             uuid.UUID `json:"id"`
-	ChannelsFirst  *int      `json:"channelsFirst"`
-	ChannelsAfter  *string   `json:"channelsAfter"`
-	LikesFirst     *int      `json:"likesFirst"`
-	LikesAfter     *string   `json:"likesAfter"`
-	AuthorsFirst   *int      `json:"authorsFirst"`
-	AuthorsAfter   *string   `json:"authorsAfter"`
+	ChannelsFirst  int       `json:"channelsFirst"`
+	ChannelsAfter  string    `json:"channelsAfter"`
+	LikesFirst     int       `json:"likesFirst"`
+	LikesAfter     string    `json:"likesAfter"`
+	AuthorsFirst   int       `json:"authorsFirst"`
+	AuthorsAfter   string    `json:"authorsAfter"`
 	AuthorsRoles   []Role    `json:"authorsRoles"`
-	MessagesLast   *int      `json:"messagesLast"`
-	MessagesBefore *string   `json:"messagesBefore"`
+	MessagesLast   int       `json:"messagesLast"`
+	MessagesBefore string    `json:"messagesBefore"`
 }
 
 // GetId returns __InstanceInput.Id, and is useful for accessing the field via an interface.
 func (v *__InstanceInput) GetId() uuid.UUID { return v.Id }
 
 // GetChannelsFirst returns __InstanceInput.ChannelsFirst, and is useful for accessing the field via an interface.
-func (v *__InstanceInput) GetChannelsFirst() *int { return v.ChannelsFirst }
+func (v *__InstanceInput) GetChannelsFirst() int { return v.ChannelsFirst }
 
 // GetChannelsAfter returns __InstanceInput.ChannelsAfter, and is useful for accessing the field via an interface.
-func (v *__InstanceInput) GetChannelsAfter() *string { return v.ChannelsAfter }
+func (v *__InstanceInput) GetChannelsAfter() string { return v.ChannelsAfter }
 
 // GetLikesFirst returns __InstanceInput.LikesFirst, and is useful for accessing the field via an interface.
-func (v *__InstanceInput) GetLikesFirst() *int { return v.LikesFirst }
+func (v *__InstanceInput) GetLikesFirst() int { return v.LikesFirst }
 
 // GetLikesAfter returns __InstanceInput.LikesAfter, and is useful for accessing the field via an interface.
-func (v *__InstanceInput) GetLikesAfter() *string { return v.LikesAfter }
+func (v *__InstanceInput) GetLikesAfter() string { return v.LikesAfter }
 
 // GetAuthorsFirst returns __InstanceInput.AuthorsFirst, and is useful for accessing the field via an interface.
-func (v *__InstanceInput) GetAuthorsFirst() *int { return v.AuthorsFirst }
+func (v *__InstanceInput) GetAuthorsFirst() int { return v.AuthorsFirst }
 
 // GetAuthorsAfter returns __InstanceInput.AuthorsAfter, and is useful for accessing the field via an interface.
-func (v *__InstanceInput) GetAuthorsAfter() *string { return v.AuthorsAfter }
+func (v *__InstanceInput) GetAuthorsAfter() string { return v.AuthorsAfter }
 
 // GetAuthorsRoles returns __InstanceInput.AuthorsRoles, and is useful for accessing the field via an interface.
 func (v *__InstanceInput) GetAuthorsRoles() []Role { return v.AuthorsRoles }
 
 // GetMessagesLast returns __InstanceInput.MessagesLast, and is useful for accessing the field via an interface.
-func (v *__InstanceInput) GetMessagesLast() *int { return v.MessagesLast }
+func (v *__InstanceInput) GetMessagesLast() int { return v.MessagesLast }
 
 // GetMessagesBefore returns __InstanceInput.MessagesBefore, and is useful for accessing the field via an interface.
-func (v *__InstanceInput) GetMessagesBefore() *string { return v.MessagesBefore }
+func (v *__InstanceInput) GetMessagesBefore() string { return v.MessagesBefore }
 
 // __InviteInput is used internally by genqlient
 type __InviteInput struct {
@@ -5675,15 +5675,15 @@ func (v *__InviteInput) GetInstanceId() uuid.UUID { return v.InstanceId }
 type __PinInstanceInput struct {
 	Input          InstancePinInput `json:"input"`
 	InstanceId     uuid.UUID        `json:"instanceId"`
-	ChannelsFirst  *int             `json:"channelsFirst"`
-	ChannelsAfter  *string          `json:"channelsAfter"`
-	LikesFirst     *int             `json:"likesFirst"`
-	LikesAfter     *string          `json:"likesAfter"`
-	AuthorsFirst   *int             `json:"authorsFirst"`
-	AuthorsAfter   *string          `json:"authorsAfter"`
+	ChannelsFirst  int              `json:"channelsFirst"`
+	ChannelsAfter  string           `json:"channelsAfter"`
+	LikesFirst     int              `json:"likesFirst"`
+	LikesAfter     string           `json:"likesAfter"`
+	AuthorsFirst   int              `json:"authorsFirst"`
+	AuthorsAfter   string           `json:"authorsAfter"`
 	AuthorsRoles   []Role           `json:"authorsRoles"`
-	MessagesLast   *int             `json:"messagesLast"`
-	MessagesBefore *string          `json:"messagesBefore"`
+	MessagesLast   int              `json:"messagesLast"`
+	MessagesBefore string           `json:"messagesBefore"`
 }
 
 // GetInput returns __PinInstanceInput.Input, and is useful for accessing the field via an interface.
@@ -5693,31 +5693,31 @@ func (v *__PinInstanceInput) GetInput() InstancePinInput { return v.Input }
 func (v *__PinInstanceInput) GetInstanceId() uuid.UUID { return v.InstanceId }
 
 // GetChannelsFirst returns __PinInstanceInput.ChannelsFirst, and is useful for accessing the field via an interface.
-func (v *__PinInstanceInput) GetChannelsFirst() *int { return v.ChannelsFirst }
+func (v *__PinInstanceInput) GetChannelsFirst() int { return v.ChannelsFirst }
 
 // GetChannelsAfter returns __PinInstanceInput.ChannelsAfter, and is useful for accessing the field via an interface.
-func (v *__PinInstanceInput) GetChannelsAfter() *string { return v.ChannelsAfter }
+func (v *__PinInstanceInput) GetChannelsAfter() string { return v.ChannelsAfter }
 
 // GetLikesFirst returns __PinInstanceInput.LikesFirst, and is useful for accessing the field via an interface.
-func (v *__PinInstanceInput) GetLikesFirst() *int { return v.LikesFirst }
+func (v *__PinInstanceInput) GetLikesFirst() int { return v.LikesFirst }
 
 // GetLikesAfter returns __PinInstanceInput.LikesAfter, and is useful for accessing the field via an interface.
-func (v *__PinInstanceInput) GetLikesAfter() *string { return v.LikesAfter }
+func (v *__PinInstanceInput) GetLikesAfter() string { return v.LikesAfter }
 
 // GetAuthorsFirst returns __PinInstanceInput.AuthorsFirst, and is useful for accessing the field via an interface.
-func (v *__PinInstanceInput) GetAuthorsFirst() *int { return v.AuthorsFirst }
+func (v *__PinInstanceInput) GetAuthorsFirst() int { return v.AuthorsFirst }
 
 // GetAuthorsAfter returns __PinInstanceInput.AuthorsAfter, and is useful for accessing the field via an interface.
-func (v *__PinInstanceInput) GetAuthorsAfter() *string { return v.AuthorsAfter }
+func (v *__PinInstanceInput) GetAuthorsAfter() string { return v.AuthorsAfter }
 
 // GetAuthorsRoles returns __PinInstanceInput.AuthorsRoles, and is useful for accessing the field via an interface.
 func (v *__PinInstanceInput) GetAuthorsRoles() []Role { return v.AuthorsRoles }
 
 // GetMessagesLast returns __PinInstanceInput.MessagesLast, and is useful for accessing the field via an interface.
-func (v *__PinInstanceInput) GetMessagesLast() *int { return v.MessagesLast }
+func (v *__PinInstanceInput) GetMessagesLast() int { return v.MessagesLast }
 
 // GetMessagesBefore returns __PinInstanceInput.MessagesBefore, and is useful for accessing the field via an interface.
-func (v *__PinInstanceInput) GetMessagesBefore() *string { return v.MessagesBefore }
+func (v *__PinInstanceInput) GetMessagesBefore() string { return v.MessagesBefore }
 
 // __RedeemInviteInput is used internally by genqlient
 type __RedeemInviteInput struct {
@@ -5730,62 +5730,62 @@ func (v *__RedeemInviteInput) GetCode() string { return v.Code }
 // __RemoveChannelInput is used internally by genqlient
 type __RemoveChannelInput struct {
 	ChannelId      uuid.UUID `json:"channelId"`
-	MessagesLast   *int      `json:"messagesLast"`
-	MessagesBefore *string   `json:"messagesBefore"`
+	MessagesLast   int       `json:"messagesLast"`
+	MessagesBefore string    `json:"messagesBefore"`
 }
 
 // GetChannelId returns __RemoveChannelInput.ChannelId, and is useful for accessing the field via an interface.
 func (v *__RemoveChannelInput) GetChannelId() uuid.UUID { return v.ChannelId }
 
 // GetMessagesLast returns __RemoveChannelInput.MessagesLast, and is useful for accessing the field via an interface.
-func (v *__RemoveChannelInput) GetMessagesLast() *int { return v.MessagesLast }
+func (v *__RemoveChannelInput) GetMessagesLast() int { return v.MessagesLast }
 
 // GetMessagesBefore returns __RemoveChannelInput.MessagesBefore, and is useful for accessing the field via an interface.
-func (v *__RemoveChannelInput) GetMessagesBefore() *string { return v.MessagesBefore }
+func (v *__RemoveChannelInput) GetMessagesBefore() string { return v.MessagesBefore }
 
 // __RemoveInstanceInput is used internally by genqlient
 type __RemoveInstanceInput struct {
 	InstanceId     uuid.UUID `json:"instanceId"`
-	ChannelsFirst  *int      `json:"channelsFirst"`
-	ChannelsAfter  *string   `json:"channelsAfter"`
-	LikesFirst     *int      `json:"likesFirst"`
-	LikesAfter     *string   `json:"likesAfter"`
-	AuthorsFirst   *int      `json:"authorsFirst"`
-	AuthorsAfter   *string   `json:"authorsAfter"`
+	ChannelsFirst  int       `json:"channelsFirst"`
+	ChannelsAfter  string    `json:"channelsAfter"`
+	LikesFirst     int       `json:"likesFirst"`
+	LikesAfter     string    `json:"likesAfter"`
+	AuthorsFirst   int       `json:"authorsFirst"`
+	AuthorsAfter   string    `json:"authorsAfter"`
 	AuthorsRoles   []Role    `json:"authorsRoles"`
-	MessagesLast   *int      `json:"messagesLast"`
-	MessagesBefore *string   `json:"messagesBefore"`
+	MessagesLast   int       `json:"messagesLast"`
+	MessagesBefore string    `json:"messagesBefore"`
 }
 
 // GetInstanceId returns __RemoveInstanceInput.InstanceId, and is useful for accessing the field via an interface.
 func (v *__RemoveInstanceInput) GetInstanceId() uuid.UUID { return v.InstanceId }
 
 // GetChannelsFirst returns __RemoveInstanceInput.ChannelsFirst, and is useful for accessing the field via an interface.
-func (v *__RemoveInstanceInput) GetChannelsFirst() *int { return v.ChannelsFirst }
+func (v *__RemoveInstanceInput) GetChannelsFirst() int { return v.ChannelsFirst }
 
 // GetChannelsAfter returns __RemoveInstanceInput.ChannelsAfter, and is useful for accessing the field via an interface.
-func (v *__RemoveInstanceInput) GetChannelsAfter() *string { return v.ChannelsAfter }
+func (v *__RemoveInstanceInput) GetChannelsAfter() string { return v.ChannelsAfter }
 
 // GetLikesFirst returns __RemoveInstanceInput.LikesFirst, and is useful for accessing the field via an interface.
-func (v *__RemoveInstanceInput) GetLikesFirst() *int { return v.LikesFirst }
+func (v *__RemoveInstanceInput) GetLikesFirst() int { return v.LikesFirst }
 
 // GetLikesAfter returns __RemoveInstanceInput.LikesAfter, and is useful for accessing the field via an interface.
-func (v *__RemoveInstanceInput) GetLikesAfter() *string { return v.LikesAfter }
+func (v *__RemoveInstanceInput) GetLikesAfter() string { return v.LikesAfter }
 
 // GetAuthorsFirst returns __RemoveInstanceInput.AuthorsFirst, and is useful for accessing the field via an interface.
-func (v *__RemoveInstanceInput) GetAuthorsFirst() *int { return v.AuthorsFirst }
+func (v *__RemoveInstanceInput) GetAuthorsFirst() int { return v.AuthorsFirst }
 
 // GetAuthorsAfter returns __RemoveInstanceInput.AuthorsAfter, and is useful for accessing the field via an interface.
-func (v *__RemoveInstanceInput) GetAuthorsAfter() *string { return v.AuthorsAfter }
+func (v *__RemoveInstanceInput) GetAuthorsAfter() string { return v.AuthorsAfter }
 
 // GetAuthorsRoles returns __RemoveInstanceInput.AuthorsRoles, and is useful for accessing the field via an interface.
 func (v *__RemoveInstanceInput) GetAuthorsRoles() []Role { return v.AuthorsRoles }
 
 // GetMessagesLast returns __RemoveInstanceInput.MessagesLast, and is useful for accessing the field via an interface.
-func (v *__RemoveInstanceInput) GetMessagesLast() *int { return v.MessagesLast }
+func (v *__RemoveInstanceInput) GetMessagesLast() int { return v.MessagesLast }
 
 // GetMessagesBefore returns __RemoveInstanceInput.MessagesBefore, and is useful for accessing the field via an interface.
-func (v *__RemoveInstanceInput) GetMessagesBefore() *string { return v.MessagesBefore }
+func (v *__RemoveInstanceInput) GetMessagesBefore() string { return v.MessagesBefore }
 
 // __RemoveLikeInput is used internally by genqlient
 type __RemoveLikeInput struct {
@@ -5819,8 +5819,8 @@ func (v *__RemoveRoleInput) GetRole() Role { return v.Role }
 type __ReorderChannelInput struct {
 	Input          ChannelReorderInput `json:"input"`
 	ChannelId      uuid.UUID           `json:"channelId"`
-	MessagesLast   *int                `json:"messagesLast"`
-	MessagesBefore *string             `json:"messagesBefore"`
+	MessagesLast   int                 `json:"messagesLast"`
+	MessagesBefore string              `json:"messagesBefore"`
 }
 
 // GetInput returns __ReorderChannelInput.Input, and is useful for accessing the field via an interface.
@@ -5830,24 +5830,24 @@ func (v *__ReorderChannelInput) GetInput() ChannelReorderInput { return v.Input 
 func (v *__ReorderChannelInput) GetChannelId() uuid.UUID { return v.ChannelId }
 
 // GetMessagesLast returns __ReorderChannelInput.MessagesLast, and is useful for accessing the field via an interface.
-func (v *__ReorderChannelInput) GetMessagesLast() *int { return v.MessagesLast }
+func (v *__ReorderChannelInput) GetMessagesLast() int { return v.MessagesLast }
 
 // GetMessagesBefore returns __ReorderChannelInput.MessagesBefore, and is useful for accessing the field via an interface.
-func (v *__ReorderChannelInput) GetMessagesBefore() *string { return v.MessagesBefore }
+func (v *__ReorderChannelInput) GetMessagesBefore() string { return v.MessagesBefore }
 
 // __ReorderInstanceInput is used internally by genqlient
 type __ReorderInstanceInput struct {
 	Input          InstanceReorderInput `json:"input"`
 	InstanceId     uuid.UUID            `json:"instanceId"`
-	ChannelsFirst  *int                 `json:"channelsFirst"`
-	ChannelsAfter  *string              `json:"channelsAfter"`
-	LikesFirst     *int                 `json:"likesFirst"`
-	LikesAfter     *string              `json:"likesAfter"`
-	AuthorsFirst   *int                 `json:"authorsFirst"`
-	AuthorsAfter   *string              `json:"authorsAfter"`
+	ChannelsFirst  int                  `json:"channelsFirst"`
+	ChannelsAfter  string               `json:"channelsAfter"`
+	LikesFirst     int                  `json:"likesFirst"`
+	LikesAfter     string               `json:"likesAfter"`
+	AuthorsFirst   int                  `json:"authorsFirst"`
+	AuthorsAfter   string               `json:"authorsAfter"`
 	AuthorsRoles   []Role               `json:"authorsRoles"`
-	MessagesLast   *int                 `json:"messagesLast"`
-	MessagesBefore *string              `json:"messagesBefore"`
+	MessagesLast   int                  `json:"messagesLast"`
+	MessagesBefore string               `json:"messagesBefore"`
 }
 
 // GetInput returns __ReorderInstanceInput.Input, and is useful for accessing the field via an interface.
@@ -5857,45 +5857,45 @@ func (v *__ReorderInstanceInput) GetInput() InstanceReorderInput { return v.Inpu
 func (v *__ReorderInstanceInput) GetInstanceId() uuid.UUID { return v.InstanceId }
 
 // GetChannelsFirst returns __ReorderInstanceInput.ChannelsFirst, and is useful for accessing the field via an interface.
-func (v *__ReorderInstanceInput) GetChannelsFirst() *int { return v.ChannelsFirst }
+func (v *__ReorderInstanceInput) GetChannelsFirst() int { return v.ChannelsFirst }
 
 // GetChannelsAfter returns __ReorderInstanceInput.ChannelsAfter, and is useful for accessing the field via an interface.
-func (v *__ReorderInstanceInput) GetChannelsAfter() *string { return v.ChannelsAfter }
+func (v *__ReorderInstanceInput) GetChannelsAfter() string { return v.ChannelsAfter }
 
 // GetLikesFirst returns __ReorderInstanceInput.LikesFirst, and is useful for accessing the field via an interface.
-func (v *__ReorderInstanceInput) GetLikesFirst() *int { return v.LikesFirst }
+func (v *__ReorderInstanceInput) GetLikesFirst() int { return v.LikesFirst }
 
 // GetLikesAfter returns __ReorderInstanceInput.LikesAfter, and is useful for accessing the field via an interface.
-func (v *__ReorderInstanceInput) GetLikesAfter() *string { return v.LikesAfter }
+func (v *__ReorderInstanceInput) GetLikesAfter() string { return v.LikesAfter }
 
 // GetAuthorsFirst returns __ReorderInstanceInput.AuthorsFirst, and is useful for accessing the field via an interface.
-func (v *__ReorderInstanceInput) GetAuthorsFirst() *int { return v.AuthorsFirst }
+func (v *__ReorderInstanceInput) GetAuthorsFirst() int { return v.AuthorsFirst }
 
 // GetAuthorsAfter returns __ReorderInstanceInput.AuthorsAfter, and is useful for accessing the field via an interface.
-func (v *__ReorderInstanceInput) GetAuthorsAfter() *string { return v.AuthorsAfter }
+func (v *__ReorderInstanceInput) GetAuthorsAfter() string { return v.AuthorsAfter }
 
 // GetAuthorsRoles returns __ReorderInstanceInput.AuthorsRoles, and is useful for accessing the field via an interface.
 func (v *__ReorderInstanceInput) GetAuthorsRoles() []Role { return v.AuthorsRoles }
 
 // GetMessagesLast returns __ReorderInstanceInput.MessagesLast, and is useful for accessing the field via an interface.
-func (v *__ReorderInstanceInput) GetMessagesLast() *int { return v.MessagesLast }
+func (v *__ReorderInstanceInput) GetMessagesLast() int { return v.MessagesLast }
 
 // GetMessagesBefore returns __ReorderInstanceInput.MessagesBefore, and is useful for accessing the field via an interface.
-func (v *__ReorderInstanceInput) GetMessagesBefore() *string { return v.MessagesBefore }
+func (v *__ReorderInstanceInput) GetMessagesBefore() string { return v.MessagesBefore }
 
 // __TagInstanceInput is used internally by genqlient
 type __TagInstanceInput struct {
 	InstanceId     uuid.UUID `json:"instanceId"`
 	Input          TagInput  `json:"input"`
-	ChannelsFirst  *int      `json:"channelsFirst"`
-	ChannelsAfter  *string   `json:"channelsAfter"`
-	LikesFirst     *int      `json:"likesFirst"`
-	LikesAfter     *string   `json:"likesAfter"`
-	AuthorsFirst   *int      `json:"authorsFirst"`
-	AuthorsAfter   *string   `json:"authorsAfter"`
+	ChannelsFirst  int       `json:"channelsFirst"`
+	ChannelsAfter  string    `json:"channelsAfter"`
+	LikesFirst     int       `json:"likesFirst"`
+	LikesAfter     string    `json:"likesAfter"`
+	AuthorsFirst   int       `json:"authorsFirst"`
+	AuthorsAfter   string    `json:"authorsAfter"`
 	AuthorsRoles   []Role    `json:"authorsRoles"`
-	MessagesLast   *int      `json:"messagesLast"`
-	MessagesBefore *string   `json:"messagesBefore"`
+	MessagesLast   int       `json:"messagesLast"`
+	MessagesBefore string    `json:"messagesBefore"`
 }
 
 // GetInstanceId returns __TagInstanceInput.InstanceId, and is useful for accessing the field via an interface.
@@ -5905,45 +5905,45 @@ func (v *__TagInstanceInput) GetInstanceId() uuid.UUID { return v.InstanceId }
 func (v *__TagInstanceInput) GetInput() TagInput { return v.Input }
 
 // GetChannelsFirst returns __TagInstanceInput.ChannelsFirst, and is useful for accessing the field via an interface.
-func (v *__TagInstanceInput) GetChannelsFirst() *int { return v.ChannelsFirst }
+func (v *__TagInstanceInput) GetChannelsFirst() int { return v.ChannelsFirst }
 
 // GetChannelsAfter returns __TagInstanceInput.ChannelsAfter, and is useful for accessing the field via an interface.
-func (v *__TagInstanceInput) GetChannelsAfter() *string { return v.ChannelsAfter }
+func (v *__TagInstanceInput) GetChannelsAfter() string { return v.ChannelsAfter }
 
 // GetLikesFirst returns __TagInstanceInput.LikesFirst, and is useful for accessing the field via an interface.
-func (v *__TagInstanceInput) GetLikesFirst() *int { return v.LikesFirst }
+func (v *__TagInstanceInput) GetLikesFirst() int { return v.LikesFirst }
 
 // GetLikesAfter returns __TagInstanceInput.LikesAfter, and is useful for accessing the field via an interface.
-func (v *__TagInstanceInput) GetLikesAfter() *string { return v.LikesAfter }
+func (v *__TagInstanceInput) GetLikesAfter() string { return v.LikesAfter }
 
 // GetAuthorsFirst returns __TagInstanceInput.AuthorsFirst, and is useful for accessing the field via an interface.
-func (v *__TagInstanceInput) GetAuthorsFirst() *int { return v.AuthorsFirst }
+func (v *__TagInstanceInput) GetAuthorsFirst() int { return v.AuthorsFirst }
 
 // GetAuthorsAfter returns __TagInstanceInput.AuthorsAfter, and is useful for accessing the field via an interface.
-func (v *__TagInstanceInput) GetAuthorsAfter() *string { return v.AuthorsAfter }
+func (v *__TagInstanceInput) GetAuthorsAfter() string { return v.AuthorsAfter }
 
 // GetAuthorsRoles returns __TagInstanceInput.AuthorsRoles, and is useful for accessing the field via an interface.
 func (v *__TagInstanceInput) GetAuthorsRoles() []Role { return v.AuthorsRoles }
 
 // GetMessagesLast returns __TagInstanceInput.MessagesLast, and is useful for accessing the field via an interface.
-func (v *__TagInstanceInput) GetMessagesLast() *int { return v.MessagesLast }
+func (v *__TagInstanceInput) GetMessagesLast() int { return v.MessagesLast }
 
 // GetMessagesBefore returns __TagInstanceInput.MessagesBefore, and is useful for accessing the field via an interface.
-func (v *__TagInstanceInput) GetMessagesBefore() *string { return v.MessagesBefore }
+func (v *__TagInstanceInput) GetMessagesBefore() string { return v.MessagesBefore }
 
 // __UntagInstanceInput is used internally by genqlient
 type __UntagInstanceInput struct {
 	InstanceId     uuid.UUID `json:"instanceId"`
 	Input          TagInput  `json:"input"`
-	ChannelsFirst  *int      `json:"channelsFirst"`
-	ChannelsAfter  *string   `json:"channelsAfter"`
-	LikesFirst     *int      `json:"likesFirst"`
-	LikesAfter     *string   `json:"likesAfter"`
-	AuthorsFirst   *int      `json:"authorsFirst"`
-	AuthorsAfter   *string   `json:"authorsAfter"`
+	ChannelsFirst  int       `json:"channelsFirst"`
+	ChannelsAfter  string    `json:"channelsAfter"`
+	LikesFirst     int       `json:"likesFirst"`
+	LikesAfter     string    `json:"likesAfter"`
+	AuthorsFirst   int       `json:"authorsFirst"`
+	AuthorsAfter   string    `json:"authorsAfter"`
 	AuthorsRoles   []Role    `json:"authorsRoles"`
-	MessagesLast   *int      `json:"messagesLast"`
-	MessagesBefore *string   `json:"messagesBefore"`
+	MessagesLast   int       `json:"messagesLast"`
+	MessagesBefore string    `json:"messagesBefore"`
 }
 
 // GetInstanceId returns __UntagInstanceInput.InstanceId, and is useful for accessing the field via an interface.
@@ -5953,38 +5953,38 @@ func (v *__UntagInstanceInput) GetInstanceId() uuid.UUID { return v.InstanceId }
 func (v *__UntagInstanceInput) GetInput() TagInput { return v.Input }
 
 // GetChannelsFirst returns __UntagInstanceInput.ChannelsFirst, and is useful for accessing the field via an interface.
-func (v *__UntagInstanceInput) GetChannelsFirst() *int { return v.ChannelsFirst }
+func (v *__UntagInstanceInput) GetChannelsFirst() int { return v.ChannelsFirst }
 
 // GetChannelsAfter returns __UntagInstanceInput.ChannelsAfter, and is useful for accessing the field via an interface.
-func (v *__UntagInstanceInput) GetChannelsAfter() *string { return v.ChannelsAfter }
+func (v *__UntagInstanceInput) GetChannelsAfter() string { return v.ChannelsAfter }
 
 // GetLikesFirst returns __UntagInstanceInput.LikesFirst, and is useful for accessing the field via an interface.
-func (v *__UntagInstanceInput) GetLikesFirst() *int { return v.LikesFirst }
+func (v *__UntagInstanceInput) GetLikesFirst() int { return v.LikesFirst }
 
 // GetLikesAfter returns __UntagInstanceInput.LikesAfter, and is useful for accessing the field via an interface.
-func (v *__UntagInstanceInput) GetLikesAfter() *string { return v.LikesAfter }
+func (v *__UntagInstanceInput) GetLikesAfter() string { return v.LikesAfter }
 
 // GetAuthorsFirst returns __UntagInstanceInput.AuthorsFirst, and is useful for accessing the field via an interface.
-func (v *__UntagInstanceInput) GetAuthorsFirst() *int { return v.AuthorsFirst }
+func (v *__UntagInstanceInput) GetAuthorsFirst() int { return v.AuthorsFirst }
 
 // GetAuthorsAfter returns __UntagInstanceInput.AuthorsAfter, and is useful for accessing the field via an interface.
-func (v *__UntagInstanceInput) GetAuthorsAfter() *string { return v.AuthorsAfter }
+func (v *__UntagInstanceInput) GetAuthorsAfter() string { return v.AuthorsAfter }
 
 // GetAuthorsRoles returns __UntagInstanceInput.AuthorsRoles, and is useful for accessing the field via an interface.
 func (v *__UntagInstanceInput) GetAuthorsRoles() []Role { return v.AuthorsRoles }
 
 // GetMessagesLast returns __UntagInstanceInput.MessagesLast, and is useful for accessing the field via an interface.
-func (v *__UntagInstanceInput) GetMessagesLast() *int { return v.MessagesLast }
+func (v *__UntagInstanceInput) GetMessagesLast() int { return v.MessagesLast }
 
 // GetMessagesBefore returns __UntagInstanceInput.MessagesBefore, and is useful for accessing the field via an interface.
-func (v *__UntagInstanceInput) GetMessagesBefore() *string { return v.MessagesBefore }
+func (v *__UntagInstanceInput) GetMessagesBefore() string { return v.MessagesBefore }
 
 // __UpdateChannelInput is used internally by genqlient
 type __UpdateChannelInput struct {
 	Input          ChannelInput `json:"input"`
 	ChannelId      uuid.UUID    `json:"channelId"`
-	MessagesLast   *int         `json:"messagesLast"`
-	MessagesBefore *string      `json:"messagesBefore"`
+	MessagesLast   int          `json:"messagesLast"`
+	MessagesBefore string       `json:"messagesBefore"`
 }
 
 // GetInput returns __UpdateChannelInput.Input, and is useful for accessing the field via an interface.
@@ -5994,24 +5994,24 @@ func (v *__UpdateChannelInput) GetInput() ChannelInput { return v.Input }
 func (v *__UpdateChannelInput) GetChannelId() uuid.UUID { return v.ChannelId }
 
 // GetMessagesLast returns __UpdateChannelInput.MessagesLast, and is useful for accessing the field via an interface.
-func (v *__UpdateChannelInput) GetMessagesLast() *int { return v.MessagesLast }
+func (v *__UpdateChannelInput) GetMessagesLast() int { return v.MessagesLast }
 
 // GetMessagesBefore returns __UpdateChannelInput.MessagesBefore, and is useful for accessing the field via an interface.
-func (v *__UpdateChannelInput) GetMessagesBefore() *string { return v.MessagesBefore }
+func (v *__UpdateChannelInput) GetMessagesBefore() string { return v.MessagesBefore }
 
 // __UpdateInstanceInput is used internally by genqlient
 type __UpdateInstanceInput struct {
 	InstanceId     uuid.UUID     `json:"instanceId"`
 	Input          InstanceInput `json:"input"`
-	ChannelsFirst  *int          `json:"channelsFirst"`
-	ChannelsAfter  *string       `json:"channelsAfter"`
-	LikesFirst     *int          `json:"likesFirst"`
-	LikesAfter     *string       `json:"likesAfter"`
-	AuthorsFirst   *int          `json:"authorsFirst"`
-	AuthorsAfter   *string       `json:"authorsAfter"`
+	ChannelsFirst  int           `json:"channelsFirst"`
+	ChannelsAfter  string        `json:"channelsAfter"`
+	LikesFirst     int           `json:"likesFirst"`
+	LikesAfter     string        `json:"likesAfter"`
+	AuthorsFirst   int           `json:"authorsFirst"`
+	AuthorsAfter   string        `json:"authorsAfter"`
 	AuthorsRoles   []Role        `json:"authorsRoles"`
-	MessagesLast   *int          `json:"messagesLast"`
-	MessagesBefore *string       `json:"messagesBefore"`
+	MessagesLast   int           `json:"messagesLast"`
+	MessagesBefore string        `json:"messagesBefore"`
 }
 
 // GetInstanceId returns __UpdateInstanceInput.InstanceId, and is useful for accessing the field via an interface.
@@ -6021,159 +6021,159 @@ func (v *__UpdateInstanceInput) GetInstanceId() uuid.UUID { return v.InstanceId 
 func (v *__UpdateInstanceInput) GetInput() InstanceInput { return v.Input }
 
 // GetChannelsFirst returns __UpdateInstanceInput.ChannelsFirst, and is useful for accessing the field via an interface.
-func (v *__UpdateInstanceInput) GetChannelsFirst() *int { return v.ChannelsFirst }
+func (v *__UpdateInstanceInput) GetChannelsFirst() int { return v.ChannelsFirst }
 
 // GetChannelsAfter returns __UpdateInstanceInput.ChannelsAfter, and is useful for accessing the field via an interface.
-func (v *__UpdateInstanceInput) GetChannelsAfter() *string { return v.ChannelsAfter }
+func (v *__UpdateInstanceInput) GetChannelsAfter() string { return v.ChannelsAfter }
 
 // GetLikesFirst returns __UpdateInstanceInput.LikesFirst, and is useful for accessing the field via an interface.
-func (v *__UpdateInstanceInput) GetLikesFirst() *int { return v.LikesFirst }
+func (v *__UpdateInstanceInput) GetLikesFirst() int { return v.LikesFirst }
 
 // GetLikesAfter returns __UpdateInstanceInput.LikesAfter, and is useful for accessing the field via an interface.
-func (v *__UpdateInstanceInput) GetLikesAfter() *string { return v.LikesAfter }
+func (v *__UpdateInstanceInput) GetLikesAfter() string { return v.LikesAfter }
 
 // GetAuthorsFirst returns __UpdateInstanceInput.AuthorsFirst, and is useful for accessing the field via an interface.
-func (v *__UpdateInstanceInput) GetAuthorsFirst() *int { return v.AuthorsFirst }
+func (v *__UpdateInstanceInput) GetAuthorsFirst() int { return v.AuthorsFirst }
 
 // GetAuthorsAfter returns __UpdateInstanceInput.AuthorsAfter, and is useful for accessing the field via an interface.
-func (v *__UpdateInstanceInput) GetAuthorsAfter() *string { return v.AuthorsAfter }
+func (v *__UpdateInstanceInput) GetAuthorsAfter() string { return v.AuthorsAfter }
 
 // GetAuthorsRoles returns __UpdateInstanceInput.AuthorsRoles, and is useful for accessing the field via an interface.
 func (v *__UpdateInstanceInput) GetAuthorsRoles() []Role { return v.AuthorsRoles }
 
 // GetMessagesLast returns __UpdateInstanceInput.MessagesLast, and is useful for accessing the field via an interface.
-func (v *__UpdateInstanceInput) GetMessagesLast() *int { return v.MessagesLast }
+func (v *__UpdateInstanceInput) GetMessagesLast() int { return v.MessagesLast }
 
 // GetMessagesBefore returns __UpdateInstanceInput.MessagesBefore, and is useful for accessing the field via an interface.
-func (v *__UpdateInstanceInput) GetMessagesBefore() *string { return v.MessagesBefore }
+func (v *__UpdateInstanceInput) GetMessagesBefore() string { return v.MessagesBefore }
 
 // __UpdateUserInput is used internally by genqlient
 type __UpdateUserInput struct {
 	Input               UserInput `json:"input"`
-	InstancesFirst      *int      `json:"instancesFirst"`
-	InstancesAfter      *string   `json:"instancesAfter"`
-	ChannelsFirst       *int      `json:"channelsFirst"`
-	ChannelsAfter       *string   `json:"channelsAfter"`
-	LikesFirst          *int      `json:"likesFirst"`
-	LikesAfter          *string   `json:"likesAfter"`
-	AuthorsFirst        *int      `json:"authorsFirst"`
-	AuthorsAfter        *string   `json:"authorsAfter"`
+	InstancesFirst      int       `json:"instancesFirst"`
+	InstancesAfter      string    `json:"instancesAfter"`
+	ChannelsFirst       int       `json:"channelsFirst"`
+	ChannelsAfter       string    `json:"channelsAfter"`
+	LikesFirst          int       `json:"likesFirst"`
+	LikesAfter          string    `json:"likesAfter"`
+	AuthorsFirst        int       `json:"authorsFirst"`
+	AuthorsAfter        string    `json:"authorsAfter"`
 	AuthorsRoles        []Role    `json:"authorsRoles"`
-	MessagesLast        *int      `json:"messagesLast"`
-	MessagesBefore      *string   `json:"messagesBefore"`
-	NotificationsLast   *int      `json:"notificationsLast"`
-	NotificationsBefore *string   `json:"notificationsBefore"`
+	MessagesLast        int       `json:"messagesLast"`
+	MessagesBefore      string    `json:"messagesBefore"`
+	NotificationsLast   int       `json:"notificationsLast"`
+	NotificationsBefore string    `json:"notificationsBefore"`
 }
 
 // GetInput returns __UpdateUserInput.Input, and is useful for accessing the field via an interface.
 func (v *__UpdateUserInput) GetInput() UserInput { return v.Input }
 
 // GetInstancesFirst returns __UpdateUserInput.InstancesFirst, and is useful for accessing the field via an interface.
-func (v *__UpdateUserInput) GetInstancesFirst() *int { return v.InstancesFirst }
+func (v *__UpdateUserInput) GetInstancesFirst() int { return v.InstancesFirst }
 
 // GetInstancesAfter returns __UpdateUserInput.InstancesAfter, and is useful for accessing the field via an interface.
-func (v *__UpdateUserInput) GetInstancesAfter() *string { return v.InstancesAfter }
+func (v *__UpdateUserInput) GetInstancesAfter() string { return v.InstancesAfter }
 
 // GetChannelsFirst returns __UpdateUserInput.ChannelsFirst, and is useful for accessing the field via an interface.
-func (v *__UpdateUserInput) GetChannelsFirst() *int { return v.ChannelsFirst }
+func (v *__UpdateUserInput) GetChannelsFirst() int { return v.ChannelsFirst }
 
 // GetChannelsAfter returns __UpdateUserInput.ChannelsAfter, and is useful for accessing the field via an interface.
-func (v *__UpdateUserInput) GetChannelsAfter() *string { return v.ChannelsAfter }
+func (v *__UpdateUserInput) GetChannelsAfter() string { return v.ChannelsAfter }
 
 // GetLikesFirst returns __UpdateUserInput.LikesFirst, and is useful for accessing the field via an interface.
-func (v *__UpdateUserInput) GetLikesFirst() *int { return v.LikesFirst }
+func (v *__UpdateUserInput) GetLikesFirst() int { return v.LikesFirst }
 
 // GetLikesAfter returns __UpdateUserInput.LikesAfter, and is useful for accessing the field via an interface.
-func (v *__UpdateUserInput) GetLikesAfter() *string { return v.LikesAfter }
+func (v *__UpdateUserInput) GetLikesAfter() string { return v.LikesAfter }
 
 // GetAuthorsFirst returns __UpdateUserInput.AuthorsFirst, and is useful for accessing the field via an interface.
-func (v *__UpdateUserInput) GetAuthorsFirst() *int { return v.AuthorsFirst }
+func (v *__UpdateUserInput) GetAuthorsFirst() int { return v.AuthorsFirst }
 
 // GetAuthorsAfter returns __UpdateUserInput.AuthorsAfter, and is useful for accessing the field via an interface.
-func (v *__UpdateUserInput) GetAuthorsAfter() *string { return v.AuthorsAfter }
+func (v *__UpdateUserInput) GetAuthorsAfter() string { return v.AuthorsAfter }
 
 // GetAuthorsRoles returns __UpdateUserInput.AuthorsRoles, and is useful for accessing the field via an interface.
 func (v *__UpdateUserInput) GetAuthorsRoles() []Role { return v.AuthorsRoles }
 
 // GetMessagesLast returns __UpdateUserInput.MessagesLast, and is useful for accessing the field via an interface.
-func (v *__UpdateUserInput) GetMessagesLast() *int { return v.MessagesLast }
+func (v *__UpdateUserInput) GetMessagesLast() int { return v.MessagesLast }
 
 // GetMessagesBefore returns __UpdateUserInput.MessagesBefore, and is useful for accessing the field via an interface.
-func (v *__UpdateUserInput) GetMessagesBefore() *string { return v.MessagesBefore }
+func (v *__UpdateUserInput) GetMessagesBefore() string { return v.MessagesBefore }
 
 // GetNotificationsLast returns __UpdateUserInput.NotificationsLast, and is useful for accessing the field via an interface.
-func (v *__UpdateUserInput) GetNotificationsLast() *int { return v.NotificationsLast }
+func (v *__UpdateUserInput) GetNotificationsLast() int { return v.NotificationsLast }
 
 // GetNotificationsBefore returns __UpdateUserInput.NotificationsBefore, and is useful for accessing the field via an interface.
-func (v *__UpdateUserInput) GetNotificationsBefore() *string { return v.NotificationsBefore }
+func (v *__UpdateUserInput) GetNotificationsBefore() string { return v.NotificationsBefore }
 
 // __UserInput is used internally by genqlient
 type __UserInput struct {
-	InstancesFirst      *int    `json:"instancesFirst"`
-	InstancesAfter      *string `json:"instancesAfter"`
-	ChannelsFirst       *int    `json:"channelsFirst"`
-	ChannelsAfter       *string `json:"channelsAfter"`
-	LikesFirst          *int    `json:"likesFirst"`
-	LikesAfter          *string `json:"likesAfter"`
-	AuthorsFirst        *int    `json:"authorsFirst"`
-	AuthorsAfter        *string `json:"authorsAfter"`
-	AuthorsRoles        []Role  `json:"authorsRoles"`
-	MessagesLast        *int    `json:"messagesLast"`
-	MessagesBefore      *string `json:"messagesBefore"`
-	NotificationsLast   *int    `json:"notificationsLast"`
-	NotificationsBefore *string `json:"notificationsBefore"`
+	InstancesFirst      int    `json:"instancesFirst"`
+	InstancesAfter      string `json:"instancesAfter"`
+	ChannelsFirst       int    `json:"channelsFirst"`
+	ChannelsAfter       string `json:"channelsAfter"`
+	LikesFirst          int    `json:"likesFirst"`
+	LikesAfter          string `json:"likesAfter"`
+	AuthorsFirst        int    `json:"authorsFirst"`
+	AuthorsAfter        string `json:"authorsAfter"`
+	AuthorsRoles        []Role `json:"authorsRoles"`
+	MessagesLast        int    `json:"messagesLast"`
+	MessagesBefore      string `json:"messagesBefore"`
+	NotificationsLast   int    `json:"notificationsLast"`
+	NotificationsBefore string `json:"notificationsBefore"`
 }
 
 // GetInstancesFirst returns __UserInput.InstancesFirst, and is useful for accessing the field via an interface.
-func (v *__UserInput) GetInstancesFirst() *int { return v.InstancesFirst }
+func (v *__UserInput) GetInstancesFirst() int { return v.InstancesFirst }
 
 // GetInstancesAfter returns __UserInput.InstancesAfter, and is useful for accessing the field via an interface.
-func (v *__UserInput) GetInstancesAfter() *string { return v.InstancesAfter }
+func (v *__UserInput) GetInstancesAfter() string { return v.InstancesAfter }
 
 // GetChannelsFirst returns __UserInput.ChannelsFirst, and is useful for accessing the field via an interface.
-func (v *__UserInput) GetChannelsFirst() *int { return v.ChannelsFirst }
+func (v *__UserInput) GetChannelsFirst() int { return v.ChannelsFirst }
 
 // GetChannelsAfter returns __UserInput.ChannelsAfter, and is useful for accessing the field via an interface.
-func (v *__UserInput) GetChannelsAfter() *string { return v.ChannelsAfter }
+func (v *__UserInput) GetChannelsAfter() string { return v.ChannelsAfter }
 
 // GetLikesFirst returns __UserInput.LikesFirst, and is useful for accessing the field via an interface.
-func (v *__UserInput) GetLikesFirst() *int { return v.LikesFirst }
+func (v *__UserInput) GetLikesFirst() int { return v.LikesFirst }
 
 // GetLikesAfter returns __UserInput.LikesAfter, and is useful for accessing the field via an interface.
-func (v *__UserInput) GetLikesAfter() *string { return v.LikesAfter }
+func (v *__UserInput) GetLikesAfter() string { return v.LikesAfter }
 
 // GetAuthorsFirst returns __UserInput.AuthorsFirst, and is useful for accessing the field via an interface.
-func (v *__UserInput) GetAuthorsFirst() *int { return v.AuthorsFirst }
+func (v *__UserInput) GetAuthorsFirst() int { return v.AuthorsFirst }
 
 // GetAuthorsAfter returns __UserInput.AuthorsAfter, and is useful for accessing the field via an interface.
-func (v *__UserInput) GetAuthorsAfter() *string { return v.AuthorsAfter }
+func (v *__UserInput) GetAuthorsAfter() string { return v.AuthorsAfter }
 
 // GetAuthorsRoles returns __UserInput.AuthorsRoles, and is useful for accessing the field via an interface.
 func (v *__UserInput) GetAuthorsRoles() []Role { return v.AuthorsRoles }
 
 // GetMessagesLast returns __UserInput.MessagesLast, and is useful for accessing the field via an interface.
-func (v *__UserInput) GetMessagesLast() *int { return v.MessagesLast }
+func (v *__UserInput) GetMessagesLast() int { return v.MessagesLast }
 
 // GetMessagesBefore returns __UserInput.MessagesBefore, and is useful for accessing the field via an interface.
-func (v *__UserInput) GetMessagesBefore() *string { return v.MessagesBefore }
+func (v *__UserInput) GetMessagesBefore() string { return v.MessagesBefore }
 
 // GetNotificationsLast returns __UserInput.NotificationsLast, and is useful for accessing the field via an interface.
-func (v *__UserInput) GetNotificationsLast() *int { return v.NotificationsLast }
+func (v *__UserInput) GetNotificationsLast() int { return v.NotificationsLast }
 
 // GetNotificationsBefore returns __UserInput.NotificationsBefore, and is useful for accessing the field via an interface.
-func (v *__UserInput) GetNotificationsBefore() *string { return v.NotificationsBefore }
+func (v *__UserInput) GetNotificationsBefore() string { return v.NotificationsBefore }
 
 func AddChannel(
 	ctx context.Context,
 	client graphql.Client,
 	input ChannelInput,
-	messagesLast *int,
-	messagesBefore *string,
+	messagesLast int,
+	messagesBefore string,
 ) (*AddChannelResponse, error) {
 	req := &graphql.Request{
 		OpName: "AddChannel",
 		Query: `
-mutation AddChannel ($input: ChannelInput!, $messagesLast: Int = 0, $messagesBefore: String = "") {
+mutation AddChannel ($input: ChannelInput!, $messagesLast: Int!, $messagesBefore: String!) {
 	addChannel(input: $input) {
 		... InstanceChannelsEdgeFragment
 	}
@@ -6260,20 +6260,20 @@ func AddInstance(
 	ctx context.Context,
 	client graphql.Client,
 	input InstanceInput,
-	channelsFirst *int,
-	channelsAfter *string,
-	likesFirst *int,
-	likesAfter *string,
-	authorsFirst *int,
-	authorsAfter *string,
+	channelsFirst int,
+	channelsAfter string,
+	likesFirst int,
+	likesAfter string,
+	authorsFirst int,
+	authorsAfter string,
 	authorsRoles []Role,
-	messagesLast *int,
-	messagesBefore *string,
+	messagesLast int,
+	messagesBefore string,
 ) (*AddInstanceResponse, error) {
 	req := &graphql.Request{
 		OpName: "AddInstance",
 		Query: `
-mutation AddInstance ($input: InstanceInput!, $channelsFirst: Int = 0, $channelsAfter: String = "", $likesFirst: Int = 0, $likesAfter: String = "", $authorsFirst: Int = 0, $authorsAfter: String = "", $authorsRoles: [Role!] = [], $messagesLast: Int = 0, $messagesBefore: String = "") {
+mutation AddInstance ($input: InstanceInput!, $channelsFirst: Int!, $channelsAfter: String!, $likesFirst: Int!, $likesAfter: String!, $authorsFirst: Int!, $authorsAfter: String!, $authorsRoles: [Role!] = [], $messagesLast: Int!, $messagesBefore: String!) {
 	addInstance(input: $input) {
 		... UserInstancesEdgeFragment
 	}
@@ -6636,13 +6636,13 @@ func Channel(
 	ctx context.Context,
 	client graphql.Client,
 	id uuid.UUID,
-	messagesLast *int,
-	messagesBefore *string,
+	messagesLast int,
+	messagesBefore string,
 ) (*ChannelResponse, error) {
 	req := &graphql.Request{
 		OpName: "Channel",
 		Query: `
-query Channel ($id: Uuid!, $messagesLast: Int = 0, $messagesBefore: String = "") {
+query Channel ($id: Uuid!, $messagesLast: Int!, $messagesBefore: String!) {
 	channel(id: $id) {
 		... ChannelFragment
 	}
@@ -6723,20 +6723,20 @@ func CheckInvite(
 	ctx context.Context,
 	client graphql.Client,
 	code string,
-	channelsFirst *int,
-	channelsAfter *string,
-	likesFirst *int,
-	likesAfter *string,
-	authorsFirst *int,
-	authorsAfter *string,
+	channelsFirst int,
+	channelsAfter string,
+	likesFirst int,
+	likesAfter string,
+	authorsFirst int,
+	authorsAfter string,
 	authorsRoles []Role,
-	messagesLast *int,
-	messagesBefore *string,
+	messagesLast int,
+	messagesBefore string,
 ) (*CheckInviteResponse, error) {
 	req := &graphql.Request{
 		OpName: "CheckInvite",
 		Query: `
-query CheckInvite ($code: String!, $channelsFirst: Int = 0, $channelsAfter: String = "", $likesFirst: Int = 0, $likesAfter: String = "", $authorsFirst: Int = 0, $authorsAfter: String = "", $authorsRoles: [Role!] = [], $messagesLast: Int = 0, $messagesBefore: String = "") {
+query CheckInvite ($code: String!, $channelsFirst: Int!, $channelsAfter: String!, $likesFirst: Int!, $likesAfter: String!, $authorsFirst: Int!, $authorsAfter: String!, $authorsRoles: [Role!]!, $messagesLast: Int!, $messagesBefore: String!) {
 	checkInvite(code: $code) {
 		instance {
 			... InstanceFragment
@@ -6898,20 +6898,20 @@ func Instance(
 	ctx context.Context,
 	client graphql.Client,
 	id uuid.UUID,
-	channelsFirst *int,
-	channelsAfter *string,
-	likesFirst *int,
-	likesAfter *string,
-	authorsFirst *int,
-	authorsAfter *string,
+	channelsFirst int,
+	channelsAfter string,
+	likesFirst int,
+	likesAfter string,
+	authorsFirst int,
+	authorsAfter string,
 	authorsRoles []Role,
-	messagesLast *int,
-	messagesBefore *string,
+	messagesLast int,
+	messagesBefore string,
 ) (*InstanceResponse, error) {
 	req := &graphql.Request{
 		OpName: "Instance",
 		Query: `
-query Instance ($id: Uuid!, $channelsFirst: Int = 0, $channelsAfter: String = "", $likesFirst: Int = 0, $likesAfter: String = "", $authorsFirst: Int = 0, $authorsAfter: String = "", $authorsRoles: [Role!] = [], $messagesLast: Int = 0, $messagesBefore: String = "") {
+query Instance ($id: Uuid!, $channelsFirst: Int!, $channelsAfter: String!, $likesFirst: Int!, $likesAfter: String!, $authorsFirst: Int!, $authorsAfter: String!, $authorsRoles: [Role!]!, $messagesLast: Int!, $messagesBefore: String!) {
 	instance(id: $id) {
 		... UserInstancesEdgeFragment
 	}
@@ -7125,20 +7125,20 @@ func PinInstance(
 	client graphql.Client,
 	input InstancePinInput,
 	instanceId uuid.UUID,
-	channelsFirst *int,
-	channelsAfter *string,
-	likesFirst *int,
-	likesAfter *string,
-	authorsFirst *int,
-	authorsAfter *string,
+	channelsFirst int,
+	channelsAfter string,
+	likesFirst int,
+	likesAfter string,
+	authorsFirst int,
+	authorsAfter string,
 	authorsRoles []Role,
-	messagesLast *int,
-	messagesBefore *string,
+	messagesLast int,
+	messagesBefore string,
 ) (*PinInstanceResponse, error) {
 	req := &graphql.Request{
 		OpName: "PinInstance",
 		Query: `
-mutation PinInstance ($input: InstancePinInput!, $instanceId: Uuid!, $channelsFirst: Int = 0, $channelsAfter: String = "", $likesFirst: Int = 0, $likesAfter: String = "", $authorsFirst: Int = 0, $authorsAfter: String = "", $authorsRoles: [Role!] = [], $messagesLast: Int = 0, $messagesBefore: String = "") {
+mutation PinInstance ($input: InstancePinInput!, $instanceId: Uuid!, $channelsFirst: Int!, $channelsAfter: String!, $likesFirst: Int!, $likesAfter: String!, $authorsFirst: Int!, $authorsAfter: String!, $authorsRoles: [Role!] = [], $messagesLast: Int!, $messagesBefore: String!) {
 	pinInstance(input: $input, instanceId: $instanceId) {
 		... UserInstancesEdgeFragment
 	}
@@ -7352,13 +7352,13 @@ func RemoveChannel(
 	ctx context.Context,
 	client graphql.Client,
 	channelId uuid.UUID,
-	messagesLast *int,
-	messagesBefore *string,
+	messagesLast int,
+	messagesBefore string,
 ) (*RemoveChannelResponse, error) {
 	req := &graphql.Request{
 		OpName: "RemoveChannel",
 		Query: `
-mutation RemoveChannel ($channelId: Uuid!, $messagesLast: Int = 0, $messagesBefore: String = "") {
+mutation RemoveChannel ($channelId: Uuid!, $messagesLast: Int!, $messagesBefore: String!) {
 	removeChannel(channelId: $channelId) {
 		... InstanceChannelsEdgeFragment
 	}
@@ -7445,20 +7445,20 @@ func RemoveInstance(
 	ctx context.Context,
 	client graphql.Client,
 	instanceId uuid.UUID,
-	channelsFirst *int,
-	channelsAfter *string,
-	likesFirst *int,
-	likesAfter *string,
-	authorsFirst *int,
-	authorsAfter *string,
+	channelsFirst int,
+	channelsAfter string,
+	likesFirst int,
+	likesAfter string,
+	authorsFirst int,
+	authorsAfter string,
 	authorsRoles []Role,
-	messagesLast *int,
-	messagesBefore *string,
+	messagesLast int,
+	messagesBefore string,
 ) (*RemoveInstanceResponse, error) {
 	req := &graphql.Request{
 		OpName: "RemoveInstance",
 		Query: `
-mutation RemoveInstance ($instanceId: Uuid!, $channelsFirst: Int = 0, $channelsAfter: String = "", $likesFirst: Int = 0, $likesAfter: String = "", $authorsFirst: Int = 0, $authorsAfter: String = "", $authorsRoles: [Role!] = [], $messagesLast: Int = 0, $messagesBefore: String = "") {
+mutation RemoveInstance ($instanceId: Uuid!, $channelsFirst: Int!, $channelsAfter: String!, $likesFirst: Int!, $likesAfter: String!, $authorsFirst: Int!, $authorsAfter: String!, $authorsRoles: [Role!] = [], $messagesLast: Int!, $messagesBefore: String!) {
 	removeInstance(instanceId: $instanceId) {
 		... UserInstancesEdgeFragment
 	}
@@ -7769,13 +7769,13 @@ func ReorderChannel(
 	client graphql.Client,
 	input ChannelReorderInput,
 	channelId uuid.UUID,
-	messagesLast *int,
-	messagesBefore *string,
+	messagesLast int,
+	messagesBefore string,
 ) (*ReorderChannelResponse, error) {
 	req := &graphql.Request{
 		OpName: "ReorderChannel",
 		Query: `
-mutation ReorderChannel ($input: ChannelReorderInput!, $channelId: Uuid!, $messagesLast: Int = 0, $messagesBefore: String = "") {
+mutation ReorderChannel ($input: ChannelReorderInput!, $channelId: Uuid!, $messagesLast: Int!, $messagesBefore: String!) {
 	reorderChannel(input: $input, channelId: $channelId) {
 		... InstanceChannelsEdgeFragment
 	}
@@ -7864,20 +7864,20 @@ func ReorderInstance(
 	client graphql.Client,
 	input InstanceReorderInput,
 	instanceId uuid.UUID,
-	channelsFirst *int,
-	channelsAfter *string,
-	likesFirst *int,
-	likesAfter *string,
-	authorsFirst *int,
-	authorsAfter *string,
+	channelsFirst int,
+	channelsAfter string,
+	likesFirst int,
+	likesAfter string,
+	authorsFirst int,
+	authorsAfter string,
 	authorsRoles []Role,
-	messagesLast *int,
-	messagesBefore *string,
+	messagesLast int,
+	messagesBefore string,
 ) (*ReorderInstanceResponse, error) {
 	req := &graphql.Request{
 		OpName: "ReorderInstance",
 		Query: `
-mutation ReorderInstance ($input: InstanceReorderInput!, $instanceId: Uuid!, $channelsFirst: Int = 0, $channelsAfter: String = "", $likesFirst: Int = 0, $likesAfter: String = "", $authorsFirst: Int = 0, $authorsAfter: String = "", $authorsRoles: [Role!] = [], $messagesLast: Int = 0, $messagesBefore: String = "") {
+mutation ReorderInstance ($input: InstanceReorderInput!, $instanceId: Uuid!, $channelsFirst: Int!, $channelsAfter: String!, $likesFirst: Int!, $likesAfter: String!, $authorsFirst: Int!, $authorsAfter: String!, $authorsRoles: [Role!] = [], $messagesLast: Int!, $messagesBefore: String!) {
 	reorderInstance(input: $input, instanceId: $instanceId) {
 		... UserInstancesEdgeFragment
 	}
@@ -8039,20 +8039,20 @@ func TagInstance(
 	client graphql.Client,
 	instanceId uuid.UUID,
 	input TagInput,
-	channelsFirst *int,
-	channelsAfter *string,
-	likesFirst *int,
-	likesAfter *string,
-	authorsFirst *int,
-	authorsAfter *string,
+	channelsFirst int,
+	channelsAfter string,
+	likesFirst int,
+	likesAfter string,
+	authorsFirst int,
+	authorsAfter string,
 	authorsRoles []Role,
-	messagesLast *int,
-	messagesBefore *string,
+	messagesLast int,
+	messagesBefore string,
 ) (*TagInstanceResponse, error) {
 	req := &graphql.Request{
 		OpName: "TagInstance",
 		Query: `
-mutation TagInstance ($instanceId: Uuid!, $input: TagInput!, $channelsFirst: Int = 0, $channelsAfter: String = "", $likesFirst: Int = 0, $likesAfter: String = "", $authorsFirst: Int = 0, $authorsAfter: String = "", $authorsRoles: [Role!] = [], $messagesLast: Int = 0, $messagesBefore: String = "") {
+mutation TagInstance ($instanceId: Uuid!, $input: TagInput!, $channelsFirst: Int!, $channelsAfter: String!, $likesFirst: Int!, $likesAfter: String!, $authorsFirst: Int!, $authorsAfter: String!, $authorsRoles: [Role!] = [], $messagesLast: Int!, $messagesBefore: String!) {
 	tagInstance(instanceId: $instanceId, input: $input) {
 		... InstanceFragment
 	}
@@ -8202,20 +8202,20 @@ func UntagInstance(
 	client graphql.Client,
 	instanceId uuid.UUID,
 	input TagInput,
-	channelsFirst *int,
-	channelsAfter *string,
-	likesFirst *int,
-	likesAfter *string,
-	authorsFirst *int,
-	authorsAfter *string,
+	channelsFirst int,
+	channelsAfter string,
+	likesFirst int,
+	likesAfter string,
+	authorsFirst int,
+	authorsAfter string,
 	authorsRoles []Role,
-	messagesLast *int,
-	messagesBefore *string,
+	messagesLast int,
+	messagesBefore string,
 ) (*UntagInstanceResponse, error) {
 	req := &graphql.Request{
 		OpName: "UntagInstance",
 		Query: `
-mutation UntagInstance ($instanceId: Uuid!, $input: TagInput!, $channelsFirst: Int = 0, $channelsAfter: String = "", $likesFirst: Int = 0, $likesAfter: String = "", $authorsFirst: Int = 0, $authorsAfter: String = "", $authorsRoles: [Role!] = [], $messagesLast: Int = 0, $messagesBefore: String = "") {
+mutation UntagInstance ($instanceId: Uuid!, $input: TagInput!, $channelsFirst: Int!, $channelsAfter: String!, $likesFirst: Int!, $likesAfter: String!, $authorsFirst: Int!, $authorsAfter: String!, $authorsRoles: [Role!] = [], $messagesLast: Int!, $messagesBefore: String!) {
 	untagInstance(instanceId: $instanceId, input: $input) {
 		... InstanceFragment
 	}
@@ -8365,13 +8365,13 @@ func UpdateChannel(
 	client graphql.Client,
 	input ChannelInput,
 	channelId uuid.UUID,
-	messagesLast *int,
-	messagesBefore *string,
+	messagesLast int,
+	messagesBefore string,
 ) (*UpdateChannelResponse, error) {
 	req := &graphql.Request{
 		OpName: "UpdateChannel",
 		Query: `
-mutation UpdateChannel ($input: ChannelInput!, $channelId: Uuid!, $messagesLast: Int = 0, $messagesBefore: String = "") {
+mutation UpdateChannel ($input: ChannelInput!, $channelId: Uuid!, $messagesLast: Int!, $messagesBefore: String!) {
 	updateChannel(input: $input, channelId: $channelId) {
 		... InstanceChannelsEdgeFragment
 	}
@@ -8460,20 +8460,20 @@ func UpdateInstance(
 	client graphql.Client,
 	instanceId uuid.UUID,
 	input InstanceInput,
-	channelsFirst *int,
-	channelsAfter *string,
-	likesFirst *int,
-	likesAfter *string,
-	authorsFirst *int,
-	authorsAfter *string,
+	channelsFirst int,
+	channelsAfter string,
+	likesFirst int,
+	likesAfter string,
+	authorsFirst int,
+	authorsAfter string,
 	authorsRoles []Role,
-	messagesLast *int,
-	messagesBefore *string,
+	messagesLast int,
+	messagesBefore string,
 ) (*UpdateInstanceResponse, error) {
 	req := &graphql.Request{
 		OpName: "UpdateInstance",
 		Query: `
-mutation UpdateInstance ($instanceId: Uuid!, $input: InstanceInput!, $channelsFirst: Int = 0, $channelsAfter: String = "", $likesFirst: Int = 0, $likesAfter: String = "", $authorsFirst: Int = 0, $authorsAfter: String = "", $authorsRoles: [Role!] = [], $messagesLast: Int = 0, $messagesBefore: String = "") {
+mutation UpdateInstance ($instanceId: Uuid!, $input: InstanceInput!, $channelsFirst: Int!, $channelsAfter: String!, $likesFirst: Int!, $likesAfter: String!, $authorsFirst: Int!, $authorsAfter: String!, $authorsRoles: [Role!] = [], $messagesLast: Int!, $messagesBefore: String!) {
 	updateInstance(instanceId: $instanceId, input: $input) {
 		... UserInstancesEdgeFragment
 	}
@@ -8634,24 +8634,24 @@ func UpdateUser(
 	ctx context.Context,
 	client graphql.Client,
 	input UserInput,
-	instancesFirst *int,
-	instancesAfter *string,
-	channelsFirst *int,
-	channelsAfter *string,
-	likesFirst *int,
-	likesAfter *string,
-	authorsFirst *int,
-	authorsAfter *string,
+	instancesFirst int,
+	instancesAfter string,
+	channelsFirst int,
+	channelsAfter string,
+	likesFirst int,
+	likesAfter string,
+	authorsFirst int,
+	authorsAfter string,
 	authorsRoles []Role,
-	messagesLast *int,
-	messagesBefore *string,
-	notificationsLast *int,
-	notificationsBefore *string,
+	messagesLast int,
+	messagesBefore string,
+	notificationsLast int,
+	notificationsBefore string,
 ) (*UpdateUserResponse, error) {
 	req := &graphql.Request{
 		OpName: "UpdateUser",
 		Query: `
-mutation UpdateUser ($input: UserInput!, $instancesFirst: Int, $instancesAfter: String, $channelsFirst: Int = 0, $channelsAfter: String = "", $likesFirst: Int = 0, $likesAfter: String = "", $authorsFirst: Int = 0, $authorsAfter: String = "", $authorsRoles: [Role!] = [], $messagesLast: Int = 0, $messagesBefore: String = "", $notificationsLast: Int = 0, $notificationsBefore: String = "") {
+mutation UpdateUser ($input: UserInput!, $instancesFirst: Int!, $instancesAfter: String!, $channelsFirst: Int!, $channelsAfter: String!, $likesFirst: Int!, $likesAfter: String!, $authorsFirst: Int!, $authorsAfter: String!, $authorsRoles: [Role!] = [], $messagesLast: Int!, $messagesBefore: String!, $notificationsLast: Int!, $notificationsBefore: String!) {
 	updateUser(input: $input) {
 		... UserFragment
 	}
@@ -8858,24 +8858,24 @@ fragment ChannelMessagesEdgeFragment on ChannelMessagesEdge {
 func User(
 	ctx context.Context,
 	client graphql.Client,
-	instancesFirst *int,
-	instancesAfter *string,
-	channelsFirst *int,
-	channelsAfter *string,
-	likesFirst *int,
-	likesAfter *string,
-	authorsFirst *int,
-	authorsAfter *string,
+	instancesFirst int,
+	instancesAfter string,
+	channelsFirst int,
+	channelsAfter string,
+	likesFirst int,
+	likesAfter string,
+	authorsFirst int,
+	authorsAfter string,
 	authorsRoles []Role,
-	messagesLast *int,
-	messagesBefore *string,
-	notificationsLast *int,
-	notificationsBefore *string,
+	messagesLast int,
+	messagesBefore string,
+	notificationsLast int,
+	notificationsBefore string,
 ) (*UserResponse, error) {
 	req := &graphql.Request{
 		OpName: "User",
 		Query: `
-query User ($instancesFirst: Int = 0, $instancesAfter: String = "", $channelsFirst: Int = 0, $channelsAfter: String = "", $likesFirst: Int = 0, $likesAfter: String = "", $authorsFirst: Int = 0, $authorsAfter: String = "", $authorsRoles: [Role!] = [], $messagesLast: Int = 0, $messagesBefore: String = "", $notificationsLast: Int = 0, $notificationsBefore: String = "") {
+query User ($instancesFirst: Int!, $instancesAfter: String!, $channelsFirst: Int!, $channelsAfter: String!, $likesFirst: Int!, $likesAfter: String!, $authorsFirst: Int!, $authorsAfter: String!, $authorsRoles: [Role!]!, $messagesLast: Int!, $messagesBefore: String!, $notificationsLast: Int!, $notificationsBefore: String!) {
 	user {
 		... UserFragment
 	}

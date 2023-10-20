@@ -46,7 +46,7 @@ If you're setting up the database for the first time, then set seed_db = true
 
 Clone this repo: `git clone https://github.com/wwwillw/pixelland-chat.git`
 
-    cd pixelland-chat/backend
+    cd pixelland-chat
     go run .
 
 ### Run the UI 🤞
@@ -57,7 +57,7 @@ Once the backend is running, open a new shell and run:
     npm install
     npm run dev
 
-🏃It should now be running at http://localhost:3000/
+🏃It should now be running at http://localhost:3001/
 
 NOTE I've probably forgotten a step! If something's not working then create a Github issue or send me a message on the PixelLand Discord (@will).
 

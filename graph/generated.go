@@ -55,7 +55,7 @@ type ResolverRoot interface {
 
 type DirectiveRoot struct {
 	Auth       func(ctx context.Context, obj interface{}, next graphql.Resolver, accessLevel string) (res interface{}, err error)
-	Constraint func(ctx context.Context, obj interface{}, next graphql.Resolver, min *float64, max *float64) (res interface{}, err error)
+	Constraint func(ctx context.Context, obj interface{}, next graphql.Resolver, min float64, max float64) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -78,7 +78,7 @@ type ComplexityRoot struct {
 		IsComments         func(childComplexity int) int
 		LastMessageAddedAt func(childComplexity int) int
 		MessageCount       func(childComplexity int) int
-		MessagesConnection func(childComplexity int, last *int, before *string) int
+		MessagesConnection func(childComplexity int, last int, before string) int
 		Name               func(childComplexity int) int
 		Publishers         func(childComplexity int) int
 		Rank               func(childComplexity int) int
@@ -97,7 +97,7 @@ type ComplexityRoot struct {
 	}
 
 	Collection struct {
-		InstancesConnection func(childComplexity int, first *int, after *string) int
+		InstancesConnection func(childComplexity int, first int, after string) int
 		Tag                 func(childComplexity int) int
 	}
 
@@ -114,14 +114,14 @@ type ComplexityRoot struct {
 
 	Instance struct {
 		Author             func(childComplexity int) int
-		AuthorsConnection  func(childComplexity int, roles []model.Role, first *int, after *string) int
-		ChannelsConnection func(childComplexity int, first *int, after *string) int
+		AuthorsConnection  func(childComplexity int, roles []model.Role, first int, after string) int
+		ChannelsConnection func(childComplexity int, first int, after string) int
 		CommentsCount      func(childComplexity int) int
 		CreatedAt          func(childComplexity int) int
 		Description        func(childComplexity int) int
 		ID                 func(childComplexity int) int
 		Icon               func(childComplexity int) int
-		LikesConnection    func(childComplexity int, first *int, after *string) int
+		LikesConnection    func(childComplexity int, first int, after string) int
 		LikesCount         func(childComplexity int) int
 		Name               func(childComplexity int) int
 		ReadAccess         func(childComplexity int) int
@@ -248,9 +248,9 @@ type ComplexityRoot struct {
 		Avatar                  func(childComplexity int) int
 		Bio                     func(childComplexity int) int
 		ID                      func(childComplexity int) int
-		InstancesConnection     func(childComplexity int, first *int, after *string) int
+		InstancesConnection     func(childComplexity int, first int, after string) int
 		Name                    func(childComplexity int) int
-		NotificationsConnection func(childComplexity int, last *int, before *string) int
+		NotificationsConnection func(childComplexity int, last int, before string) int
 		UID                     func(childComplexity int) int
 	}
 
@@ -281,21 +281,21 @@ type ComplexityRoot struct {
 }
 
 type ChannelResolver interface {
-	MessagesConnection(ctx context.Context, obj *model.Channel, last *int, before *string) (*model.ChannelMessagesConnection, error)
+	MessagesConnection(ctx context.Context, obj *model.Channel, last int, before string) (*model.ChannelMessagesConnection, error)
 	Publishers(ctx context.Context, obj *model.Channel) ([]model.Role, error)
 	Readers(ctx context.Context, obj *model.Channel) ([]model.Role, error)
 }
 type CollectionResolver interface {
 	Tag(ctx context.Context, obj *model.Collection) (model.TagKind, error)
-	InstancesConnection(ctx context.Context, obj *model.Collection, first *int, after *string) (*model.CollectionInstancesConnection, error)
+	InstancesConnection(ctx context.Context, obj *model.Collection, first int, after string) (*model.CollectionInstancesConnection, error)
 }
 type InstanceResolver interface {
 	Author(ctx context.Context, obj *model.Instance) (*model.Author, error)
 	ReadAccess(ctx context.Context, obj *model.Instance) (model.Access, error)
 
-	ChannelsConnection(ctx context.Context, obj *model.Instance, first *int, after *string) (*model.InstanceChannelsConnection, error)
-	LikesConnection(ctx context.Context, obj *model.Instance, first *int, after *string) (*model.InstanceLikesConnection, error)
-	AuthorsConnection(ctx context.Context, obj *model.Instance, roles []model.Role, first *int, after *string) (*model.InstanceAuthorsConnection, error)
+	ChannelsConnection(ctx context.Context, obj *model.Instance, first int, after string) (*model.InstanceChannelsConnection, error)
+	LikesConnection(ctx context.Context, obj *model.Instance, first int, after string) (*model.InstanceLikesConnection, error)
+	AuthorsConnection(ctx context.Context, obj *model.Instance, roles []model.Role, first int, after string) (*model.InstanceAuthorsConnection, error)
 }
 type InviteResolver interface {
 	Author(ctx context.Context, obj *model.Invite) (*model.Author, error)
@@ -342,8 +342,8 @@ type SubscriptionResolver interface {
 	Stream(ctx context.Context, instanceID uuid.UUID) (<-chan *model.Notice, error)
 }
 type UserResolver interface {
-	InstancesConnection(ctx context.Context, obj *model.User, first *int, after *string) (*model.UserInstancesConnection, error)
-	NotificationsConnection(ctx context.Context, obj *model.User, last *int, before *string) (*model.UserNotificationsConnection, error)
+	InstancesConnection(ctx context.Context, obj *model.User, first int, after string) (*model.UserInstancesConnection, error)
+	NotificationsConnection(ctx context.Context, obj *model.User, last int, before string) (*model.UserNotificationsConnection, error)
 }
 
 type executableSchema struct {
@@ -476,7 +476,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Channel.MessagesConnection(childComplexity, args["last"].(*int), args["before"].(*string)), true
+		return e.complexity.Channel.MessagesConnection(childComplexity, args["last"].(int), args["before"].(string)), true
 
 	case "Channel.name":
 		if e.complexity.Channel.Name == nil {
@@ -551,7 +551,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Collection.InstancesConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
+		return e.complexity.Collection.InstancesConnection(childComplexity, args["first"].(int), args["after"].(string)), true
 
 	case "Collection.tag":
 		if e.complexity.Collection.Tag == nil {
@@ -612,7 +612,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Instance.AuthorsConnection(childComplexity, args["roles"].([]model.Role), args["first"].(*int), args["after"].(*string)), true
+		return e.complexity.Instance.AuthorsConnection(childComplexity, args["roles"].([]model.Role), args["first"].(int), args["after"].(string)), true
 
 	case "Instance.channelsConnection":
 		if e.complexity.Instance.ChannelsConnection == nil {
@@ -624,7 +624,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Instance.ChannelsConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
+		return e.complexity.Instance.ChannelsConnection(childComplexity, args["first"].(int), args["after"].(string)), true
 
 	case "Instance.commentsCount":
 		if e.complexity.Instance.CommentsCount == nil {
@@ -671,7 +671,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Instance.LikesConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
+		return e.complexity.Instance.LikesConnection(childComplexity, args["first"].(int), args["after"].(string)), true
 
 	case "Instance.likesCount":
 		if e.complexity.Instance.LikesCount == nil {
@@ -1385,7 +1385,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.User.InstancesConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
+		return e.complexity.User.InstancesConnection(childComplexity, args["first"].(int), args["after"].(string)), true
 
 	case "User.name":
 		if e.complexity.User.Name == nil {
@@ -1404,7 +1404,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.User.NotificationsConnection(childComplexity, args["last"].(*int), args["before"].(*string)), true
+		return e.complexity.User.NotificationsConnection(childComplexity, args["last"].(int), args["before"].(string)), true
 
 	case "User.uid":
 		if e.complexity.User.UID == nil {
@@ -1635,19 +1635,19 @@ func (ec *executionContext) dir_auth_args(ctx context.Context, rawArgs map[strin
 func (ec *executionContext) dir_constraint_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *float64
+	var arg0 float64
 	if tmp, ok := rawArgs["min"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("min"))
-		arg0, err = ec.unmarshalOFloat2ᚖfloat64(ctx, tmp)
+		arg0, err = ec.unmarshalNFloat2float64(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["min"] = arg0
-	var arg1 *float64
+	var arg1 float64
 	if tmp, ok := rawArgs["max"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("max"))
-		arg1, err = ec.unmarshalOFloat2ᚖfloat64(ctx, tmp)
+		arg1, err = ec.unmarshalNFloat2float64(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1659,16 +1659,16 @@ func (ec *executionContext) dir_constraint_args(ctx context.Context, rawArgs map
 func (ec *executionContext) field_Channel_messagesConnection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *int
+	var arg0 int
 	if tmp, ok := rawArgs["last"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
-		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOInt2ᚖint(ctx, tmp) }
+		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNInt2int(ctx, tmp) }
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			min, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 0)
+			min, err := ec.unmarshalNFloat2float64(ctx, 0)
 			if err != nil {
 				return nil, err
 			}
-			max, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 50)
+			max, err := ec.unmarshalNFloat2float64(ctx, 50)
 			if err != nil {
 				return nil, err
 			}
@@ -1682,19 +1682,17 @@ func (ec *executionContext) field_Channel_messagesConnection_args(ctx context.Co
 		if err != nil {
 			return nil, graphql.ErrorOnPath(ctx, err)
 		}
-		if data, ok := tmp.(*int); ok {
+		if data, ok := tmp.(int); ok {
 			arg0 = data
-		} else if tmp == nil {
-			arg0 = nil
 		} else {
-			return nil, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be *int`, tmp))
+			return nil, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be int`, tmp))
 		}
 	}
 	args["last"] = arg0
-	var arg1 *string
+	var arg1 string
 	if tmp, ok := rawArgs["before"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
-		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1706,16 +1704,16 @@ func (ec *executionContext) field_Channel_messagesConnection_args(ctx context.Co
 func (ec *executionContext) field_Collection_instancesConnection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *int
+	var arg0 int
 	if tmp, ok := rawArgs["first"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOInt2ᚖint(ctx, tmp) }
+		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNInt2int(ctx, tmp) }
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			min, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 0)
+			min, err := ec.unmarshalNFloat2float64(ctx, 0)
 			if err != nil {
 				return nil, err
 			}
-			max, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 50)
+			max, err := ec.unmarshalNFloat2float64(ctx, 50)
 			if err != nil {
 				return nil, err
 			}
@@ -1729,19 +1727,17 @@ func (ec *executionContext) field_Collection_instancesConnection_args(ctx contex
 		if err != nil {
 			return nil, graphql.ErrorOnPath(ctx, err)
 		}
-		if data, ok := tmp.(*int); ok {
+		if data, ok := tmp.(int); ok {
 			arg0 = data
-		} else if tmp == nil {
-			arg0 = nil
 		} else {
-			return nil, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be *int`, tmp))
+			return nil, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be int`, tmp))
 		}
 	}
 	args["first"] = arg0
-	var arg1 *string
+	var arg1 string
 	if tmp, ok := rawArgs["after"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1762,16 +1758,16 @@ func (ec *executionContext) field_Instance_authorsConnection_args(ctx context.Co
 		}
 	}
 	args["roles"] = arg0
-	var arg1 *int
+	var arg1 int
 	if tmp, ok := rawArgs["first"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOInt2ᚖint(ctx, tmp) }
+		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNInt2int(ctx, tmp) }
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			min, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 0)
+			min, err := ec.unmarshalNFloat2float64(ctx, 0)
 			if err != nil {
 				return nil, err
 			}
-			max, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 50)
+			max, err := ec.unmarshalNFloat2float64(ctx, 50)
 			if err != nil {
 				return nil, err
 			}
@@ -1785,19 +1781,17 @@ func (ec *executionContext) field_Instance_authorsConnection_args(ctx context.Co
 		if err != nil {
 			return nil, graphql.ErrorOnPath(ctx, err)
 		}
-		if data, ok := tmp.(*int); ok {
+		if data, ok := tmp.(int); ok {
 			arg1 = data
-		} else if tmp == nil {
-			arg1 = nil
 		} else {
-			return nil, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be *int`, tmp))
+			return nil, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be int`, tmp))
 		}
 	}
 	args["first"] = arg1
-	var arg2 *string
+	var arg2 string
 	if tmp, ok := rawArgs["after"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1809,16 +1803,16 @@ func (ec *executionContext) field_Instance_authorsConnection_args(ctx context.Co
 func (ec *executionContext) field_Instance_channelsConnection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *int
+	var arg0 int
 	if tmp, ok := rawArgs["first"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOInt2ᚖint(ctx, tmp) }
+		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNInt2int(ctx, tmp) }
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			min, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 0)
+			min, err := ec.unmarshalNFloat2float64(ctx, 0)
 			if err != nil {
 				return nil, err
 			}
-			max, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 50)
+			max, err := ec.unmarshalNFloat2float64(ctx, 50)
 			if err != nil {
 				return nil, err
 			}
@@ -1832,19 +1826,17 @@ func (ec *executionContext) field_Instance_channelsConnection_args(ctx context.C
 		if err != nil {
 			return nil, graphql.ErrorOnPath(ctx, err)
 		}
-		if data, ok := tmp.(*int); ok {
+		if data, ok := tmp.(int); ok {
 			arg0 = data
-		} else if tmp == nil {
-			arg0 = nil
 		} else {
-			return nil, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be *int`, tmp))
+			return nil, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be int`, tmp))
 		}
 	}
 	args["first"] = arg0
-	var arg1 *string
+	var arg1 string
 	if tmp, ok := rawArgs["after"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1856,16 +1848,16 @@ func (ec *executionContext) field_Instance_channelsConnection_args(ctx context.C
 func (ec *executionContext) field_Instance_likesConnection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *int
+	var arg0 int
 	if tmp, ok := rawArgs["first"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOInt2ᚖint(ctx, tmp) }
+		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNInt2int(ctx, tmp) }
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			min, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 0)
+			min, err := ec.unmarshalNFloat2float64(ctx, 0)
 			if err != nil {
 				return nil, err
 			}
-			max, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 50)
+			max, err := ec.unmarshalNFloat2float64(ctx, 50)
 			if err != nil {
 				return nil, err
 			}
@@ -1879,19 +1871,17 @@ func (ec *executionContext) field_Instance_likesConnection_args(ctx context.Cont
 		if err != nil {
 			return nil, graphql.ErrorOnPath(ctx, err)
 		}
-		if data, ok := tmp.(*int); ok {
+		if data, ok := tmp.(int); ok {
 			arg0 = data
-		} else if tmp == nil {
-			arg0 = nil
 		} else {
-			return nil, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be *int`, tmp))
+			return nil, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be int`, tmp))
 		}
 	}
 	args["first"] = arg0
-	var arg1 *string
+	var arg1 string
 	if tmp, ok := rawArgs["after"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2404,16 +2394,16 @@ func (ec *executionContext) field_Subscription_stream_args(ctx context.Context, 
 func (ec *executionContext) field_User_instancesConnection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *int
+	var arg0 int
 	if tmp, ok := rawArgs["first"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOInt2ᚖint(ctx, tmp) }
+		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNInt2int(ctx, tmp) }
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			min, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 0)
+			min, err := ec.unmarshalNFloat2float64(ctx, 0)
 			if err != nil {
 				return nil, err
 			}
-			max, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 50)
+			max, err := ec.unmarshalNFloat2float64(ctx, 50)
 			if err != nil {
 				return nil, err
 			}
@@ -2427,19 +2417,17 @@ func (ec *executionContext) field_User_instancesConnection_args(ctx context.Cont
 		if err != nil {
 			return nil, graphql.ErrorOnPath(ctx, err)
 		}
-		if data, ok := tmp.(*int); ok {
+		if data, ok := tmp.(int); ok {
 			arg0 = data
-		} else if tmp == nil {
-			arg0 = nil
 		} else {
-			return nil, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be *int`, tmp))
+			return nil, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be int`, tmp))
 		}
 	}
 	args["first"] = arg0
-	var arg1 *string
+	var arg1 string
 	if tmp, ok := rawArgs["after"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
-		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -2451,16 +2439,16 @@ func (ec *executionContext) field_User_instancesConnection_args(ctx context.Cont
 func (ec *executionContext) field_User_notificationsConnection_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *int
+	var arg0 int
 	if tmp, ok := rawArgs["last"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
-		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOInt2ᚖint(ctx, tmp) }
+		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNInt2int(ctx, tmp) }
 		directive1 := func(ctx context.Context) (interface{}, error) {
-			min, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 0)
+			min, err := ec.unmarshalNFloat2float64(ctx, 0)
 			if err != nil {
 				return nil, err
 			}
-			max, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 50)
+			max, err := ec.unmarshalNFloat2float64(ctx, 50)
 			if err != nil {
 				return nil, err
 			}
@@ -2474,19 +2462,17 @@ func (ec *executionContext) field_User_notificationsConnection_args(ctx context.
 		if err != nil {
 			return nil, graphql.ErrorOnPath(ctx, err)
 		}
-		if data, ok := tmp.(*int); ok {
+		if data, ok := tmp.(int); ok {
 			arg0 = data
-		} else if tmp == nil {
-			arg0 = nil
 		} else {
-			return nil, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be *int`, tmp))
+			return nil, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be int`, tmp))
 		}
 	}
 	args["last"] = arg0
-	var arg1 *string
+	var arg1 string
 	if tmp, ok := rawArgs["before"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
-		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3336,7 +3322,7 @@ func (ec *executionContext) _Channel_messagesConnection(ctx context.Context, fie
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Channel().MessagesConnection(rctx, obj, fc.Args["last"].(*int), fc.Args["before"].(*string))
+		return ec.resolvers.Channel().MessagesConnection(rctx, obj, fc.Args["last"].(int), fc.Args["before"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3729,7 +3715,7 @@ func (ec *executionContext) _Collection_instancesConnection(ctx context.Context,
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Collection().InstancesConnection(rctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*string))
+		return ec.resolvers.Collection().InstancesConnection(rctx, obj, fc.Args["first"].(int), fc.Args["after"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4648,7 +4634,7 @@ func (ec *executionContext) _Instance_channelsConnection(ctx context.Context, fi
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Instance().ChannelsConnection(rctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*string))
+		return ec.resolvers.Instance().ChannelsConnection(rctx, obj, fc.Args["first"].(int), fc.Args["after"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4709,7 +4695,7 @@ func (ec *executionContext) _Instance_likesConnection(ctx context.Context, field
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Instance().LikesConnection(rctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*string))
+		return ec.resolvers.Instance().LikesConnection(rctx, obj, fc.Args["first"].(int), fc.Args["after"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4770,7 +4756,7 @@ func (ec *executionContext) _Instance_authorsConnection(ctx context.Context, fie
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Instance().AuthorsConnection(rctx, obj, fc.Args["roles"].([]model.Role), fc.Args["first"].(*int), fc.Args["after"].(*string))
+		return ec.resolvers.Instance().AuthorsConnection(rctx, obj, fc.Args["roles"].([]model.Role), fc.Args["first"].(int), fc.Args["after"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10008,7 +9994,7 @@ func (ec *executionContext) _User_instancesConnection(ctx context.Context, field
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.User().InstancesConnection(rctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*string))
+		return ec.resolvers.User().InstancesConnection(rctx, obj, fc.Args["first"].(int), fc.Args["after"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10069,7 +10055,7 @@ func (ec *executionContext) _User_notificationsConnection(ctx context.Context, f
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.User().NotificationsConnection(rctx, obj, fc.Args["last"].(*int), fc.Args["before"].(*string))
+		return ec.resolvers.User().NotificationsConnection(rctx, obj, fc.Args["last"].(int), fc.Args["before"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -12581,11 +12567,11 @@ func (ec *executionContext) unmarshalInputChannelInput(ctx context.Context, obj 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
-				min, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 0)
+				min, err := ec.unmarshalNFloat2float64(ctx, 0)
 				if err != nil {
 					return nil, err
 				}
-				max, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 32)
+				max, err := ec.unmarshalNFloat2float64(ctx, 32)
 				if err != nil {
 					return nil, err
 				}
@@ -12699,11 +12685,11 @@ func (ec *executionContext) unmarshalInputInstanceInput(ctx context.Context, obj
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
-				min, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 0)
+				min, err := ec.unmarshalNFloat2float64(ctx, 0)
 				if err != nil {
 					return nil, err
 				}
-				max, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 32)
+				max, err := ec.unmarshalNFloat2float64(ctx, 32)
 				if err != nil {
 					return nil, err
 				}
@@ -12737,11 +12723,11 @@ func (ec *executionContext) unmarshalInputInstanceInput(ctx context.Context, obj
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("icon"))
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
-				min, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 0)
+				min, err := ec.unmarshalNFloat2float64(ctx, 0)
 				if err != nil {
 					return nil, err
 				}
-				max, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 1024)
+				max, err := ec.unmarshalNFloat2float64(ctx, 1024)
 				if err != nil {
 					return nil, err
 				}
@@ -12767,11 +12753,11 @@ func (ec *executionContext) unmarshalInputInstanceInput(ctx context.Context, obj
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
-				min, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 0)
+				min, err := ec.unmarshalNFloat2float64(ctx, 0)
 				if err != nil {
 					return nil, err
 				}
-				max, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 1024)
+				max, err := ec.unmarshalNFloat2float64(ctx, 1024)
 				if err != nil {
 					return nil, err
 				}
@@ -12949,11 +12935,11 @@ func (ec *executionContext) unmarshalInputMessageInput(ctx context.Context, obj 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("text"))
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
-				min, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 1)
+				min, err := ec.unmarshalNFloat2float64(ctx, 1)
 				if err != nil {
 					return nil, err
 				}
-				max, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 1024)
+				max, err := ec.unmarshalNFloat2float64(ctx, 1024)
 				if err != nil {
 					return nil, err
 				}
@@ -13035,11 +13021,11 @@ func (ec *executionContext) unmarshalInputUserInput(ctx context.Context, obj int
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
-				min, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 0)
+				min, err := ec.unmarshalNFloat2float64(ctx, 0)
 				if err != nil {
 					return nil, err
 				}
-				max, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 32)
+				max, err := ec.unmarshalNFloat2float64(ctx, 32)
 				if err != nil {
 					return nil, err
 				}
@@ -13073,11 +13059,11 @@ func (ec *executionContext) unmarshalInputUserInput(ctx context.Context, obj int
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bio"))
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
-				min, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 0)
+				min, err := ec.unmarshalNFloat2float64(ctx, 0)
 				if err != nil {
 					return nil, err
 				}
-				max, err := ec.unmarshalOFloat2ᚖfloat64(ctx, 1024)
+				max, err := ec.unmarshalNFloat2float64(ctx, 1024)
 				if err != nil {
 					return nil, err
 				}
@@ -15512,6 +15498,21 @@ func (ec *executionContext) marshalNCollectionInstancesEdge2ᚖgithubᚗcomᚋww
 	return ec._CollectionInstancesEdge(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
+	res, err := graphql.UnmarshalFloatContext(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
+	res := graphql.MarshalFloatContext(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return graphql.WrapContextMarshaler(ctx, res)
+}
+
 func (ec *executionContext) marshalNInstance2githubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstance(ctx context.Context, sel ast.SelectionSet, v model.Instance) graphql.Marshaler {
 	return ec._Instance(ctx, sel, &v)
 }
@@ -16437,22 +16438,6 @@ func (ec *executionContext) marshalOChannelMessagesEdge2ᚖgithubᚗcomᚋwwwill
 		return graphql.Null
 	}
 	return ec._ChannelMessagesEdge(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOFloat2ᚖfloat64(ctx context.Context, v interface{}) (*float64, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := graphql.UnmarshalFloatContext(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel ast.SelectionSet, v *float64) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	res := graphql.MarshalFloatContext(*v)
-	return graphql.WrapContextMarshaler(ctx, res)
 }
 
 func (ec *executionContext) marshalOInstance2ᚖgithubᚗcomᚋwwwillwᚋpixellandᚑchatᚋgraphᚋmodelᚐInstance(ctx context.Context, sel ast.SelectionSet, v *model.Instance) graphql.Marshaler {

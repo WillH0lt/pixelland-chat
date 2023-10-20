@@ -1,6 +1,6 @@
 overwrite: true
 schema:
-  - ../backend/graph/schema.graphqls
+  - ../graph/schema.graphqls
 documents:
   - ./src/graphql/mutations/**/!(*.gen).ts
   - ./src/graphql/queries/**/!(*.gen).ts

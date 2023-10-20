@@ -7,12 +7,12 @@ type User {
   avatar: String!
   bio: String!
   instancesConnection(
-    first: Int = 50 @constraint(max: 50)
-    after: String = ""
+    first: Int! = 0 @constraint(max: 50)
+    after: String! = ""
   ): UserInstancesConnection!
   notificationsConnection(
-    last: Int = 50 @constraint(max: 50)
-    before: String = ""
+    last: Int! = 0 @constraint(max: 50)
+    before: String! = ""
   ): UserNotificationsConnection!
 }
 
@@ -31,17 +31,17 @@ type Instance {
   likesCount: Int!
   commentsCount: Int!
   channelsConnection(
-    first: Int = 50 @constraint(max: 50)
-    after: String = ""
+    first: Int! = 0 @constraint(max: 50)
+    after: String! = ""
   ): InstanceChannelsConnection!
   likesConnection(
-    first: Int = 50 @constraint(max: 50)
-    after: String = ""
+    first: Int! = 0 @constraint(max: 50)
+    after: String! = ""
   ): InstanceLikesConnection!
   authorsConnection(
     roles: [Role!]!
-    first: Int = 50 @constraint(max: 50)
-    after: String = ""
+    first: Int! = 0 @constraint(max: 50)
+    after: String! = ""
   ): InstanceAuthorsConnection!
 }
 
@@ -68,8 +68,8 @@ type Channel {
   isComments: Boolean!
   messageCount: Int!
   messagesConnection(
-    last: Int = 50 @constraint(max: 50)
-    before: String = ""
+    last: Int! = 0 @constraint(max: 50)
+    before: String! = ""
   ): ChannelMessagesConnection!
   publishers: [Role!]!
   readers: [Role!]!
@@ -106,8 +106,8 @@ type Notification {
 type Collection {
   tag: TagKind!
   instancesConnection(
-    first: Int = 50 @constraint(max: 50)
-    after: String = ""
+    first: Int! = 0 @constraint(max: 50)
+    after: String! = ""
   ): CollectionInstancesConnection!
 }
 
@@ -367,8 +367,8 @@ scalar Uuid
 # ==============================================
 # directives
 directive @constraint(
-  min: Float = 0
-  max: Float = 50
+  min: Float! = 0
+  max: Float! = 50
 ) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
 directive @auth(accessLevel: String!) on FIELD_DEFINITION
