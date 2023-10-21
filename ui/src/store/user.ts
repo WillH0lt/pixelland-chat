@@ -23,7 +23,22 @@ export const useUserStore = defineStore('user', () => {
   // actions
   async function updateUser(input: UserInput) {
     const { mutate } = useUpdateUserMutation({
-      variables: { input, instancesFirst: 50 },
+      variables: {
+        input,
+        instancesFirst: 50,
+        instancesAfter: '',
+        notificationsLast: 0,
+        notificationsBefore: '',
+        channelsFirst: 0,
+        channelsAfter: '',
+        likesFirst: 0,
+        likesAfter: '',
+        authorsFirst: 0,
+        authorsAfter: '',
+        authorsRoles: [],
+        messagesLast: 0,
+        messagesBefore: '',
+      },
     })
     const result = await mutate()
 

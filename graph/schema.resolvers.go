@@ -470,7 +470,7 @@ func (r *mutationResolver) AddInstance(ctx context.Context, input model.Instance
 		return nil, err
 	}
 
-	edge := createUserInstancesEdge(instanceUser, instanceUser.Instance)
+	edge := createUserInstancesEdge(instanceUser, &instance)
 	return edge, nil
 }
 

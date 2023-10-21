@@ -52,7 +52,7 @@ export const useChannelStore = defineStore('channel', () => {
   // actions
   async function addChannel(input: ChannelInput) {
     const { mutate } = useAddChannelMutation({
-      variables: { input },
+      variables: { input, messagesLast: 0, messagesBefore: '' },
     })
 
     await mutate()
@@ -60,7 +60,7 @@ export const useChannelStore = defineStore('channel', () => {
 
   async function updateChannel(input: ChannelInput, channelId: string) {
     const { mutate } = useUpdateChannelMutation({
-      variables: { input, channelId },
+      variables: { input, channelId, messagesLast: 0, messagesBefore: '' },
     })
 
     await mutate()
@@ -75,7 +75,15 @@ export const useChannelStore = defineStore('channel', () => {
 
     const { onResult, onError } = useInstanceQuery({
       id: instanceId,
-      channelsFirst: 50,
+      channelsFirst: 0,
+      channelsAfter: '',
+      likesFirst: 0,
+      likesAfter: '',
+      authorsFirst: 0,
+      authorsAfter: '',
+      authorsRoles: [],
+      messagesLast: 0,
+      messagesBefore: '',
     })
 
     const userInstancesEdge = await new Promise<UserInstancesEdge>((resolve, reject) => {
@@ -110,7 +118,7 @@ export const useChannelStore = defineStore('channel', () => {
     channel.mutableRank = (prevRank + nextRank) / 2
 
     const { mutate } = useReorderChannelMutation({
-      variables: { input, channelId },
+      variables: { input, channelId, messagesLast: 0, messagesBefore: '' },
     })
 
     await mutate()
@@ -118,7 +126,7 @@ export const useChannelStore = defineStore('channel', () => {
 
   async function removeChannel(channelId: string) {
     const { mutate } = useRemoveChannelMutation({
-      variables: { channelId },
+      variables: { channelId, messagesLast: 0, messagesBefore: '' },
     })
 
     await mutate()

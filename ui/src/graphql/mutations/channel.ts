@@ -3,7 +3,7 @@ import gql from 'graphql-tag'
 import { InstanceChannelsEdgeFragment } from '@/graphql/fragments/fragments'
 
 export const addChannel = gql`
-  mutation addChannel($input: ChannelInput!, $messagesLast: Int = 0, $messagesBefore: String = "") {
+  mutation addChannel($input: ChannelInput!, $messagesLast: Int!, $messagesBefore: String!) {
     addChannel(input: $input) {
       ...InstanceChannelsEdgeFragment
     }
@@ -15,8 +15,8 @@ export const updateChannel = gql`
   mutation updateChannel(
     $input: ChannelInput!
     $channelId: Uuid!
-    $messagesLast: Int = 0
-    $messagesBefore: String = ""
+    $messagesLast: Int!
+    $messagesBefore: String!
   ) {
     updateChannel(input: $input, channelId: $channelId) {
       ...InstanceChannelsEdgeFragment
@@ -29,8 +29,8 @@ export const reorderChannel = gql`
   mutation reorderChannel(
     $input: ChannelReorderInput!
     $channelId: Uuid!
-    $messagesLast: Int = 0
-    $messagesBefore: String = ""
+    $messagesLast: Int!
+    $messagesBefore: String!
   ) {
     reorderChannel(input: $input, channelId: $channelId) {
       ...InstanceChannelsEdgeFragment
@@ -40,7 +40,7 @@ export const reorderChannel = gql`
 `
 
 export const removeChannel = gql`
-  mutation removeChannel($channelId: Uuid!, $messagesLast: Int = 0, $messagesBefore: String = "") {
+  mutation removeChannel($channelId: Uuid!, $messagesLast: Int!, $messagesBefore: String!) {
     removeChannel(channelId: $channelId) {
       ...InstanceChannelsEdgeFragment
     }

@@ -6,15 +6,15 @@ import * as VueCompositionApi from 'vue';
 export type ReactiveFunction<TParam> = () => TParam;
 export type AddInstanceMutationVariables = Types.Exact<{
   input: Types.InstanceInput;
-  channelsFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  channelsAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  likesFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  likesAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  authorsFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  authorsAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  authorsRoles?: Types.InputMaybe<Array<Types.Role> | Types.Role>;
-  messagesLast?: Types.InputMaybe<Types.Scalars['Int']>;
-  messagesBefore?: Types.InputMaybe<Types.Scalars['String']>;
+  channelsFirst: Types.Scalars['Int'];
+  channelsAfter: Types.Scalars['String'];
+  likesFirst: Types.Scalars['Int'];
+  likesAfter: Types.Scalars['String'];
+  authorsFirst: Types.Scalars['Int'];
+  authorsAfter: Types.Scalars['String'];
+  authorsRoles: Array<Types.Role> | Types.Role;
+  messagesLast: Types.Scalars['Int'];
+  messagesBefore: Types.Scalars['String'];
 }>;
 
 
@@ -23,15 +23,15 @@ export type AddInstanceMutation = { __typename?: 'Mutation', addInstance: { __ty
 export type UpdateInstanceMutationVariables = Types.Exact<{
   instanceId: Types.Scalars['Uuid'];
   input: Types.InstanceInput;
-  channelsFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  channelsAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  likesFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  likesAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  authorsFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  authorsAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  authorsRoles?: Types.InputMaybe<Array<Types.Role> | Types.Role>;
-  messagesLast?: Types.InputMaybe<Types.Scalars['Int']>;
-  messagesBefore?: Types.InputMaybe<Types.Scalars['String']>;
+  channelsFirst: Types.Scalars['Int'];
+  channelsAfter: Types.Scalars['String'];
+  likesFirst: Types.Scalars['Int'];
+  likesAfter: Types.Scalars['String'];
+  authorsFirst: Types.Scalars['Int'];
+  authorsAfter: Types.Scalars['String'];
+  authorsRoles: Array<Types.Role> | Types.Role;
+  messagesLast: Types.Scalars['Int'];
+  messagesBefore: Types.Scalars['String'];
 }>;
 
 
@@ -39,15 +39,15 @@ export type UpdateInstanceMutation = { __typename?: 'Mutation', updateInstance: 
 
 export type RemoveInstanceMutationVariables = Types.Exact<{
   instanceId: Types.Scalars['Uuid'];
-  channelsFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  channelsAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  likesFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  likesAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  authorsFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  authorsAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  authorsRoles?: Types.InputMaybe<Array<Types.Role> | Types.Role>;
-  messagesLast?: Types.InputMaybe<Types.Scalars['Int']>;
-  messagesBefore?: Types.InputMaybe<Types.Scalars['String']>;
+  channelsFirst: Types.Scalars['Int'];
+  channelsAfter: Types.Scalars['String'];
+  likesFirst: Types.Scalars['Int'];
+  likesAfter: Types.Scalars['String'];
+  authorsFirst: Types.Scalars['Int'];
+  authorsAfter: Types.Scalars['String'];
+  authorsRoles: Array<Types.Role> | Types.Role;
+  messagesLast: Types.Scalars['Int'];
+  messagesBefore: Types.Scalars['String'];
 }>;
 
 
@@ -56,15 +56,15 @@ export type RemoveInstanceMutation = { __typename?: 'Mutation', removeInstance: 
 export type ReorderInstanceMutationVariables = Types.Exact<{
   input: Types.InstanceReorderInput;
   instanceId: Types.Scalars['Uuid'];
-  channelsFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  channelsAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  likesFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  likesAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  authorsFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  authorsAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  authorsRoles?: Types.InputMaybe<Array<Types.Role> | Types.Role>;
-  messagesLast?: Types.InputMaybe<Types.Scalars['Int']>;
-  messagesBefore?: Types.InputMaybe<Types.Scalars['String']>;
+  channelsFirst: Types.Scalars['Int'];
+  channelsAfter: Types.Scalars['String'];
+  likesFirst: Types.Scalars['Int'];
+  likesAfter: Types.Scalars['String'];
+  authorsFirst: Types.Scalars['Int'];
+  authorsAfter: Types.Scalars['String'];
+  authorsRoles: Array<Types.Role> | Types.Role;
+  messagesLast: Types.Scalars['Int'];
+  messagesBefore: Types.Scalars['String'];
 }>;
 
 
@@ -73,15 +73,15 @@ export type ReorderInstanceMutation = { __typename?: 'Mutation', reorderInstance
 export type PinInstanceMutationVariables = Types.Exact<{
   input: Types.InstancePinInput;
   instanceId: Types.Scalars['Uuid'];
-  channelsFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  channelsAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  likesFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  likesAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  authorsFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  authorsAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  authorsRoles?: Types.InputMaybe<Array<Types.Role> | Types.Role>;
-  messagesLast?: Types.InputMaybe<Types.Scalars['Int']>;
-  messagesBefore?: Types.InputMaybe<Types.Scalars['String']>;
+  channelsFirst: Types.Scalars['Int'];
+  channelsAfter: Types.Scalars['String'];
+  likesFirst: Types.Scalars['Int'];
+  likesAfter: Types.Scalars['String'];
+  authorsFirst: Types.Scalars['Int'];
+  authorsAfter: Types.Scalars['String'];
+  authorsRoles: Array<Types.Role> | Types.Role;
+  messagesLast: Types.Scalars['Int'];
+  messagesBefore: Types.Scalars['String'];
 }>;
 
 
@@ -90,15 +90,15 @@ export type PinInstanceMutation = { __typename?: 'Mutation', pinInstance: { __ty
 export type TagInstanceMutationVariables = Types.Exact<{
   instanceId: Types.Scalars['Uuid'];
   input: Types.TagInput;
-  channelsFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  channelsAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  likesFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  likesAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  authorsFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  authorsAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  authorsRoles?: Types.InputMaybe<Array<Types.Role> | Types.Role>;
-  messagesLast?: Types.InputMaybe<Types.Scalars['Int']>;
-  messagesBefore?: Types.InputMaybe<Types.Scalars['String']>;
+  channelsFirst: Types.Scalars['Int'];
+  channelsAfter: Types.Scalars['String'];
+  likesFirst: Types.Scalars['Int'];
+  likesAfter: Types.Scalars['String'];
+  authorsFirst: Types.Scalars['Int'];
+  authorsAfter: Types.Scalars['String'];
+  authorsRoles: Array<Types.Role> | Types.Role;
+  messagesLast: Types.Scalars['Int'];
+  messagesBefore: Types.Scalars['String'];
 }>;
 
 
@@ -107,15 +107,15 @@ export type TagInstanceMutation = { __typename?: 'Mutation', tagInstance: { __ty
 export type UntagInstanceMutationVariables = Types.Exact<{
   instanceId: Types.Scalars['Uuid'];
   input: Types.TagInput;
-  channelsFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  channelsAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  likesFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  likesAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  authorsFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  authorsAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  authorsRoles?: Types.InputMaybe<Array<Types.Role> | Types.Role>;
-  messagesLast?: Types.InputMaybe<Types.Scalars['Int']>;
-  messagesBefore?: Types.InputMaybe<Types.Scalars['String']>;
+  channelsFirst: Types.Scalars['Int'];
+  channelsAfter: Types.Scalars['String'];
+  likesFirst: Types.Scalars['Int'];
+  likesAfter: Types.Scalars['String'];
+  authorsFirst: Types.Scalars['Int'];
+  authorsAfter: Types.Scalars['String'];
+  authorsRoles: Array<Types.Role> | Types.Role;
+  messagesLast: Types.Scalars['Int'];
+  messagesBefore: Types.Scalars['String'];
 }>;
 
 

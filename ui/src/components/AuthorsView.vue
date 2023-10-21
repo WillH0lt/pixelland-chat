@@ -139,6 +139,12 @@ async function fetchAuthors() {
     authorsRoles: roles,
     authorsFirst: 50,
     authorsAfter: cursor.value,
+    channelsFirst: 0,
+    channelsAfter: '',
+    likesFirst: 0,
+    likesAfter: '',
+    messagesLast: 0,
+    messagesBefore: '',
   })
 
   const authorsConnection = await new Promise<InstanceAuthorsConnection>((resolve, reject) => {

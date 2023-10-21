@@ -14,15 +14,15 @@ export const invite = gql`
 export const checkInvite = gql`
   query checkInvite(
     $code: String!
-    $channelsFirst: Int = 0
-    $channelsAfter: String = ""
-    $likesFirst: Int = 0
-    $likesAfter: String = ""
-    $authorsFirst: Int = 0
-    $authorsAfter: String = ""
-    $authorsRoles: [Role!] = []
-    $messagesLast: Int = 0
-    $messagesBefore: String = ""
+    $channelsFirst: Int!
+    $channelsAfter: String!
+    $likesFirst: Int!
+    $likesAfter: String!
+    $authorsFirst: Int!
+    $authorsAfter: String!
+    $authorsRoles: [Role!]!
+    $messagesLast: Int!
+    $messagesBefore: String!
   ) {
     checkInvite(code: $code) {
       instance {

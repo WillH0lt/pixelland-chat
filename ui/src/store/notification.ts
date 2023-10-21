@@ -51,6 +51,17 @@ export const useNotificationStore = defineStore('notifications', () => {
     const { onResult, onError } = useUserQuery({
       notificationsLast: 50,
       notificationsBefore: cursor.value,
+      instancesFirst: 0,
+      instancesAfter: '',
+      channelsFirst: 0,
+      channelsAfter: '',
+      likesFirst: 0,
+      likesAfter: '',
+      authorsFirst: 0,
+      authorsAfter: '',
+      authorsRoles: [],
+      messagesLast: 0,
+      messagesBefore: '',
     })
 
     loading.value = true

@@ -6,19 +6,19 @@ import * as VueCompositionApi from 'vue';
 export type ReactiveFunction<TParam> = () => TParam;
 export type StreamSubscriptionVariables = Types.Exact<{
   instanceId: Types.Scalars['Uuid'];
-  instancesFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  instancesAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  channelsFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  channelsAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  likesFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  likesAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  authorsFirst?: Types.InputMaybe<Types.Scalars['Int']>;
-  authorsAfter?: Types.InputMaybe<Types.Scalars['String']>;
-  authorsRoles?: Types.InputMaybe<Array<Types.Role> | Types.Role>;
-  messagesLast?: Types.InputMaybe<Types.Scalars['Int']>;
-  messagesBefore?: Types.InputMaybe<Types.Scalars['String']>;
-  notificationsLast?: Types.InputMaybe<Types.Scalars['Int']>;
-  notificationsBefore?: Types.InputMaybe<Types.Scalars['String']>;
+  instancesFirst: Types.Scalars['Int'];
+  instancesAfter: Types.Scalars['String'];
+  channelsFirst: Types.Scalars['Int'];
+  channelsAfter: Types.Scalars['String'];
+  likesFirst: Types.Scalars['Int'];
+  likesAfter: Types.Scalars['String'];
+  authorsFirst: Types.Scalars['Int'];
+  authorsAfter: Types.Scalars['String'];
+  authorsRoles: Array<Types.Role> | Types.Role;
+  messagesLast: Types.Scalars['Int'];
+  messagesBefore: Types.Scalars['String'];
+  notificationsLast: Types.Scalars['Int'];
+  notificationsBefore: Types.Scalars['String'];
 }>;
 
 

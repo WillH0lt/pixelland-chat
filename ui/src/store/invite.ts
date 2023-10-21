@@ -34,6 +34,15 @@ export const useInviteStore = defineStore('invite', () => {
   async function checkInvite(code: string): Promise<ExtendedInvite | null> {
     const { onResult, onError } = useCheckInviteQuery({
       code,
+      channelsFirst: 0,
+      channelsAfter: '',
+      likesFirst: 0,
+      likesAfter: '',
+      authorsFirst: 0,
+      authorsAfter: '',
+      authorsRoles: [],
+      messagesLast: 0,
+      messagesBefore: '',
     })
 
     return new Promise((resolve, reject) => {

@@ -64,6 +64,14 @@ export const useInstanceStore = defineStore('instance', () => {
     const { onResult, onError } = useInstanceQuery({
       id: instanceId,
       channelsFirst: 50,
+      channelsAfter: '',
+      likesFirst: 0,
+      likesAfter: '',
+      authorsFirst: 0,
+      authorsAfter: '',
+      authorsRoles: [],
+      messagesLast: 0,
+      messagesBefore: '',
     })
 
     const userInstancesEdge = await new Promise<UserInstancesEdge>((resolve, reject) => {
@@ -95,6 +103,19 @@ export const useInstanceStore = defineStore('instance', () => {
     // subscribe to instance stream
     const { onResult: onStreamResult, stop } = useStreamSubscription({
       instanceId: instance.id,
+      notificationsLast: 0,
+      notificationsBefore: '',
+      instancesFirst: 0,
+      instancesAfter: '',
+      channelsFirst: 0,
+      channelsAfter: '',
+      likesFirst: 0,
+      likesAfter: '',
+      authorsFirst: 0,
+      authorsAfter: '',
+      authorsRoles: [],
+      messagesLast: 0,
+      messagesBefore: '',
     })
     stopInstanceStream = stop
     onStreamResult(result => {
@@ -143,6 +164,15 @@ export const useInstanceStore = defineStore('instance', () => {
     const { mutate } = useAddInstanceMutation({
       variables: {
         input,
+        channelsFirst: 0,
+        channelsAfter: '',
+        likesFirst: 0,
+        likesAfter: '',
+        authorsFirst: 0,
+        authorsAfter: '',
+        authorsRoles: [],
+        messagesLast: 0,
+        messagesBefore: '',
       },
     })
 
@@ -162,6 +192,15 @@ export const useInstanceStore = defineStore('instance', () => {
     const { mutate } = useRemoveInstanceMutation({
       variables: {
         instanceId,
+        channelsFirst: 0,
+        channelsAfter: '',
+        likesFirst: 0,
+        likesAfter: '',
+        authorsFirst: 0,
+        authorsAfter: '',
+        authorsRoles: [],
+        messagesLast: 0,
+        messagesBefore: '',
       },
     })
 
@@ -197,7 +236,19 @@ export const useInstanceStore = defineStore('instance', () => {
     instance.mutablePinned = true
 
     const { mutate } = useReorderInstanceMutation({
-      variables: { input, instanceId },
+      variables: {
+        input,
+        instanceId,
+        channelsFirst: 0,
+        channelsAfter: '',
+        likesFirst: 0,
+        likesAfter: '',
+        authorsFirst: 0,
+        authorsAfter: '',
+        authorsRoles: [],
+        messagesLast: 0,
+        messagesBefore: '',
+      },
     })
 
     const result = await mutate()
@@ -216,7 +267,19 @@ export const useInstanceStore = defineStore('instance', () => {
     instance.mutablePinned = input.pinned
 
     const { mutate } = usePinInstanceMutation({
-      variables: { input, instanceId },
+      variables: {
+        input,
+        instanceId,
+        channelsFirst: 0,
+        channelsAfter: '',
+        likesFirst: 0,
+        likesAfter: '',
+        authorsFirst: 0,
+        authorsAfter: '',
+        authorsRoles: [],
+        messagesLast: 0,
+        messagesBefore: '',
+      },
     })
 
     const result = await mutate()
@@ -235,6 +298,15 @@ export const useInstanceStore = defineStore('instance', () => {
       variables: {
         instanceId,
         input,
+        channelsFirst: 0,
+        channelsAfter: '',
+        likesFirst: 0,
+        likesAfter: '',
+        authorsFirst: 0,
+        authorsAfter: '',
+        authorsRoles: [],
+        messagesLast: 0,
+        messagesBefore: '',
       },
     })
 
@@ -251,6 +323,15 @@ export const useInstanceStore = defineStore('instance', () => {
       variables: {
         instanceId,
         input,
+        channelsFirst: 0,
+        channelsAfter: '',
+        likesFirst: 0,
+        likesAfter: '',
+        authorsFirst: 0,
+        authorsAfter: '',
+        authorsRoles: [],
+        messagesLast: 0,
+        messagesBefore: '',
       },
     })
 
@@ -262,6 +343,15 @@ export const useInstanceStore = defineStore('instance', () => {
       variables: {
         instanceId,
         input,
+        channelsFirst: 0,
+        channelsAfter: '',
+        likesFirst: 0,
+        likesAfter: '',
+        authorsFirst: 0,
+        authorsAfter: '',
+        authorsRoles: [],
+        messagesLast: 0,
+        messagesBefore: '',
       },
     })
 

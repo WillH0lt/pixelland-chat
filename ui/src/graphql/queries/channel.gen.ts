@@ -6,8 +6,8 @@ import * as VueCompositionApi from 'vue';
 export type ReactiveFunction<TParam> = () => TParam;
 export type ChannelQueryVariables = Types.Exact<{
   id: Types.Scalars['Uuid'];
-  messagesLast?: Types.InputMaybe<Types.Scalars['Int']>;
-  messagesBefore?: Types.InputMaybe<Types.Scalars['String']>;
+  messagesLast: Types.Scalars['Int'];
+  messagesBefore: Types.Scalars['String'];
 }>;
 
 

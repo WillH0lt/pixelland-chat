@@ -13,19 +13,19 @@ import {
 export const stream = gql`
   subscription stream(
     $instanceId: Uuid!
-    $instancesFirst: Int = 0
-    $instancesAfter: String = ""
-    $channelsFirst: Int = 0
-    $channelsAfter: String = ""
-    $likesFirst: Int = 0
-    $likesAfter: String = ""
-    $authorsFirst: Int = 0
-    $authorsAfter: String = ""
-    $authorsRoles: [Role!] = []
-    $messagesLast: Int = 0
-    $messagesBefore: String = ""
-    $notificationsLast: Int = 0
-    $notificationsBefore: String = ""
+    $instancesFirst: Int!
+    $instancesAfter: String!
+    $channelsFirst: Int!
+    $channelsAfter: String!
+    $likesFirst: Int!
+    $likesAfter: String!
+    $authorsFirst: Int!
+    $authorsAfter: String!
+    $authorsRoles: [Role!]!
+    $messagesLast: Int!
+    $messagesBefore: String!
+    $notificationsLast: Int!
+    $notificationsBefore: String!
   ) {
     stream(instanceId: $instanceId) {
       kind

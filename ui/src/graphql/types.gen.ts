@@ -51,8 +51,8 @@ export type Channel = {
 
 
 export type ChannelMessagesConnectionArgs = {
-  before?: InputMaybe<Scalars['String']>;
-  last?: InputMaybe<Scalars['Int']>;
+  before?: Scalars['String'];
+  last?: Scalars['Int'];
 };
 
 export type ChannelInput = {
@@ -87,8 +87,8 @@ export type Collection = {
 
 
 export type CollectionInstancesConnectionArgs = {
-  after?: InputMaybe<Scalars['String']>;
-  first?: InputMaybe<Scalars['Int']>;
+  after?: Scalars['String'];
+  first?: Scalars['Int'];
 };
 
 export type CollectionInstancesConnection = {
@@ -126,21 +126,21 @@ export type Instance = {
 
 
 export type InstanceAuthorsConnectionArgs = {
-  after?: InputMaybe<Scalars['String']>;
-  first?: InputMaybe<Scalars['Int']>;
+  after?: Scalars['String'];
+  first?: Scalars['Int'];
   roles: ReadonlyArray<Role>;
 };
 
 
 export type InstanceChannelsConnectionArgs = {
-  after?: InputMaybe<Scalars['String']>;
-  first?: InputMaybe<Scalars['Int']>;
+  after?: Scalars['String'];
+  first?: Scalars['Int'];
 };
 
 
 export type InstanceLikesConnectionArgs = {
-  after?: InputMaybe<Scalars['String']>;
-  first?: InputMaybe<Scalars['Int']>;
+  after?: Scalars['String'];
+  first?: Scalars['Int'];
 };
 
 export type InstanceAuthorsConnection = {
@@ -498,14 +498,14 @@ export type User = {
 
 
 export type UserInstancesConnectionArgs = {
-  after?: InputMaybe<Scalars['String']>;
-  first?: InputMaybe<Scalars['Int']>;
+  after?: Scalars['String'];
+  first?: Scalars['Int'];
 };
 
 
 export type UserNotificationsConnectionArgs = {
-  before?: InputMaybe<Scalars['String']>;
-  last?: InputMaybe<Scalars['Int']>;
+  before?: Scalars['String'];
+  last?: Scalars['Int'];
 };
 
 export type UserInput = {

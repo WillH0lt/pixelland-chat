@@ -311,9 +311,13 @@
                 "name": "before",
                 "description": null,
                 "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": "\"\"",
                 "isDeprecated": false,
@@ -323,11 +327,15 @@
                 "name": "last",
                 "description": null,
                 "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
                 },
-                "defaultValue": "50",
+                "defaultValue": "0",
                 "isDeprecated": false,
                 "deprecationReason": null
               }
@@ -683,9 +691,13 @@
                 "name": "after",
                 "description": null,
                 "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": "\"\"",
                 "isDeprecated": false,
@@ -695,11 +707,15 @@
                 "name": "first",
                 "description": null,
                 "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
                 },
-                "defaultValue": "50",
+                "defaultValue": "0",
                 "isDeprecated": false,
                 "deprecationReason": null
               }
@@ -887,9 +903,13 @@
                 "name": "after",
                 "description": null,
                 "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": "\"\"",
                 "isDeprecated": false,
@@ -899,11 +919,15 @@
                 "name": "first",
                 "description": null,
                 "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
                 },
-                "defaultValue": "50",
+                "defaultValue": "0",
                 "isDeprecated": false,
                 "deprecationReason": null
               },
@@ -952,9 +976,13 @@
                 "name": "after",
                 "description": null,
                 "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": "\"\"",
                 "isDeprecated": false,
@@ -964,11 +992,15 @@
                 "name": "first",
                 "description": null,
                 "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
                 },
-                "defaultValue": "50",
+                "defaultValue": "0",
                 "isDeprecated": false,
                 "deprecationReason": null
               }
@@ -1073,9 +1105,13 @@
                 "name": "after",
                 "description": null,
                 "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": "\"\"",
                 "isDeprecated": false,
@@ -1085,11 +1121,15 @@
                 "name": "first",
                 "description": null,
                 "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
                 },
-                "defaultValue": "50",
+                "defaultValue": "0",
                 "isDeprecated": false,
                 "deprecationReason": null
               }
@@ -3666,9 +3706,13 @@
                 "name": "after",
                 "description": null,
                 "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": "\"\"",
                 "isDeprecated": false,
@@ -3678,11 +3722,15 @@
                 "name": "first",
                 "description": null,
                 "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
                 },
-                "defaultValue": "50",
+                "defaultValue": "0",
                 "isDeprecated": false,
                 "deprecationReason": null
               }
@@ -3723,9 +3771,13 @@
                 "name": "before",
                 "description": null,
                 "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": "\"\"",
                 "isDeprecated": false,
@@ -3735,11 +3787,15 @@
                 "name": "last",
                 "description": null,
                 "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int",
+                    "ofType": null
+                  }
                 },
-                "defaultValue": "50",
+                "defaultValue": "0",
                 "isDeprecated": false,
                 "deprecationReason": null
               }
@@ -5063,9 +5119,13 @@
             "name": "max",
             "description": null,
             "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
             },
             "defaultValue": "50",
             "isDeprecated": false,
@@ -5075,9 +5135,13 @@
             "name": "min",
             "description": null,
             "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Float",
+                "ofType": null
+              }
             },
             "defaultValue": "0",
             "isDeprecated": false,

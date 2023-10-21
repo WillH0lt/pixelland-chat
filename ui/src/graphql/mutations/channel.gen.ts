@@ -6,8 +6,8 @@ import * as VueCompositionApi from 'vue';
 export type ReactiveFunction<TParam> = () => TParam;
 export type AddChannelMutationVariables = Types.Exact<{
   input: Types.ChannelInput;
-  messagesLast?: Types.InputMaybe<Types.Scalars['Int']>;
-  messagesBefore?: Types.InputMaybe<Types.Scalars['String']>;
+  messagesLast: Types.Scalars['Int'];
+  messagesBefore: Types.Scalars['String'];
 }>;
 
 
@@ -16,8 +16,8 @@ export type AddChannelMutation = { __typename?: 'Mutation', addChannel: { __type
 export type UpdateChannelMutationVariables = Types.Exact<{
   input: Types.ChannelInput;
   channelId: Types.Scalars['Uuid'];
-  messagesLast?: Types.InputMaybe<Types.Scalars['Int']>;
-  messagesBefore?: Types.InputMaybe<Types.Scalars['String']>;
+  messagesLast: Types.Scalars['Int'];
+  messagesBefore: Types.Scalars['String'];
 }>;
 
 
@@ -26,8 +26,8 @@ export type UpdateChannelMutation = { __typename?: 'Mutation', updateChannel: { 
 export type ReorderChannelMutationVariables = Types.Exact<{
   input: Types.ChannelReorderInput;
   channelId: Types.Scalars['Uuid'];
-  messagesLast?: Types.InputMaybe<Types.Scalars['Int']>;
-  messagesBefore?: Types.InputMaybe<Types.Scalars['String']>;
+  messagesLast: Types.Scalars['Int'];
+  messagesBefore: Types.Scalars['String'];
 }>;
 
 
@@ -35,8 +35,8 @@ export type ReorderChannelMutation = { __typename?: 'Mutation', reorderChannel: 
 
 export type RemoveChannelMutationVariables = Types.Exact<{
   channelId: Types.Scalars['Uuid'];
-  messagesLast?: Types.InputMaybe<Types.Scalars['Int']>;
-  messagesBefore?: Types.InputMaybe<Types.Scalars['String']>;
+  messagesLast: Types.Scalars['Int'];
+  messagesBefore: Types.Scalars['String'];
 }>;
 
 

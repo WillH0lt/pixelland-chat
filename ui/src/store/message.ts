@@ -67,7 +67,7 @@ export const useMessageStore = defineStore('message', () => {
     const { onResult } = useChannelQuery({
       id: channelId,
       messagesLast: 50,
-      messagesBefore: messages.length ? messages[0].cursor : undefined,
+      messagesBefore: messages.length ? messages[0].cursor : '',
     })
 
     const sub = onResult(result => {

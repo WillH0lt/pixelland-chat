@@ -5,15 +5,15 @@ import { InstanceFragment, UserInstancesEdgeFragment } from '@/graphql/fragments
 export const addInstance = gql`
   mutation addInstance(
     $input: InstanceInput!
-    $channelsFirst: Int = 0
-    $channelsAfter: String = ""
-    $likesFirst: Int = 0
-    $likesAfter: String = ""
-    $authorsFirst: Int = 0
-    $authorsAfter: String = ""
-    $authorsRoles: [Role!] = []
-    $messagesLast: Int = 0
-    $messagesBefore: String = ""
+    $channelsFirst: Int!
+    $channelsAfter: String!
+    $likesFirst: Int!
+    $likesAfter: String!
+    $authorsFirst: Int!
+    $authorsAfter: String!
+    $authorsRoles: [Role!]!
+    $messagesLast: Int!
+    $messagesBefore: String!
   ) {
     addInstance(input: $input) {
       ...UserInstancesEdgeFragment
@@ -26,15 +26,15 @@ export const updateInstance = gql`
   mutation updateInstance(
     $instanceId: Uuid!
     $input: InstanceInput!
-    $channelsFirst: Int = 0
-    $channelsAfter: String = ""
-    $likesFirst: Int = 0
-    $likesAfter: String = ""
-    $authorsFirst: Int = 0
-    $authorsAfter: String = ""
-    $authorsRoles: [Role!] = []
-    $messagesLast: Int = 0
-    $messagesBefore: String = ""
+    $channelsFirst: Int!
+    $channelsAfter: String!
+    $likesFirst: Int!
+    $likesAfter: String!
+    $authorsFirst: Int!
+    $authorsAfter: String!
+    $authorsRoles: [Role!]!
+    $messagesLast: Int!
+    $messagesBefore: String!
   ) {
     updateInstance(instanceId: $instanceId, input: $input) {
       ...UserInstancesEdgeFragment
@@ -46,15 +46,15 @@ export const updateInstance = gql`
 export const removeInstance = gql`
   mutation removeInstance(
     $instanceId: Uuid!
-    $channelsFirst: Int = 0
-    $channelsAfter: String = ""
-    $likesFirst: Int = 0
-    $likesAfter: String = ""
-    $authorsFirst: Int = 0
-    $authorsAfter: String = ""
-    $authorsRoles: [Role!] = []
-    $messagesLast: Int = 0
-    $messagesBefore: String = ""
+    $channelsFirst: Int!
+    $channelsAfter: String!
+    $likesFirst: Int!
+    $likesAfter: String!
+    $authorsFirst: Int!
+    $authorsAfter: String!
+    $authorsRoles: [Role!]!
+    $messagesLast: Int!
+    $messagesBefore: String!
   ) {
     removeInstance(instanceId: $instanceId) {
       ...UserInstancesEdgeFragment
@@ -67,15 +67,15 @@ export const reorderInstance = gql`
   mutation reorderInstance(
     $input: InstanceReorderInput!
     $instanceId: Uuid!
-    $channelsFirst: Int = 0
-    $channelsAfter: String = ""
-    $likesFirst: Int = 0
-    $likesAfter: String = ""
-    $authorsFirst: Int = 0
-    $authorsAfter: String = ""
-    $authorsRoles: [Role!] = []
-    $messagesLast: Int = 0
-    $messagesBefore: String = ""
+    $channelsFirst: Int!
+    $channelsAfter: String!
+    $likesFirst: Int!
+    $likesAfter: String!
+    $authorsFirst: Int!
+    $authorsAfter: String!
+    $authorsRoles: [Role!]!
+    $messagesLast: Int!
+    $messagesBefore: String!
   ) {
     reorderInstance(input: $input, instanceId: $instanceId) {
       ...UserInstancesEdgeFragment
@@ -88,15 +88,15 @@ export const pinInstance = gql`
   mutation pinInstance(
     $input: InstancePinInput!
     $instanceId: Uuid!
-    $channelsFirst: Int = 0
-    $channelsAfter: String = ""
-    $likesFirst: Int = 0
-    $likesAfter: String = ""
-    $authorsFirst: Int = 0
-    $authorsAfter: String = ""
-    $authorsRoles: [Role!] = []
-    $messagesLast: Int = 0
-    $messagesBefore: String = ""
+    $channelsFirst: Int!
+    $channelsAfter: String!
+    $likesFirst: Int!
+    $likesAfter: String!
+    $authorsFirst: Int!
+    $authorsAfter: String!
+    $authorsRoles: [Role!]!
+    $messagesLast: Int!
+    $messagesBefore: String!
   ) {
     pinInstance(input: $input, instanceId: $instanceId) {
       ...UserInstancesEdgeFragment
@@ -109,15 +109,15 @@ export const tagInstance = gql`
   mutation tagInstance(
     $instanceId: Uuid!
     $input: TagInput!
-    $channelsFirst: Int = 0
-    $channelsAfter: String = ""
-    $likesFirst: Int = 0
-    $likesAfter: String = ""
-    $authorsFirst: Int = 0
-    $authorsAfter: String = ""
-    $authorsRoles: [Role!] = []
-    $messagesLast: Int = 0
-    $messagesBefore: String = ""
+    $channelsFirst: Int!
+    $channelsAfter: String!
+    $likesFirst: Int!
+    $likesAfter: String!
+    $authorsFirst: Int!
+    $authorsAfter: String!
+    $authorsRoles: [Role!]!
+    $messagesLast: Int!
+    $messagesBefore: String!
   ) {
     tagInstance(instanceId: $instanceId, input: $input) {
       ...InstanceFragment
@@ -130,15 +130,15 @@ export const untagInstance = gql`
   mutation untagInstance(
     $instanceId: Uuid!
     $input: TagInput!
-    $channelsFirst: Int = 0
-    $channelsAfter: String = ""
-    $likesFirst: Int = 0
-    $likesAfter: String = ""
-    $authorsFirst: Int = 0
-    $authorsAfter: String = ""
-    $authorsRoles: [Role!] = []
-    $messagesLast: Int = 0
-    $messagesBefore: String = ""
+    $channelsFirst: Int!
+    $channelsAfter: String!
+    $likesFirst: Int!
+    $likesAfter: String!
+    $authorsFirst: Int!
+    $authorsAfter: String!
+    $authorsRoles: [Role!]!
+    $messagesLast: Int!
+    $messagesBefore: String!
   ) {
     untagInstance(instanceId: $instanceId, input: $input) {
       ...InstanceFragment

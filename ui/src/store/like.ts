@@ -86,6 +86,13 @@ export const useLikeStore = defineStore('like', () => {
       id: instanceId,
       likesFirst: 50,
       likesAfter: cursor.value,
+      channelsFirst: 0,
+      channelsAfter: '',
+      authorsFirst: 0,
+      authorsAfter: '',
+      authorsRoles: [],
+      messagesLast: 0,
+      messagesBefore: '',
     })
 
     loading.value = true
