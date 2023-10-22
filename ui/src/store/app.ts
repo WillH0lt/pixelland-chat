@@ -5,7 +5,6 @@ import { computed, ref } from 'vue'
 import { DEFAULT_API_HOST, NULL_UUID } from '@/constants'
 import { apolloClient, createLink } from '@/graphql/client'
 import { useAuthorStore } from '@/store/author'
-import { PAGE } from '@/types/PageEnum'
 
 export const useAppStore = defineStore('app', () => {
   provideApolloClient(apolloClient)
@@ -25,8 +24,6 @@ export const useAppStore = defineStore('app', () => {
   const visible = ref(true)
   const connected = ref(false)
   const isSuperAdmin = ref(false)
-  const selectedPage = ref(PAGE.INSTANCE)
-  const showBottomBar = ref(false)
 
   // =========================================
   // getters
@@ -65,8 +62,6 @@ export const useAppStore = defineStore('app', () => {
     verified,
     visible,
     connected,
-    selectedPage,
-    showBottomBar,
 
     isSuperAdmin,
     isLoggedIn,

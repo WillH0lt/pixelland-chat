@@ -2,8 +2,7 @@
   <div class="absolute inset-0 bg-gray-dark" v-if="error">Error: {{ error }}</div>
   <div class="absolute inset-0 bg-gray-dark" v-else-if="loading">Loading</div>
   <div class="absolute inset-0 bg-gray-dark" v-else>
-    <HomeView v-if="appStore.showBottomBar" @close="emitter.emit('chat:close')" />
-    <InstanceView class="h-full" v-else @close="emitter.emit('chat:close')" />
+    <InstanceView class="h-full" @close="emitter.emit('chat:close')" />
     <router-view @close="router.back()" v-slot="{ Component, route }" @keydown.stop>
       <transition name="slide">
         <component
@@ -30,7 +29,6 @@ import { useRouter } from 'vue-router'
 
 import { emitter } from '@/Emitter'
 import ElementDialog from '@/components/ElementDialog.vue'
-import HomeView from '@/components/HomeView.vue'
 import InstanceView from '@/components/InstanceView.vue'
 import { useAppStore } from '@/store/app'
 import { useDialogStore } from '@/store/dialog'
@@ -103,9 +101,6 @@ onMounted(async () => {
   if (params.isSuperAdmin) {
     appStore.isSuperAdmin = params.isSuperAdmin === 'true'
   }
-  if (params.showBottomBar) {
-    appStore.showBottomBar = params.showBottomBar === 'true'
-  }
 
   if (
     import.meta.env.MODE === MODE.PROD ||
@@ -136,6 +131,7 @@ onMounted(async () => {
     )
     emitter.on('chat:login:request', () => host?.send('chat:login:request'))
     emitter.on('chat:verify:request', () => host?.send('chat:verify:request'))
+    emitter.on('chat:user:edit', () => host?.send('chat:user:edit'))
 
     watch(hasUnreadMessages, () => {
       host?.send('chat:messages:unread', { hasUnread: hasUnreadMessages.value })

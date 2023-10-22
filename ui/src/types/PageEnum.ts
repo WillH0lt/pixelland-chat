@@ -1,5 +1,0 @@
-export enum PAGE {
-  INSTANCE,
-  PROFILE,
-  NOTIFICATIONS,
-}

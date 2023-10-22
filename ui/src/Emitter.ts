@@ -7,6 +7,7 @@ interface Events {
   'chat:instance:click': string
   'chat:verify:request': void
   'chat:login:request': void
+  'chat:user:edit': void
 }
 
 export const emitter: StrictEventEmitter<EventEmitter, Events> = new EventEmitter()

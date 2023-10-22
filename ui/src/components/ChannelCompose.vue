@@ -3,7 +3,7 @@
     <img
       class="bg-accent h-12 w-12 mx-2 hover:cursor-pointer hover:brightness-110 transition pixelated"
       :src="authorStore.instanceUser?.avatar"
-      @click="appStore.selectedPage = PAGE.PROFILE"
+      @click="emitter.emit('chat:user:edit')"
     />
     <ElementTextArea
       v-if="appStore.verified && appStore.isLoggedIn"
@@ -71,7 +71,6 @@ import { useAppStore } from '@/store/app'
 import { useAuthorStore } from '@/store/author'
 import { useChannelStore } from '@/store/channel'
 import { useMessageStore } from '@/store/message'
-import { PAGE } from '@/types/PageEnum'
 import { getMostPermissiveRole } from '@/utils'
 
 const props = defineProps<{

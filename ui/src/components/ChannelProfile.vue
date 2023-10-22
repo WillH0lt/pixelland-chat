@@ -10,7 +10,7 @@
         <img
           class="w-10 h-10 pixelated hover:scale-110 transition cursor-pointer"
           src="/img/edit.png"
-          @click="appStore.selectedPage = PAGE.PROFILE"
+          @click="emitter.emit('chat:user:edit')"
         />
       </div>
     </div>
@@ -45,6 +45,7 @@
 import { onMounted, onUnmounted, ref, watchEffect } from 'vue'
 import Markdown from 'vue3-markdown-it'
 
+import { emitter } from '@/Emitter'
 import antiSkullImg from '@/assets/anti-skull.png'
 import downArrowImg from '@/assets/down-arrow.png'
 import pencilMinusImg from '@/assets/pencil-minus.png'
@@ -52,15 +53,11 @@ import pencilPlusImg from '@/assets/pencil-plus.png'
 import skullImg from '@/assets/skull.png'
 import upArrowImg from '@/assets/up-arrow.png'
 import { Author, Role } from '@/graphql/types.gen'
-import { useAppStore } from '@/store/app'
 import { useAuthorStore } from '@/store/author'
 import { useDialogStore } from '@/store/dialog'
-import { PAGE } from '@/types/PageEnum'
 import { handleLinkClicks } from '@/utils'
 
 import ElementHoverText from './ElementHoverText.vue'
-
-const appStore = useAppStore()
 
 const props = defineProps<{
   user: Author
