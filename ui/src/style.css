@@ -7,6 +7,11 @@
   src: url('/fonts/pixelar.woff2') format('woff2'), url('/fonts/pixelar.woff') format('woff');
 }
 
+@font-face {
+  font-family: 'Halloween';
+  src: url('/fonts/CFHalloween-Regular.ttf');
+}
+
 :root {
   /* --chat-app-height: 100%; */
   font-family: 'Pixelar';

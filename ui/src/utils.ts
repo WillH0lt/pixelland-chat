@@ -163,3 +163,57 @@ export function extendAuthor(author: Author): ExtendedAuthor {
     createdAtTimeSince,
   }
 }
+
+const spookyWords = [
+  'vampire',
+  'vampires',
+  'ghost',
+  'ghosts',
+  'Werewolf',
+  'werewolves',
+  'mummy',
+  'mummies',
+  'monster',
+  'monsters',
+  'dracula',
+  'demon',
+  'demons',
+  'skeleton',
+  'skeletons',
+  'frankenstein',
+  'ghoul',
+  'ghouls',
+  'banshee',
+  'banshees',
+  'zombie',
+  'zombies',
+  'bat',
+  'bats',
+  'witch',
+  'witches',
+  'pumpkin',
+  'pumpkins',
+  'haunted',
+  'spooky',
+  'spookier',
+  'spookiest',
+  'scary',
+  'scarier',
+  'scariest',
+  'boo',
+  'jack-o-lantern',
+  'halloween',
+  'doom',
+  'skull',
+  'skulls'
+]
+
+export function spookifyString(str: string): string {
+  const pattern = new RegExp(`\\b(${spookyWords.join('|')})\\b`, 'ig')
+  const spookyStr = str.replace(
+    pattern,
+    v => `<span style="font-family: \'Halloween\'; color: #D6002F;">${v.toUpperCase()}</span>`
+  )
+
+  return spookyStr
+}
