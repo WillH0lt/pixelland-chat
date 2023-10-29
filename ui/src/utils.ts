@@ -250,10 +250,36 @@ const spookyWords = [
   'Spork',
   'eyeballs',
   'heinous',
+  'pantsplant',
+  'joris',
+  'alex',
+  'voidism',
+  'sans',
+  'amogus',
+  'among us',
+  'Abyss',
+  'Hades',
+  'Tartarus',
+  'Giraffe',
+  'uwu',
+  'Voldemort',
+  'Terrify',
+  'Terrifying',
+  'evil',
+  'ptsd',
+  'Wilhelm',
+  'owo',
+  '>w<',
+  'Litarrly didnt know about the exist of this white furry until floyd decided to show me',
+  'Cringe',
+  'genocide',
+  'Disestablishmentarianism',
+  'quote',
+  'some of these words seem a bit weird',
 ]
 
 export function spookifyString(str: string): string {
-  const pattern = new RegExp(`\\b(${spookyWords.join('|')})\\b`, 'ig')
+  const pattern = new RegExp(`\\b(${spookyWords.join('|')})\\b(?![\w-])`, 'ig')
   const spookyStr = str.replace(
     pattern,
     v => `<span style="font-family: \'Halloween\'; color: #D6002F;">${v.toUpperCase()}</span>`

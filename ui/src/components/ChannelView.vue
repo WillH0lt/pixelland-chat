@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col">
+  <div class="flex flex-col" v-if="channel">
     <ElementHeader
       class="border-b-black border-b-4 border-solid bg-gray-darkest"
       @close="$emit('close')"
@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 
 import ChannelCompose from '@/components/ChannelCompose.vue'
@@ -22,13 +22,21 @@ import ChannelMessageList from '@/components/ChannelMessageList.vue'
 import ChannelStatus from '@/components/ChannelStatus.vue'
 import ElementHeader from '@/components/ElementHeader.vue'
 import { useChannelStore } from '@/store/channel'
+import { useInstanceStore } from '@/store/instance'
 
-defineEmits(['close'])
+const emit = defineEmits(['close'])
 
 const router = useRouter()
 const channelStore = useChannelStore()
+const instanceStore = useInstanceStore()
 const channel = computed(() => {
   const channelId = router.currentRoute.value.params.channelId as string
   return channelStore.channels[channelId]
+})
+
+watchEffect(() => {
+  if (!channel.value || instanceStore.instance.id !== channel.value.instanceId) {
+    emit('close')
+  }
 })
 </script>

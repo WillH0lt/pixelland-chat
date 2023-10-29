@@ -66,16 +66,10 @@ export const useChannelStore = defineStore('channel', () => {
     await mutate()
   }
 
-  // TODO
   async function refreshChannels(instanceId: string) {
-    const instanceChannels = getChannels(instanceId)
-    for (const channel of instanceChannels) {
-      delete channels.value[channel.id]
-    }
-
     const { onResult, onError } = useInstanceQuery({
       id: instanceId,
-      channelsFirst: 0,
+      channelsFirst: 50,
       channelsAfter: '',
       likesFirst: 0,
       likesAfter: '',
@@ -98,6 +92,10 @@ export const useChannelStore = defineStore('channel', () => {
       })
     })
 
+    const instanceChannels = getChannels(instanceId)
+    for (const channel of instanceChannels) {
+      delete channels.value[channel.id]
+    }
     handleChannelsAdded(userInstancesEdge.node.channelsConnection.edges)
   }
 
