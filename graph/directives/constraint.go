@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"unicode/utf8"
 
 	"github.com/99designs/gqlgen/graphql"
 )
@@ -30,7 +31,8 @@ func ConstraintDirective(ctx context.Context, obj interface{}, next graphql.Reso
 		}
 	case string:
 		s := val.(string)
-		if len(s) < int(min) || len(s) > int(max) {
+		count := utf8.RuneCountInString(s)
+		if count < int(min) || count > int(max) {
 			return nil, fmt.Errorf("text length out of range")
 		}
 	default:
