@@ -12,7 +12,6 @@ import { computed } from 'vue'
 
 import { useDialogStore } from '@/store/dialog'
 import { handleLinkClicks } from '@/utils'
-import { spookifyString } from '@/utils'
 
 const dialogStore = useDialogStore()
 
@@ -24,7 +23,6 @@ const formattedText = computed(() => {
   let t = props.text
   t = t.trim()
   t = linkifyStr(t, { defaultProtocol: 'https' })
-  t = spookifyString(t)
   return t
 })
 </script>
