@@ -1,6 +1,11 @@
 import gql from 'graphql-tag'
 
-import { UserFragment, UserInstancesEdgeFragment } from '@/graphql/fragments/fragments'
+import {
+  PageInfoFragment,
+  UserBadgesEdgeFragment,
+  UserFragment,
+  UserInstancesEdgeFragment,
+} from '@/graphql/fragments/fragments'
 
 export const user = gql`
   query user(
@@ -24,4 +29,19 @@ export const user = gql`
   }
   ${UserFragment}
   ${UserInstancesEdgeFragment}
+`
+
+export const userBadges = gql`
+  query userBadges($userId: Uuid!, $badgesFirst: Int!, $badgesAfter: String!) {
+    userBadges(userId: $userId, first: $badgesFirst, after: $badgesAfter) {
+      edges {
+        ...UserBadgesEdgeFragment
+      }
+      pageInfo {
+        ...PageInfoFragment
+      }
+    }
+  }
+  ${UserBadgesEdgeFragment}
+  ${PageInfoFragment}
 `

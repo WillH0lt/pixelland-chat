@@ -11,6 +11,16 @@ import (
 	"github.com/google/uuid"
 )
 
+type AppBadgesConnection struct {
+	PageInfo *PageInfo        `json:"pageInfo"`
+	Edges    []*AppBadgesEdge `json:"edges"`
+}
+
+type AppBadgesEdge struct {
+	Cursor string `json:"cursor"`
+	Node   *Badge `json:"node"`
+}
+
 type Author struct {
 	ID         uuid.UUID `json:"id"`
 	UserID     uuid.UUID `json:"userId"`
@@ -20,6 +30,11 @@ type Author struct {
 	Avatar     string    `json:"avatar"`
 	Bio        string    `json:"bio"`
 	CreatedAt  time.Time `json:"createdAt"`
+}
+
+type BadgeInput struct {
+	Name string `json:"name"`
+	Icon string `json:"icon"`
 }
 
 type ChannelInput struct {
@@ -41,18 +56,7 @@ type ChannelMessagesEdge struct {
 }
 
 type ChannelReorderInput struct {
-	PrevChannelID *uuid.UUID `json:"prevChannelId"`
-}
-
-type CollectionInstancesConnection struct {
-	PageInfo *PageInfo                  `json:"pageInfo"`
-	Edges    []*CollectionInstancesEdge `json:"edges"`
-}
-
-type CollectionInstancesEdge struct {
-	Cursor   string    `json:"cursor"`
-	Node     *Instance `json:"node"`
-	TaggedAt time.Time `json:"taggedAt"`
+	PrevChannelID *uuid.UUID `json:"prevChannelId,omitempty"`
 }
 
 type InstanceAuthorsConnection struct {
@@ -76,7 +80,7 @@ type InstanceChannelsEdge struct {
 }
 
 type InstanceInput struct {
-	ID           *uuid.UUID `json:"id"`
+	ID           *uuid.UUID `json:"id,omitempty"`
 	Name         string     `json:"name"`
 	ReadAccess   Access     `json:"readAccess"`
 	Icon         string     `json:"icon"`
@@ -103,13 +107,13 @@ type InstancePinInput struct {
 }
 
 type InstanceReorderInput struct {
-	PrevInstanceID *uuid.UUID `json:"prevInstanceId"`
+	PrevInstanceID *uuid.UUID `json:"prevInstanceId,omitempty"`
 }
 
 type InviteInput struct {
 	InstanceID  uuid.UUID  `json:"instanceId"`
-	ExpiresAt   *time.Time `json:"expiresAt"`
-	Redemptions *int       `json:"redemptions"`
+	ExpiresAt   *time.Time `json:"expiresAt,omitempty"`
+	Redemptions *int       `json:"redemptions,omitempty"`
 }
 
 type MessageInput struct {
@@ -119,14 +123,14 @@ type MessageInput struct {
 
 type Notice struct {
 	Kind                  NoticeKind             `json:"kind"`
-	ChannelMessagesEdge   *ChannelMessagesEdge   `json:"channelMessagesEdge"`
-	UserInstancesEdge     *UserInstancesEdge     `json:"userInstancesEdge"`
-	InstanceChannelsEdge  *InstanceChannelsEdge  `json:"instanceChannelsEdge"`
-	InstanceLikesEdge     *InstanceLikesEdge     `json:"instanceLikesEdge"`
-	UserNotificationsEdge *UserNotificationsEdge `json:"userNotificationsEdge"`
-	Instance              *Instance              `json:"instance"`
-	User                  *User                  `json:"user"`
-	Author                *Author                `json:"author"`
+	ChannelMessagesEdge   *ChannelMessagesEdge   `json:"channelMessagesEdge,omitempty"`
+	UserInstancesEdge     *UserInstancesEdge     `json:"userInstancesEdge,omitempty"`
+	InstanceChannelsEdge  *InstanceChannelsEdge  `json:"instanceChannelsEdge,omitempty"`
+	InstanceLikesEdge     *InstanceLikesEdge     `json:"instanceLikesEdge,omitempty"`
+	UserNotificationsEdge *UserNotificationsEdge `json:"userNotificationsEdge,omitempty"`
+	Instance              *Instance              `json:"instance,omitempty"`
+	User                  *User                  `json:"user,omitempty"`
+	Author                *Author                `json:"author,omitempty"`
 }
 
 type PageInfo struct {
@@ -134,8 +138,14 @@ type PageInfo struct {
 	HasNextPage     bool `json:"hasNextPage"`
 }
 
-type TagInput struct {
-	Tag TagKind `json:"tag"`
+type UserBadgesConnection struct {
+	PageInfo *PageInfo         `json:"pageInfo"`
+	Edges    []*UserBadgesEdge `json:"edges"`
+}
+
+type UserBadgesEdge struct {
+	Cursor string `json:"cursor"`
+	Node   *Badge `json:"node"`
 }
 
 type UserInput struct {
@@ -356,44 +366,5 @@ func (e *Role) UnmarshalGQL(v interface{}) error {
 }
 
 func (e Role) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type TagKind string
-
-const (
-	TagKindFeatured TagKind = "FEATURED"
-)
-
-var AllTagKind = []TagKind{
-	TagKindFeatured,
-}
-
-func (e TagKind) IsValid() bool {
-	switch e {
-	case TagKindFeatured:
-		return true
-	}
-	return false
-}
-
-func (e TagKind) String() string {
-	return string(e)
-}
-
-func (e *TagKind) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = TagKind(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid TagKind", str)
-	}
-	return nil
-}
-
-func (e TagKind) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

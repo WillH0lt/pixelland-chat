@@ -6,8 +6,6 @@ import {
   usePinInstanceMutation,
   useRemoveInstanceMutation,
   useReorderInstanceMutation,
-  useTagInstanceMutation,
-  useUntagInstanceMutation,
   useUpdateInstanceMutation,
 } from '@/graphql/mutations/instance.gen'
 import { useInstanceQuery } from '@/graphql/queries/instance.gen'
@@ -19,7 +17,6 @@ import {
   InstancePinInput,
   InstanceReorderInput,
   NoticeKind,
-  TagInput,
   UserInstancesEdge,
 } from '@/graphql/types.gen'
 import { useAuthorStore } from '@/store/author'
@@ -318,46 +315,6 @@ export const useInstanceStore = defineStore('instance', () => {
     }
   }
 
-  async function tagInstance(instanceId: string, input: TagInput) {
-    const { mutate } = useTagInstanceMutation({
-      variables: {
-        instanceId,
-        input,
-        channelsFirst: 0,
-        channelsAfter: '',
-        likesFirst: 0,
-        likesAfter: '',
-        authorsFirst: 0,
-        authorsAfter: '',
-        authorsRoles: [],
-        messagesLast: 0,
-        messagesBefore: '',
-      },
-    })
-
-    await mutate()
-  }
-
-  async function untagInstance(instanceId: string, input: TagInput) {
-    const { mutate } = useUntagInstanceMutation({
-      variables: {
-        instanceId,
-        input,
-        channelsFirst: 0,
-        channelsAfter: '',
-        likesFirst: 0,
-        likesAfter: '',
-        authorsFirst: 0,
-        authorsAfter: '',
-        authorsRoles: [],
-        messagesLast: 0,
-        messagesBefore: '',
-      },
-    })
-
-    await mutate()
-  }
-
   function handleInstancesAdded(edges: UserInstancesEdge[]) {
     for (const edge of edges) {
       instances.value[edge.node.id] = extendInstance(edge)
@@ -381,8 +338,6 @@ export const useInstanceStore = defineStore('instance', () => {
     reorderInstance,
     pinInstance,
     handleInstancesAdded,
-    tagInstance,
-    untagInstance,
   }
 })
 

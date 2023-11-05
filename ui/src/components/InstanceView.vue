@@ -45,7 +45,7 @@ import InstanceComments from '@/components/InstanceComments.vue'
 import InstanceDescription from '@/components/InstanceDescription.vue'
 import InstanceGutter from '@/components/InstanceGutter.vue'
 import InstanceLikes from '@/components/InstanceLikes.vue'
-import { Role, TagKind } from '@/graphql/types.gen'
+import { Role } from '@/graphql/types.gen'
 import { useAppStore } from '@/store/app'
 import { useAuthorStore } from '@/store/author'
 import { useChannelStore } from '@/store/channel'
@@ -129,21 +129,6 @@ watchEffect(() => {
         } else {
           router.push({ name: 'editInstance' })
         }
-      },
-    })
-  }
-  if (appStore.isSuperAdmin) {
-    instanceDropdownItems.value.push({
-      text: 'Add Featured Tag',
-      onClicked: () => {
-        instanceStore.tagInstance(instanceStore.instance.id, { tag: TagKind.Featured })
-      },
-    })
-
-    instanceDropdownItems.value.push({
-      text: 'Remove Featured Tag',
-      onClicked: () => {
-        instanceStore.untagInstance(instanceStore.instance.id, { tag: TagKind.Featured })
       },
     })
   }

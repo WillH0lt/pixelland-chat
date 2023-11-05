@@ -3,9 +3,13 @@ schema:
   - graph/*.graphqls
 
 # Where should the generated instance code go?
+# exec:
+#   filename: graph/generated.go
+#   package: graph
 exec:
-  filename: graph/generated.go
-  package: graph
+  layout: follow-schema
+  dir: graph/generated
+  package: generated
 
 # Uncomment to enable federation
 # federation:
@@ -22,6 +26,7 @@ resolver:
   layout: follow-schema
   dir: graph
   package: graph
+  filename_template: '{name}.resolvers.go'
 
 # Optional: turn on use ` + "`" + `gqlgen:"fieldName"` + "`" + ` tags in your models
 # struct_tag: json

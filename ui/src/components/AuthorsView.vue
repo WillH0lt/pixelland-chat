@@ -19,7 +19,7 @@
       </div>
       <ChannelProfile
         v-if="profileAnchor && profileAuthor"
-        :user="profileAuthor"
+        :author="profileAuthor"
         @close="profileAnchor = null"
         class="absolute left-16 w-72 bg-gray-darkest"
         :style="{

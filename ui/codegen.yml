@@ -10,12 +10,17 @@ generates:
   ./src/graphql/types.gen.ts:
     plugins:
       - typescript
+
+      # - typescript-operations
     config:
       constEnums: true
       enumsAsConst: true
       enumsAsTypes: false
       immutableTypes: true
-      useImplementingTypes: true
+      flattenGeneratedTypes: true
+      flattenGeneratedTypesIncludeFragments: true
+      preResolveTypes: false
+      # useImplementingTypes: true
       scalars:
         Uuid: string
         Time: string # should be Date but it won't automatically cast

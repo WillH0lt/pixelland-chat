@@ -10,6 +10,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/wwwillw/pixelland-chat/graph/directives"
+	"github.com/wwwillw/pixelland-chat/graph/generated"
 	"github.com/wwwillw/pixelland-chat/graph/model"
 )
 
@@ -26,7 +27,7 @@ type Resolver struct {
 	ProfanityDetector *goaway.ProfanityDetector
 }
 
-func New() Config {
+func New() generated.Config {
 
 	bytes, err := ioutil.ReadFile("./assets/profanities.json")
 	if err != nil {
@@ -43,13 +44,13 @@ func New() Config {
 	falseNegatives := []string{}
 	profanityDetector := goaway.NewProfanityDetector().WithCustomDictionary(profanities, falsePositives, falseNegatives)
 
-	return Config{
+	return generated.Config{
 		Resolvers: &Resolver{
 			StreamObservers:   sync.Map{},
 			MessageLog:        sync.Map{},
 			ProfanityDetector: profanityDetector,
 		},
-		Directives: DirectiveRoot{
+		Directives: generated.DirectiveRoot{
 			Constraint: directives.ConstraintDirective,
 			Auth:       directives.AuthDirective,
 		},

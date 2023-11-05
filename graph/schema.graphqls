@@ -83,6 +83,12 @@ type Message {
   channelId: Uuid!
 }
 
+type Badge {
+  id: Uuid!
+  name: String!
+  icon: String!
+}
+
 type Author {
   id: Uuid!
   userId: Uuid!
@@ -103,24 +109,11 @@ type Notification {
   message: Message
 }
 
-type Collection {
-  tag: TagKind!
-  instancesConnection(
-    first: Int! = 0 @constraint(max: 50)
-    after: String! = ""
-  ): CollectionInstancesConnection!
-}
-
 # ==============================================
 # connections
 type UserInstancesConnection {
   pageInfo: PageInfo!
   edges: [UserInstancesEdge!]!
-}
-
-type CollectionInstancesConnection {
-  pageInfo: PageInfo!
-  edges: [CollectionInstancesEdge!]!
 }
 
 type UserNotificationsConnection {
@@ -150,6 +143,16 @@ type ChannelMessagesConnection {
   edges: [ChannelMessagesEdge!]!
 }
 
+type UserBadgesConnection {
+  pageInfo: PageInfo!
+  edges: [UserBadgesEdge!]!
+}
+
+type AppBadgesConnection {
+  pageInfo: PageInfo!
+  edges: [AppBadgesEdge!]!
+}
+
 # ==============================================
 # edges
 type UserInstancesEdge {
@@ -159,12 +162,6 @@ type UserInstancesEdge {
   likedByMe: Boolean!
   rank: String!
   pinned: Boolean!
-}
-
-type CollectionInstancesEdge {
-  cursor: String!
-  node: Instance!
-  taggedAt: Time!
 }
 
 type UserNotificationsEdge {
@@ -193,6 +190,16 @@ type ChannelMessagesEdge {
   node: Message!
 }
 
+type UserBadgesEdge {
+  cursor: String!
+  node: Badge!
+}
+
+type AppBadgesEdge {
+  cursor: String!
+  node: Badge!
+}
+
 # ==============================================
 # streams
 type Notice {
@@ -218,11 +225,18 @@ type PageInfo {
 # API
 type Query {
   user: User! @auth(accessLevel: "user")
-  collection(tag: TagKind!): Collection! @auth(accessLevel: "guest")
   instance(id: Uuid!): UserInstancesEdge! @auth(accessLevel: "guest")
   channel(id: Uuid!): Channel! @auth(accessLevel: "guest")
   invite(instanceId: Uuid!): Invite! @auth(accessLevel: "guest")
   checkInvite(code: String!): Invite! @auth(accessLevel: "guest")
+  author(id: Uuid!): Author! @auth(accessLevel: "guest")
+  userBadges(
+    userId: Uuid!
+    first: Int! = 0 @constraint(max: 50)
+    after: String! = ""
+  ): UserBadgesConnection! @auth(accessLevel: "guest")
+  badges(first: Int! = 0 @constraint(max: 50), after: String! = ""): AppBadgesConnection!
+    @auth(accessLevel: "admin")
 }
 
 type Mutation {
@@ -237,8 +251,6 @@ type Mutation {
     @auth(accessLevel: "user")
   pinInstance(instanceId: Uuid!, input: InstancePinInput!): UserInstancesEdge!
     @auth(accessLevel: "user")
-  tagInstance(instanceId: Uuid!, input: TagInput!): Instance! @auth(accessLevel: "admin")
-  untagInstance(instanceId: Uuid!, input: TagInput!): Instance! @auth(accessLevel: "admin")
   # channel
   addChannel(input: ChannelInput!): InstanceChannelsEdge! @auth(accessLevel: "user")
   updateChannel(channelId: Uuid!, input: ChannelInput!): InstanceChannelsEdge!
@@ -259,6 +271,12 @@ type Mutation {
   # like
   addLike(instanceId: Uuid!): InstanceLikesEdge! @auth(accessLevel: "user")
   removeLike(instanceId: Uuid!): InstanceLikesEdge! @auth(accessLevel: "user")
+  # badge
+  addBadge(input: BadgeInput!): Badge! @auth(accessLevel: "admin")
+  assignBadge(userId: Uuid!, badgeId: Uuid!): Badge! @auth(accessLevel: "admin")
+  unassignBadge(userId: Uuid!, badgeId: Uuid!): Badge! @auth(accessLevel: "admin")
+  updateBadge(badgeId: Uuid!, input: BadgeInput!): Badge! @auth(accessLevel: "admin")
+  removeBadge(badgeId: Uuid!): Badge! @auth(accessLevel: "admin")
 }
 
 type Subscription {
@@ -316,8 +334,9 @@ input InviteInput {
   redemptions: Int
 }
 
-input TagInput {
-  tag: TagKind!
+input BadgeInput {
+  name: String! @constraint(min: 0, max: 64)
+  icon: String! @constraint(min: 0, max: 1024)
 }
 
 # ==============================================
@@ -353,10 +372,6 @@ enum NoticeKind {
 enum NotificationKind {
   LIKE_ADDED
   COMMENT_ADDED
-}
-
-enum TagKind {
-  FEATURED
 }
 
 # ==============================================

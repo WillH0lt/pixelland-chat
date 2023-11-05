@@ -5,13 +5,14 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"gorm.io/gorm"
 )
 
 type Base struct {
 	ID        uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()" copier:"Id"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt *time.Time `gorm:"index"`
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
 type User struct {
@@ -23,6 +24,7 @@ type User struct {
 	InstanceUsers       []*InstanceUser ``
 	Notifications       []*Notification ``
 	ReadNotificationsAt *time.Time      ``
+	Badges              []*Badge        `gorm:"many2many:user_badges;"`
 }
 
 type Instance struct {
@@ -113,17 +115,25 @@ type Notification struct {
 	Message    *Message      ``
 }
 
-type Tag struct {
+type UserBadge struct {
 	Base
-	Kind       string    `json:"kind"`
-	InstanceID uuid.UUID `json:"instanceId" gorm:"type:uuid"`
-	Instance   *Instance `gorm:"foreignKey:InstanceID"`
-	AuthorID   uuid.UUID `json:"authorId" gorm:"type:uuid"`
-	Author     *User     `gorm:"foreignKey:AuthorID"`
+	UserID  uuid.UUID `gorm:"primaryKey"`
+	BadgeID uuid.UUID `gorm:"primaryKey"`
 }
 
-// abstract - only used so gql-generate can create resolver
-type Collection struct {
+type Badge struct {
 	Base
-	Tag string `json:"tag"`
+	Name string `json:"name"`
+	Icon string `json:"icon"`
 }
+
+// // used to create resolver, not a db table
+// type Author struct {
+// 	Base
+// 	UserID     uuid.UUID `json:"userId" copier:"UserId"`
+// 	InstanceID uuid.UUID `json:"instanceId" copier:"InstanceId"`
+// 	Roles      []Role    `json:"roles"`
+// 	Name       string    `json:"name"`
+// 	Avatar     string    `json:"avatar"`
+// 	Bio        string    `json:"bio"`
+// }

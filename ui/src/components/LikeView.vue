@@ -21,7 +21,7 @@
       </div>
       <ChannelProfile
         v-if="profileAnchor"
-        :user="authorStore.getUser(profileAnchor.id)"
+        :author="authorStore.getUser(profileAnchor.id)"
         @close="profileAnchor = null"
         class="absolute left-16 w-72 bg-gray-darkest"
         :style="{

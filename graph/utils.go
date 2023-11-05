@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/jinzhu/copier"
 	"github.com/rs/zerolog/log"
 
 	"github.com/google/uuid"
@@ -385,13 +386,21 @@ func createChannelMessagesEdge(message *model.Message) *model.ChannelMessagesEdg
 	}
 }
 
-func createCollectionInstancesEdge(tag *model.Tag) *model.CollectionInstancesEdge {
-	cursor := toCursorHash(tag.CreatedAt)
+func createUserBadgesEdge(badge *model.Badge) *model.UserBadgesEdge {
+	cursor := toCursorHash(badge.CreatedAt)
 
-	return &model.CollectionInstancesEdge{
-		Cursor:   cursor,
-		TaggedAt: tag.CreatedAt,
-		Node:     tag.Instance,
+	return &model.UserBadgesEdge{
+		Cursor: cursor,
+		Node:   badge,
+	}
+}
+
+func createAppBadgesEdge(badge *model.Badge) *model.AppBadgesEdge {
+	cursor := toCursorHash(badge.CreatedAt)
+
+	return &model.AppBadgesEdge{
+		Cursor: cursor,
+		Node:   badge,
 	}
 }
 
@@ -444,10 +453,6 @@ func populateInstanceFromInput(instance *model.Instance, input model.InstanceInp
 	instance.ShowLikes = input.ShowLikes
 }
 
-func populateTagFromInput(tag *model.Tag, input model.TagInput) {
-	tag.Kind = input.Tag.String()
-}
-
 func generateInviteCode() string {
 	return randString(16)
 }
@@ -462,16 +467,20 @@ func randString(n int) string {
 }
 
 func instanceUserToAuthor(instanceUser *model.InstanceUser) *model.Author {
-	return &model.Author{
-		ID:         instanceUser.ID,
-		UserID:     instanceUser.UserID,
-		InstanceID: instanceUser.InstanceID,
-		Name:       instanceUser.Name,
-		Avatar:     instanceUser.Avatar,
-		Bio:        instanceUser.Bio,
-		Roles:      stringsToRoles(instanceUser.Roles),
-		CreatedAt:  instanceUser.CreatedAt,
-	}
+	author := model.Author{}
+	copier.Copy(&author, &instanceUser)
+	author.Roles = stringsToRoles(instanceUser.Roles)
+	return &author
+	// return &model.Author{
+	// 	ID:         instanceUser.ID,
+	// 	UserID:     instanceUser.UserID,
+	// 	InstanceID: instanceUser.InstanceID,
+	// 	Name:       instanceUser.Name,
+	// 	Avatar:     instanceUser.Avatar,
+	// 	Bio:        instanceUser.Bio,
+	// 	Roles:      stringsToRoles(instanceUser.Roles),
+	// 	CreatedAt:  instanceUser.CreatedAt,
+	// }
 }
 
 func userToInstanceUser(user *model.User, instance model.Instance, roles []string) *model.InstanceUser {

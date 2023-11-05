@@ -13,7 +13,7 @@
     />
     <ChannelProfile
       v-if="profileMessage"
-      :user="authorStore.getUser(profileMessage.authorId)"
+      :author="authorStore.getUser(profileMessage.authorId)"
       @close="profileMessage = null"
       class="absolute left-16 w-72 bg-gray-darkest"
       :style="{
@@ -74,7 +74,6 @@ onMounted(() => {
   cancelRefresh = setInterval(() => {
     messageStore.refreshTimeSince(props.channelId)
   }, 1000 * 10)
-
 })
 
 onUnmounted(() => {

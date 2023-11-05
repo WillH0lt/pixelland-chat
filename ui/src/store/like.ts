@@ -91,6 +91,7 @@ export const useLikeStore = defineStore('like', () => {
       authorsFirst: 0,
       authorsAfter: '',
       authorsRoles: [],
+
       messagesLast: 0,
       messagesBefore: '',
     })

@@ -19,6 +19,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli"
 	"github.com/wwwillw/pixelland-chat/graph"
+	"github.com/wwwillw/pixelland-chat/graph/generated"
 	"github.com/wwwillw/pixelland-chat/interfaces"
 )
 
@@ -124,7 +125,7 @@ func run(args *cli.Context) error {
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
 
-	srv := handler.New(graph.NewExecutableSchema(graph.New()))
+	srv := handler.New(generated.NewExecutableSchema(graph.New()))
 
 	srv.AddTransport(transport.POST{})
 	srv.AddTransport(transport.Options{})
@@ -137,13 +138,13 @@ func run(args *cli.Context) error {
 				return true
 			},
 		},
-		InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, error) {
+		InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {
 			val := initPayload["Authorization"]
 			authHeader, ok := val.(string)
 			if !ok {
 				authHeader = ""
 			}
-			return updateAuthContext(ctx, authHeader, s.EnforceAuth), nil
+			return updateAuthContext(ctx, authHeader, s.EnforceAuth), &initPayload, nil
 		},
 	})
 

@@ -145,11 +145,7 @@ fragment InstanceFragment on Instance {
       ...PageInfoFragment
     }
   }
-  authorsConnection(
-    first: $authorsFirst
-    after: $authorsAfter
-    roles: $authorsRoles
-  ) {
+  authorsConnection(first: $authorsFirst, after: $authorsAfter, roles: $authorsRoles) {
     edges {
       ...InstanceAuthorsEdgeFragment
     }
@@ -186,10 +182,7 @@ fragment UserFragment on User {
       ...PageInfoFragment
     }
   }
-  notificationsConnection(
-    last: $notificationsLast
-    before: $notificationsBefore
-  ) {
+  notificationsConnection(last: $notificationsLast, before: $notificationsBefore) {
     edges {
       ...UserNotificationsEdgeFragment
     }
@@ -287,11 +280,7 @@ mutation RemoveRole($authorId: Uuid!, $role: Role!) {
   }
 }
 
-mutation AddChannel(
-  $input: ChannelInput!
-  $messagesLast: Int!
-  $messagesBefore: String!
-) {
+mutation AddChannel($input: ChannelInput!, $messagesLast: Int!, $messagesBefore: String!) {
   addChannel(input: $input) {
     ...InstanceChannelsEdgeFragment
   }
@@ -319,11 +308,7 @@ mutation ReorderChannel(
   }
 }
 
-mutation RemoveChannel(
-  $channelId: Uuid!
-  $messagesLast: Int!
-  $messagesBefore: String!
-) {
+mutation RemoveChannel($channelId: Uuid!, $messagesLast: Int!, $messagesBefore: String!) {
   removeChannel(channelId: $channelId) {
     ...InstanceChannelsEdgeFragment
   }
@@ -414,42 +399,6 @@ mutation PinInstance(
 ) {
   pinInstance(input: $input, instanceId: $instanceId) {
     ...UserInstancesEdgeFragment
-  }
-}
-
-mutation TagInstance(
-  $instanceId: Uuid!
-  $input: TagInput!
-  $channelsFirst: Int!
-  $channelsAfter: String!
-  $likesFirst: Int!
-  $likesAfter: String!
-  $authorsFirst: Int!
-  $authorsAfter: String!
-  $authorsRoles: [Role!] = []
-  $messagesLast: Int!
-  $messagesBefore: String!
-) {
-  tagInstance(instanceId: $instanceId, input: $input) {
-    ...InstanceFragment
-  }
-}
-
-mutation UntagInstance(
-  $instanceId: Uuid!
-  $input: TagInput!
-  $channelsFirst: Int!
-  $channelsAfter: String!
-  $likesFirst: Int!
-  $likesAfter: String!
-  $authorsFirst: Int!
-  $authorsAfter: String!
-  $authorsRoles: [Role!] = []
-  $messagesLast: Int!
-  $messagesBefore: String!
-) {
-  untagInstance(instanceId: $instanceId, input: $input) {
-    ...InstanceFragment
   }
 }
 

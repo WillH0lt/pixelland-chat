@@ -7,6 +7,24 @@ export const PageInfoFragment = gql`
   }
 `
 
+export const BadgeFragment = gql`
+  fragment BadgeFragment on Badge {
+    id
+    name
+    icon
+  }
+`
+
+export const UserBadgesEdgeFragment = gql`
+  fragment UserBadgesEdgeFragment on UserBadgesEdge {
+    cursor
+    node {
+      ...BadgeFragment
+    }
+  }
+  ${BadgeFragment}
+`
+
 export const AuthorFragment = gql`
   fragment AuthorFragment on Author {
     id

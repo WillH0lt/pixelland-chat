@@ -20,6 +20,18 @@ export const Access = {
 } as const;
 
 export type Access = typeof Access[keyof typeof Access];
+export type AppBadgesConnection = {
+  readonly __typename?: 'AppBadgesConnection';
+  readonly edges: ReadonlyArray<AppBadgesEdge>;
+  readonly pageInfo: PageInfo;
+};
+
+export type AppBadgesEdge = {
+  readonly __typename?: 'AppBadgesEdge';
+  readonly cursor: Scalars['String'];
+  readonly node: Badge;
+};
+
 export type Author = {
   readonly __typename?: 'Author';
   readonly avatar: Scalars['String'];
@@ -30,6 +42,18 @@ export type Author = {
   readonly name: Scalars['String'];
   readonly roles: ReadonlyArray<Role>;
   readonly userId: Scalars['Uuid'];
+};
+
+export type Badge = {
+  readonly __typename?: 'Badge';
+  readonly icon: Scalars['String'];
+  readonly id: Scalars['Uuid'];
+  readonly name: Scalars['String'];
+};
+
+export type BadgeInput = {
+  readonly icon: Scalars['String'];
+  readonly name: Scalars['String'];
 };
 
 export type Channel = {
@@ -77,31 +101,6 @@ export type ChannelMessagesEdge = {
 
 export type ChannelReorderInput = {
   readonly prevChannelId?: InputMaybe<Scalars['Uuid']>;
-};
-
-export type Collection = {
-  readonly __typename?: 'Collection';
-  readonly instancesConnection: CollectionInstancesConnection;
-  readonly tag: TagKind;
-};
-
-
-export type CollectionInstancesConnectionArgs = {
-  after?: Scalars['String'];
-  first?: Scalars['Int'];
-};
-
-export type CollectionInstancesConnection = {
-  readonly __typename?: 'CollectionInstancesConnection';
-  readonly edges: ReadonlyArray<CollectionInstancesEdge>;
-  readonly pageInfo: PageInfo;
-};
-
-export type CollectionInstancesEdge = {
-  readonly __typename?: 'CollectionInstancesEdge';
-  readonly cursor: Scalars['String'];
-  readonly node: Instance;
-  readonly taggedAt: Scalars['Time'];
 };
 
 export type Instance = {
@@ -234,14 +233,17 @@ export type MessageInput = {
 
 export type Mutation = {
   readonly __typename?: 'Mutation';
+  readonly addBadge: Badge;
   readonly addChannel: InstanceChannelsEdge;
   readonly addInstance: UserInstancesEdge;
   readonly addInvite: Invite;
   readonly addLike: InstanceLikesEdge;
   readonly addMessage: ChannelMessagesEdge;
   readonly addRole: Author;
+  readonly assignBadge: Badge;
   readonly pinInstance: UserInstancesEdge;
   readonly redeemInvite: Invite;
+  readonly removeBadge: Badge;
   readonly removeChannel: InstanceChannelsEdge;
   readonly removeInstance: UserInstancesEdge;
   readonly removeInvite: Invite;
@@ -250,11 +252,16 @@ export type Mutation = {
   readonly removeRole: Author;
   readonly reorderChannel: InstanceChannelsEdge;
   readonly reorderInstance: UserInstancesEdge;
-  readonly tagInstance: Instance;
-  readonly untagInstance: Instance;
+  readonly unassignBadge: Badge;
+  readonly updateBadge: Badge;
   readonly updateChannel: InstanceChannelsEdge;
   readonly updateInstance: UserInstancesEdge;
   readonly updateUser: User;
+};
+
+
+export type MutationAddBadgeArgs = {
+  input: BadgeInput;
 };
 
 
@@ -289,6 +296,12 @@ export type MutationAddRoleArgs = {
 };
 
 
+export type MutationAssignBadgeArgs = {
+  badgeId: Scalars['Uuid'];
+  userId: Scalars['Uuid'];
+};
+
+
 export type MutationPinInstanceArgs = {
   input: InstancePinInput;
   instanceId: Scalars['Uuid'];
@@ -297,6 +310,11 @@ export type MutationPinInstanceArgs = {
 
 export type MutationRedeemInviteArgs = {
   code: Scalars['String'];
+};
+
+
+export type MutationRemoveBadgeArgs = {
+  badgeId: Scalars['Uuid'];
 };
 
 
@@ -343,15 +361,15 @@ export type MutationReorderInstanceArgs = {
 };
 
 
-export type MutationTagInstanceArgs = {
-  input: TagInput;
-  instanceId: Scalars['Uuid'];
+export type MutationUnassignBadgeArgs = {
+  badgeId: Scalars['Uuid'];
+  userId: Scalars['Uuid'];
 };
 
 
-export type MutationUntagInstanceArgs = {
-  input: TagInput;
-  instanceId: Scalars['Uuid'];
+export type MutationUpdateBadgeArgs = {
+  badgeId: Scalars['Uuid'];
+  input: BadgeInput;
 };
 
 
@@ -424,12 +442,25 @@ export type PageInfo = {
 
 export type Query = {
   readonly __typename?: 'Query';
+  readonly author: Author;
+  readonly badges: AppBadgesConnection;
   readonly channel: Channel;
   readonly checkInvite: Invite;
-  readonly collection: Collection;
   readonly instance: UserInstancesEdge;
   readonly invite: Invite;
   readonly user: User;
+  readonly userBadges: UserBadgesConnection;
+};
+
+
+export type QueryAuthorArgs = {
+  id: Scalars['Uuid'];
+};
+
+
+export type QueryBadgesArgs = {
+  after?: Scalars['String'];
+  first?: Scalars['Int'];
 };
 
 
@@ -443,11 +474,6 @@ export type QueryCheckInviteArgs = {
 };
 
 
-export type QueryCollectionArgs = {
-  tag: TagKind;
-};
-
-
 export type QueryInstanceArgs = {
   id: Scalars['Uuid'];
 };
@@ -455,6 +481,13 @@ export type QueryInstanceArgs = {
 
 export type QueryInviteArgs = {
   instanceId: Scalars['Uuid'];
+};
+
+
+export type QueryUserBadgesArgs = {
+  after?: Scalars['String'];
+  first?: Scalars['Int'];
+  userId: Scalars['Uuid'];
 };
 
 export const Role = {
@@ -476,15 +509,6 @@ export type SubscriptionStreamArgs = {
   instanceId: Scalars['Uuid'];
 };
 
-export type TagInput = {
-  readonly tag: TagKind;
-};
-
-export const TagKind = {
-  Featured: 'FEATURED'
-} as const;
-
-export type TagKind = typeof TagKind[keyof typeof TagKind];
 export type User = {
   readonly __typename?: 'User';
   readonly avatar: Scalars['String'];
@@ -506,6 +530,18 @@ export type UserInstancesConnectionArgs = {
 export type UserNotificationsConnectionArgs = {
   before?: Scalars['String'];
   last?: Scalars['Int'];
+};
+
+export type UserBadgesConnection = {
+  readonly __typename?: 'UserBadgesConnection';
+  readonly edges: ReadonlyArray<UserBadgesEdge>;
+  readonly pageInfo: PageInfo;
+};
+
+export type UserBadgesEdge = {
+  readonly __typename?: 'UserBadgesEdge';
+  readonly cursor: Scalars['String'];
+  readonly node: Badge;
 };
 
 export type UserInput = {

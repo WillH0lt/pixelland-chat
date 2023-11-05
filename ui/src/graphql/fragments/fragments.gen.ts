@@ -5,6 +5,16 @@ export type PageInfoFragmentFragment = { __typename?: 'PageInfo', hasNextPage: b
 
 export type PageInfoFragmentFragmentVariables = Types.Exact<{ [key: string]: never; }>;
 
+export type BadgeFragmentFragment = { __typename?: 'Badge', id: any, name: string, icon: string };
+
+
+export type BadgeFragmentFragmentVariables = Types.Exact<{ [key: string]: never; }>;
+
+export type UserBadgesEdgeFragmentFragment = { __typename?: 'UserBadgesEdge', cursor: string, node: { __typename?: 'Badge', id: any, name: string, icon: string } };
+
+
+export type UserBadgesEdgeFragmentFragmentVariables = Types.Exact<{ [key: string]: never; }>;
+
 export type AuthorFragmentFragment = { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role>, createdAt: any };
 
 
@@ -71,6 +81,8 @@ export type UserFragmentFragment = { __typename?: 'User', id: any, name: string,
 export type UserFragmentFragmentVariables = Types.Exact<{ [key: string]: never; }>;
 
 export declare const PageInfoFragment: import("graphql").DocumentNode;
+export declare const BadgeFragment: import("graphql").DocumentNode;
+export declare const UserBadgesEdgeFragment: import("graphql").DocumentNode;
 export declare const AuthorFragment: import("graphql").DocumentNode;
 export declare const InviteFragment: import("graphql").DocumentNode;
 export declare const MessageFragment: import("graphql").DocumentNode;

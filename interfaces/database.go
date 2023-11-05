@@ -71,6 +71,9 @@ func InitDatabase(config DatabaseConfig, retries int) (*Database, error) {
 
 func (db *Database) RunMigrations() error {
 	log.Info().Msg("running database migrations")
+	if err := db.SetupJoinTable(&model.User{}, "Badges", &model.UserBadge{}); err != nil {
+		return err
+	}
 	return db.AutoMigrate(
 		&model.User{},
 		&model.Instance{},
@@ -79,7 +82,8 @@ func (db *Database) RunMigrations() error {
 		&model.InstanceUser{},
 		&model.Invite{},
 		&model.Notification{},
-		&model.Tag{},
+		&model.UserBadge{},
+		&model.Badge{},
 	)
 }
 
