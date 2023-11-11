@@ -1263,9 +1263,23 @@ func (r *mutationResolver) AssignBadge(ctx context.Context, userID uuid.UUID, ba
 		return nil, err
 	}
 
-	if err := db.Model(&user).Association("Badges").Append(&badge); err != nil {
-		log.Error().Err(err).Msg("failed to assign badge")
-		return nil, err
+	userBadge := model.UserBadge{}
+	if err := db.Model(userBadge).Where("user_id = ? AND badge_id = ?", userID, badgeID).First(&userBadge).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			// assign new badge to user
+			if err := db.Model(&user).Association("Badges").Append(&badge); err != nil {
+				log.Error().Err(err).Msg("failed to assign badge")
+				return nil, err
+			}
+		} else {
+			return nil, err
+		}
+	} else {
+		// increment badge count
+		userBadge.Count++
+		if err := db.Save(&userBadge).Error; err != nil {
+			return nil, err
+		}
 	}
 
 	return &badge, nil
@@ -1285,8 +1299,22 @@ func (r *mutationResolver) UnassignBadge(ctx context.Context, userID uuid.UUID, 
 		return nil, err
 	}
 
-	if err := db.Model(&user).Association("Badges").Delete(&badge); err != nil {
-		return nil, err
+	userBadge := model.UserBadge{}
+	if err := db.Model(userBadge).Where("user_id = ? AND badge_id = ?", userID, badgeID).First(&userBadge).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, errors.New("user does not have badge")
+		}
+	}
+
+	if userBadge.Count > 1 {
+		userBadge.Count--
+		if err := db.Save(&userBadge).Error; err != nil {
+			return nil, err
+		}
+	} else {
+		if err := db.Model(&user).Association("Badges").Delete(&badge); err != nil {
+			return nil, err
+		}
 	}
 
 	return &badge, nil
@@ -1499,33 +1527,36 @@ func (r *queryResolver) UserBadges(ctx context.Context, userID uuid.UUID, first 
 	}
 
 	db := interfaces.GetDatabase()
-	badges := []model.Badge{}
+	userBadges := []model.UserBadge{}
 
 	user := model.User{}
 	if err := db.First(&user, userID).Error; err != nil {
 		return nil, err
 	}
 
-	tx := db.Model(user).Limit(first + 1).Order("badges.created_at asc")
+	tx := db.Model(model.UserBadge{}).Preload("Badge").Limit(first+1).Order("created_at asc").Where("user_id = ?", userID)
 
 	if after != "" {
 		createdAt, err := fromCursorHash(after)
 		if err != nil {
 			return nil, err
 		}
-		tx = tx.Where("badges.created_at < ?", createdAt)
+		tx = tx.Where("created_at < ?", createdAt)
 	}
 
-	tx.Association("Badges").Find(&badges)
+	tx.Find(&userBadges)
 
-	hasPreviousPage := (len(badges) == first+1)
-	if len(badges) > 0 && hasPreviousPage {
-		badges = badges[:len(badges)-1]
+	hasPreviousPage := (len(userBadges) == first+1)
+	if len(userBadges) > 0 && hasPreviousPage {
+		userBadges = userBadges[:len(userBadges)-1]
 	}
+
+	log.Info().Msgf("userBadges: %+v", userBadges)
+	log.Info().Msgf("count: %d", len(userBadges))
 
 	edges := []*model.UserBadgesEdge{}
-	for i := len(badges) - 1; i >= 0; i-- {
-		edge := createUserBadgesEdge(&badges[i])
+	for i := len(userBadges) - 1; i >= 0; i-- {
+		edge := createUserBadgesEdge(&userBadges[i])
 		edges = append(edges, edge)
 	}
 

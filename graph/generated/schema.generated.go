@@ -9097,6 +9097,10 @@ func (ec *executionContext) fieldContext_UserBadgesConnection_edges(ctx context.
 				return ec.fieldContext_UserBadgesEdge_cursor(ctx, field)
 			case "node":
 				return ec.fieldContext_UserBadgesEdge_node(ctx, field)
+			case "count":
+				return ec.fieldContext_UserBadgesEdge_count(ctx, field)
+			case "badgedAt":
+				return ec.fieldContext_UserBadgesEdge_badgedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserBadgesEdge", field.Name)
 		},
@@ -9195,6 +9199,94 @@ func (ec *executionContext) fieldContext_UserBadgesEdge_node(ctx context.Context
 				return ec.fieldContext_Badge_icon(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Badge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserBadgesEdge_count(ctx context.Context, field graphql.CollectedField, obj *model.UserBadgesEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserBadgesEdge_count(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Count, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserBadgesEdge_count(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserBadgesEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserBadgesEdge_badgedAt(ctx context.Context, field graphql.CollectedField, obj *model.UserBadgesEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserBadgesEdge_badgedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BadgedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserBadgesEdge_badgedAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserBadgesEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
 		},
 	}
 	return fc, nil
@@ -12574,6 +12666,16 @@ func (ec *executionContext) _UserBadgesEdge(ctx context.Context, sel ast.Selecti
 			}
 		case "node":
 			out.Values[i] = ec._UserBadgesEdge_node(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "count":
+			out.Values[i] = ec._UserBadgesEdge_count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "badgedAt":
+			out.Values[i] = ec._UserBadgesEdge_badgedAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

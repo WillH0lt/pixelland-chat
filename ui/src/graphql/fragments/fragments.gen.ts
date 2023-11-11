@@ -10,7 +10,7 @@ export type BadgeFragmentFragment = { __typename?: 'Badge', id: any, name: strin
 
 export type BadgeFragmentFragmentVariables = Types.Exact<{ [key: string]: never; }>;
 
-export type UserBadgesEdgeFragmentFragment = { __typename?: 'UserBadgesEdge', cursor: string, node: { __typename?: 'Badge', id: any, name: string, icon: string } };
+export type UserBadgesEdgeFragmentFragment = { __typename?: 'UserBadgesEdge', cursor: string, count: number, badgedAt: any, node: { __typename?: 'Badge', id: any, name: string, icon: string } };
 
 
 export type UserBadgesEdgeFragmentFragmentVariables = Types.Exact<{ [key: string]: never; }>;

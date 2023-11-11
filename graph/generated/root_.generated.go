@@ -257,8 +257,10 @@ type ComplexityRoot struct {
 	}
 
 	UserBadgesEdge struct {
-		Cursor func(childComplexity int) int
-		Node   func(childComplexity int) int
+		BadgedAt func(childComplexity int) int
+		Count    func(childComplexity int) int
+		Cursor   func(childComplexity int) int
+		Node     func(childComplexity int) int
 	}
 
 	UserInstancesConnection struct {
@@ -1427,6 +1429,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UserBadgesConnection.PageInfo(childComplexity), true
 
+	case "UserBadgesEdge.badgedAt":
+		if e.complexity.UserBadgesEdge.BadgedAt == nil {
+			break
+		}
+
+		return e.complexity.UserBadgesEdge.BadgedAt(childComplexity), true
+
+	case "UserBadgesEdge.count":
+		if e.complexity.UserBadgesEdge.Count == nil {
+			break
+		}
+
+		return e.complexity.UserBadgesEdge.Count(childComplexity), true
+
 	case "UserBadgesEdge.cursor":
 		if e.complexity.UserBadgesEdge.Cursor == nil {
 			break
@@ -1858,6 +1874,8 @@ type ChannelMessagesEdge {
 type UserBadgesEdge {
   cursor: String!
   node: Badge!
+  count: Int!
+  badgedAt: Time!
 }
 
 type AppBadgesEdge {

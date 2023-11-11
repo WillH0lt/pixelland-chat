@@ -144,8 +144,10 @@ type UserBadgesConnection struct {
 }
 
 type UserBadgesEdge struct {
-	Cursor string `json:"cursor"`
-	Node   *Badge `json:"node"`
+	Cursor   string    `json:"cursor"`
+	Node     *Badge    `json:"node"`
+	Count    int       `json:"count"`
+	BadgedAt time.Time `json:"badgedAt"`
 }
 
 type UserInput struct {

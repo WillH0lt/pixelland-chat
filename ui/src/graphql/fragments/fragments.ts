@@ -18,6 +18,8 @@ export const BadgeFragment = gql`
 export const UserBadgesEdgeFragment = gql`
   fragment UserBadgesEdgeFragment on UserBadgesEdge {
     cursor
+    count
+    badgedAt
     node {
       ...BadgeFragment
     }

@@ -30,7 +30,7 @@ export type UserBadgesQueryVariables = Types.Exact<{
 }>;
 
 
-export type UserBadgesQuery = { __typename?: 'Query', userBadges: { __typename?: 'UserBadgesConnection', edges: Array<{ __typename?: 'UserBadgesEdge', cursor: string, node: { __typename?: 'Badge', id: any, name: string, icon: string } }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean } } };
+export type UserBadgesQuery = { __typename?: 'Query', userBadges: { __typename?: 'UserBadgesConnection', edges: Array<{ __typename?: 'UserBadgesEdge', cursor: string, count: number, badgedAt: any, node: { __typename?: 'Badge', id: any, name: string, icon: string } }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean } } };
 
 export declare const user: import("graphql").DocumentNode;
 export declare const userBadges: import("graphql").DocumentNode;

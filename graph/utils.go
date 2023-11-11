@@ -114,15 +114,16 @@ func assertCanRead(user model.InstanceUser, channel model.Channel) error {
 }
 
 func upsertCaller(ctx context.Context) (*model.User, error) {
-	uid := ctx.Value("uid").(string)
+	parsed := parseContext(ctx)
+
 	user := model.User{}
 
-	if uid == "" {
+	if parsed.Uid == "" {
 		return &user, nil
 	}
 	db := interfaces.GetDatabase()
 
-	if err := db.Where(model.User{UID: uid}).FirstOrCreate(&user).Error; err != nil {
+	if err := db.Where(model.User{UID: parsed.Uid}).FirstOrCreate(&user).Error; err != nil {
 		return nil, err
 	}
 
@@ -138,8 +139,9 @@ func getCallerInstanceUser(ctx context.Context, instanceId uuid.UUID) (*model.In
 		return nil, err
 	}
 
-	uid := ctx.Value("uid").(string)
-	if uid == "" {
+	parsed := parseContext(ctx)
+
+	if parsed.Uid == "" {
 		instanceUser := model.InstanceUser{}
 		instanceUser.InstanceID = instanceId
 		instanceUser.Instance = &instance
@@ -386,12 +388,14 @@ func createChannelMessagesEdge(message *model.Message) *model.ChannelMessagesEdg
 	}
 }
 
-func createUserBadgesEdge(badge *model.Badge) *model.UserBadgesEdge {
-	cursor := toCursorHash(badge.CreatedAt)
+func createUserBadgesEdge(userBadge *model.UserBadge) *model.UserBadgesEdge {
+	cursor := toCursorHash(userBadge.CreatedAt)
 
 	return &model.UserBadgesEdge{
-		Cursor: cursor,
-		Node:   badge,
+		Cursor:   cursor,
+		Count:    userBadge.Count,
+		BadgedAt: userBadge.CreatedAt,
+		Node:     userBadge.Badge,
 	}
 }
 

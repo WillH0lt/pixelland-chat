@@ -193,6 +193,8 @@ type ChannelMessagesEdge {
 type UserBadgesEdge {
   cursor: String!
   node: Badge!
+  count: Int!
+  badgedAt: Time!
 }
 
 type AppBadgesEdge {

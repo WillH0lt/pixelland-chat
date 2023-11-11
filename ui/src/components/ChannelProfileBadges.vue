@@ -3,7 +3,15 @@
   <div class="flex" v-if="!loading">
     <div v-for="badge in badges">
       <ElementHoverText :text="badge.name">
-        <img class="w-16 h-16 m-2 pixelated" :src="badge.icon" />
+        <div class="relative w-16 h-16">
+          <img class="absolute inset-0 w-full h-full pixelated" :src="badge.icon" />
+          <div
+            class="absolute top-0 right-0 bg-black text-accent px-2 text-sm translate-x-1 -translate-y-0.5"
+            v-if="badge.count > 1"
+          >
+            x{{ badge.count }}
+          </div>
+        </div>
       </ElementHoverText>
     </div>
     <div class="w-full text-center" v-if="badges.length === 0">No badges yet!</div>
@@ -16,6 +24,7 @@ import { onMounted, ref } from 'vue'
 import ElementHoverText from '@/components/ElementHoverText.vue'
 import { useUserBadgesQuery } from '@/graphql/queries/user.gen'
 import { Badge } from '@/graphql/types.gen'
+import { ExtendedBadge, extendBadge } from '@/types/ExtendedBadge'
 
 const props = defineProps<{
   userId: string
@@ -23,7 +32,7 @@ const props = defineProps<{
 
 const loading = ref(false)
 const error = ref('')
-const badges = ref<Badge[]>([])
+const badges = ref<ExtendedBadge[]>([])
 
 onMounted(async () => {
   loading.value = true
@@ -36,7 +45,7 @@ onMounted(async () => {
   onResult(result => {
     loading.value = false
     if (result.data?.userBadges.edges) {
-      badges.value = result.data.userBadges.edges.map(edge => edge.node)
+      badges.value = result.data.userBadges.edges.map(edge => extendBadge(edge))
     }
   })
 

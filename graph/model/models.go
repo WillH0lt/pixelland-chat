@@ -119,6 +119,13 @@ type UserBadge struct {
 	Base
 	UserID  uuid.UUID `gorm:"primaryKey"`
 	BadgeID uuid.UUID `gorm:"primaryKey"`
+	Badge   *Badge    ``
+	Count   int       ``
+}
+
+func (u *UserBadge) BeforeCreate(tx *gorm.DB) (err error) {
+	u.Count = 1
+	return nil
 }
 
 type Badge struct {

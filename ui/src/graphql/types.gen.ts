@@ -540,6 +540,8 @@ export type UserBadgesConnection = {
 
 export type UserBadgesEdge = {
   readonly __typename?: 'UserBadgesEdge';
+  readonly badgedAt: Scalars['Time'];
+  readonly count: Scalars['Int'];
   readonly cursor: Scalars['String'];
   readonly node: Badge;
 };
