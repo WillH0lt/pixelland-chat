@@ -812,6 +812,7 @@ func (r *mutationResolver) AddMessage(ctx context.Context, input model.MessageIn
 
 	message := model.Message{}
 	message.Text = input.Text
+	message.RepliedMessageID = input.RepliedMessageID
 	message.AuthorID = callerInstanceUser.ID
 	message.Author = callerInstanceUser
 

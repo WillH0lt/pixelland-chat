@@ -19,7 +19,7 @@
         <div class="border-gray-medium w-16 h-3 border-l-2 border-t-2 self-end"></div>
         <AuthorName
           :name="repliedMessage.author.name"
-          :roles="[]"
+          :roles="repliedMessage.author.roles"
           :inReply="true"
         />
         <p class="text-ellipsis w-full text-lg text-gray-light">{{ repliedMessage.text }}</p>
@@ -97,5 +97,11 @@ const dropdownItems = ref([
       messageStore.removeMessage(props.message)
     },
   },
+  {
+    text: 'reply',
+    onClicked: () => {
+      messageStore.setReplyingTo(props.message.channelId, props.message as unknown as Message)
+    },
+  }
 ])
 </script>

@@ -5,7 +5,6 @@ import { useAddMessageMutation, useRemoveMessageMutation } from '@/graphql/mutat
 import { useChannelQuery } from '@/graphql/queries/channel.gen'
 import {
   Author,
-  ChannelMessagesConnection,
   ChannelMessagesEdge,
   Message,
   MessageInput,
@@ -28,7 +27,7 @@ export const useMessageStore = defineStore('message', () => {
   const allHasPreviousPage = reactive<{ [channelId: string]: boolean }>({})
   const allLoading = reactive<{ [channelId: string]: boolean }>({})
   const allComposeText = reactive<{ [channelId: string]: string }>({})
-  const allReplyingTo = reactive<{ [channelId: string]: string | undefined }>({})
+  const allReplyingTo = reactive<{ [channelId: string]: Message | undefined }>({})
 
   // =========================================
   // getters
@@ -50,7 +49,7 @@ export const useMessageStore = defineStore('message', () => {
     return allComposeText[channelId] || ''
   }
 
-  function getReplyingTo(channelId: string): string | undefined {
+  function getReplyingTo(channelId: string): Message | undefined {
     return allReplyingTo[channelId]
   }
 
@@ -60,8 +59,8 @@ export const useMessageStore = defineStore('message', () => {
     allComposeText[channelId] = text
   }
 
-  function setReplyingTo(channelId: string, messageId: string | undefined) {
-    allReplyingTo[channelId] = messageId
+  function setReplyingTo(channelId: string, message: Message) {
+    allReplyingTo[channelId] = message
   }
 
   function clearReplyingTo(channelId: string) {
@@ -165,6 +164,7 @@ export const useMessageStore = defineStore('message', () => {
     // setters
     setComposeText,
     setReplyingTo,
+    clearReplyingTo,
 
     // actions
     fetchMessages,

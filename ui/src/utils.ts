@@ -87,41 +87,37 @@ export function generateAvatar() {
 export function timeSince(timestamp: Date) {
   const now = new Date()
   const secondsPast = (now.getTime() - timestamp.getTime()) / 1000
-  if (secondsPast < 10) {
-    return 'just now'
-  }
   if (secondsPast < 60) {
-    return `a few seconds ago`
-  }
-  if (secondsPast < 3600) {
+    return 'just now'
+  } else if (secondsPast < 3600) {
     return `${Math.floor(secondsPast / 60)}m ago`
-  }
-  if (secondsPast <= 86400) {
+  } else if (secondsPast <= 86400) {
     return `${Math.floor(secondsPast / 3600)}h ago`
+  } else {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ]
+    const day = timestamp.getDate()
+    const month = months[timestamp.getMonth()]
+    if (timestamp.getFullYear() == now.getFullYear()) {
+      return `${month} ${day}`
+    } else {
+      const year = timestamp.getFullYear()
+      return `${month} ${day}, ${year}`
+    }
   }
 
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ]
-  const day = timestamp.getDate()
-  const month = months[timestamp.getMonth()]
-  if (timestamp.getFullYear() == now.getFullYear()) {
-    return `${month} ${day}`
-  } else {
-    const year = timestamp.getFullYear()
-    return `${month} ${day}, ${year}`
-  }
 }
 
 export function getInstanceInput(instance: ExtendedInstance): InstanceInput {

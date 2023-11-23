@@ -1,21 +1,26 @@
 <template>
-  <div class="flex items-center mt-2" ref="composeRef">
+  <div class="flex items-end mt-2" ref="composeRef">
     <img
       class="bg-accent h-12 w-12 mx-2 hover:cursor-pointer hover:brightness-110 transition pixelated"
       :src="authorStore.instanceUser?.avatar"
       @click="emitter.emit('chat:user:edit')"
     />
-    <ElementTextArea
-      v-if="appStore.verified && appStore.isLoggedIn"
-      class="flex-1 text-xl pr-8 text-black bg-gray-light placeholder:text-gray-dark"
-      :placeholder="messagePlaceholder"
-      placeholder-color="error"
-      v-model:text="text"
-      :editable="editable && canPublish"
-      maxlength="1024"
-      @keydown.stop
-      @keydown.enter.exact.prevent="onEnterDown"
-    />
+    <div class="flex flex-1 flex-col" v-if="appStore.verified && appStore.isLoggedIn">
+      <div class="flex flex-row gap-4 items-center" v-if="messageStore.getReplyingTo(channelId)">
+        <p class="bg-gray-dark text-lg text-gray-medium">Replying to <span class="text-gray-light">{{ messageStore.getReplyingTo(channelId)?.author.name }}</span></p>
+        <button class="text-lg" @click="messageStore.clearReplyingTo(channelId)">x</button>
+      </div>
+      <ElementTextArea
+        class="flex-1 text-xl pr-8 text-black bg-gray-light placeholder:text-gray-dark"
+        :placeholder="messagePlaceholder"
+        placeholder-color="error"
+        v-model:text="text"
+        :editable="editable && canPublish"
+        maxlength="1024"
+        @keydown.stop
+        @keydown.enter.exact.prevent="onEnterDown"
+      />
+    </div>
     <div v-else class="flex-1 text-xl h-full text-black bg-gray-light flex items-center pl-2">
       <div v-if="!appStore.isLoggedIn">
         👋
@@ -34,7 +39,7 @@
     </div>
     <img
       v-if="canPublish"
-      class="h-6 pixelated -mr-6 -translate-x-8 opacity-80 grayscale hover:scale-105 cursor-pointer hover:grayscale-0 transition"
+      class="h-6 pixelated -mr-6 mb-2 -translate-x-8 opacity-80 grayscale hover:scale-105 cursor-pointer hover:grayscale-0 transition"
       @click="emojiPickerVisible = !emojiPickerVisible"
       src="/img/emoji.svg"
     />
@@ -74,11 +79,11 @@ import { useMessageStore } from '@/store/message'
 import { getMostPermissiveRole } from '@/utils'
 
 const props = defineProps<{
-  channelId: string
+  channelId: string,
 }>()
 
 const emit = defineEmits<{
-  (event: 'send', message: string): void
+  (event: 'send', message: string, repliedMessageId?: string): void
 }>()
 
 const appStore = useAppStore()
@@ -169,10 +174,13 @@ async function submit() {
   await messageStore.addMessage({
     text: publishableText,
     channelId: props.channelId,
+    repliedMessageId: messageStore.getReplyingTo(props.channelId)?.id,
   })
   editable.value = true
+  
+  messageStore.clearReplyingTo(props.channelId)
 
-  emit('send', publishableText)
+  emit('send', publishableText, messageStore.getReplyingTo(props.channelId)?.id)
 }
 
 function hasUnion(rolesA: Role[], rolesB: Role[]) {
