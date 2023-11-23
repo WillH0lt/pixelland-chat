@@ -22,7 +22,9 @@
           :roles="repliedMessage.author.roles"
           :inReply="true"
         />
-        <p class="text-ellipsis w-full text-lg text-gray-light">{{ repliedMessage.text }}</p>
+        <p class="text-ellipsis w-full text-lg text-gray-light overflow-x-hidden whitespace-nowrap">
+          {{ repliedMessage.text }}
+        </p>
       </div>
       <div v-if="!message.compact || repliedMessage" class="flex items-end">
         <AuthorName :name="user.name" :roles="user.roles" @click="$emit('showProfile', message)" />
@@ -41,9 +43,7 @@
       </div>
     </div>
     <div
-      v-if="
-        user.id === authorStore.instanceUser.id
-      "
+      v-if="user.id === authorStore.instanceUser.id"
       class="ml-auto mr-3 flex items-center justify-center md:invisible md:group-hover:visible"
     >
       <ElementDropdown
@@ -68,17 +68,17 @@ import { computed, ref } from 'vue'
 import AuthorName from '@/components/AuthorName.vue'
 import ChannelText from '@/components/ChannelText.vue'
 import ElementDropdown from '@/components/ElementDropdown.vue'
-import { Role, Message } from '@/graphql/types.gen'
+import { Maybe, Message, Role } from '@/graphql/types.gen'
 import { useAuthorStore } from '@/store/author'
 import { useMessageStore } from '@/store/message'
+import { DropdownItem } from '@/types/DropdownItem'
 import { ExtendedAuthor } from '@/types/ExtendedAuthor'
 import { ExtendedMessage } from '@/types/ExtendedMessage'
 import { SIDE } from '@/types/SideEnum'
-import { DropdownItem } from '@/types/DropdownItem'
 
 const props = defineProps<{
   message: ExtendedMessage
-  repliedMessage?: Message
+  repliedMessage: Maybe<Message> | undefined
   user: ExtendedAuthor
 }>()
 
@@ -90,20 +90,28 @@ const authorStore = useAuthorStore()
 const dropdownOpen = ref(false)
 const messageStore = useMessageStore()
 
-const dropdownItems = ref<DropdownItem[]>([
-  {
-    text: 'delete',
-    onClicked: () => {
-      messageStore.removeMessage(props.message)
+const dropdownItems = computed(() => {
+  const items: DropdownItem[] = [
+    {
+      text: 'reply',
+      onClicked: () => {
+        messageStore.setReplyingTo(props.message.channelId, props.message as unknown as Message)
+      },
     },
-    active: authorStore.isModerator && !props.user.roles.includes(Role.Moderator)
-  },
-  {
-    text: 'reply',
-    onClicked: () => {
-      messageStore.setReplyingTo(props.message.channelId, props.message as unknown as Message)
-    },
-    active: true
+  ]
+
+  if (
+    props.message.authorId === authorStore.instanceUser.id ||
+    (authorStore.isModerator && !props.user.roles.includes(Role.Moderator))
+  ) {
+    items.push({
+      text: 'delete',
+      onClicked: () => {
+        messageStore.removeMessage(props.message)
+      },
+    })
   }
-].filter(item => item.active))
+
+  return items
+})
 </script>

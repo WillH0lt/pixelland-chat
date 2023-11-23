@@ -9,14 +9,14 @@ export type AddMessageMutationVariables = Types.Exact<{
 }>;
 
 
-export type AddMessageMutation = { __typename?: 'Mutation', addMessage: { __typename?: 'ChannelMessagesEdge', cursor: string, node: { __typename?: 'Message', id: any, text: string, createdAt: any, channelId: any, repliedMessageId?: any | null, author: { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role>, createdAt: any } } } };
+export type AddMessageMutation = { __typename?: 'Mutation', addMessage: { __typename?: 'ChannelMessagesEdge', cursor: string, node: { __typename?: 'Message', id: any, text: string, createdAt: any, channelId: any, author: { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role>, createdAt: any }, repliedMessage?: { __typename?: 'Message', id: any, text: string, createdAt: any, channelId: any, author: { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role>, createdAt: any } } | null } } };
 
 export type RemoveMessageMutationVariables = Types.Exact<{
   messageId: Types.Scalars['Uuid'];
 }>;
 
 
-export type RemoveMessageMutation = { __typename?: 'Mutation', removeMessage: { __typename?: 'ChannelMessagesEdge', cursor: string, node: { __typename?: 'Message', id: any, text: string, createdAt: any, channelId: any, repliedMessageId?: any | null, author: { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role>, createdAt: any } } } };
+export type RemoveMessageMutation = { __typename?: 'Mutation', removeMessage: { __typename?: 'ChannelMessagesEdge', cursor: string, node: { __typename?: 'Message', id: any, text: string, createdAt: any, channelId: any, author: { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role>, createdAt: any }, repliedMessage?: { __typename?: 'Message', id: any, text: string, createdAt: any, channelId: any, author: { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role>, createdAt: any } } | null } } };
 
 export declare const addMessage: import("graphql").DocumentNode;
 export declare const removeMessage: import("graphql").DocumentNode;

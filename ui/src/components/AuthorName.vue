@@ -1,7 +1,7 @@
 <template>
   <div class="flex items-center">
     <a
-      class="overflow-x-hidden whitespace-nowrap"
+      class="break-words overflow-x-hidden whitespace-nowrap text-ellipsis"
       :class="{
         '!text-accent': roles.includes(Role.Moderator),
         '!text-error': roles.includes(Role.Banned),
@@ -11,7 +11,11 @@
     >
       {{ name + (roles.includes(Role.Banned) ? ' (banned)' : '') }}
     </a>
-    <ElementHoverText v-if="roles.includes(Role.Member) && !inReply" text="Editor" :side="SIDE.RIGHT">
+    <ElementHoverText
+      v-if="roles.includes(Role.Member) && !inReply"
+      text="Editor"
+      :side="SIDE.RIGHT"
+    >
       <img class="pixelated ml-1 h-4" src="/img/pencil.png" />
     </ElementHoverText>
   </div>

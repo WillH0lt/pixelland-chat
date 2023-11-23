@@ -2031,12 +2031,12 @@
             "deprecationReason": null
           },
           {
-            "name": "repliedMessageId",
+            "name": "repliedMessage",
             "description": null,
             "args": [],
             "type": {
-              "kind": "SCALAR",
-              "name": "Uuid",
+              "kind": "OBJECT",
+              "name": "Message",
               "ofType": null
             },
             "isDeprecated": false,
@@ -3380,6 +3380,18 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
+          },
+          {
+            "name": "reply",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Message",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -3403,6 +3415,12 @@
           },
           {
             "name": "LIKE_ADDED",
+            "description": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "REPLY_ADDED",
             "description": null,
             "isDeprecated": false,
             "deprecationReason": null

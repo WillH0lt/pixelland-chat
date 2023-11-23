@@ -21,11 +21,13 @@ import { useRoute } from 'vue-router'
 
 import ChannelCompose from '@/components/ChannelCompose.vue'
 import ChannelMessageList from '@/components/ChannelMessageList.vue'
+import { useMessageStore } from '@/store/message'
 import { ExtendedChannel } from '@/types/ExtendedChannel'
 
 const route = useRoute()
+const messageStore = useMessageStore()
 
-defineProps<{
+const props = defineProps<{
   channel: ExtendedChannel
 }>()
 
@@ -35,6 +37,13 @@ watch(
   () => route.path,
   () => {
     composing.value = false
+  }
+)
+
+watch(
+  () => messageStore.getReplyingTo(props.channel.id),
+  replyingTo => {
+    composing.value = !!replyingTo
   }
 )
 </script>

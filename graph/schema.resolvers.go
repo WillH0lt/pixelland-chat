@@ -304,6 +304,21 @@ func (r *messageResolver) Author(ctx context.Context, obj *model.Message) (*mode
 	return instanceUserToAuthor(&instanceUser), nil
 }
 
+// RepliedMessage is the resolver for the repliedMessage field.
+func (r *messageResolver) RepliedMessage(ctx context.Context, obj *model.Message) (*model.Message, error) {
+	if obj.RepliedMessageID == nil {
+		return nil, nil
+	}
+
+	db := interfaces.GetDatabase()
+	message := model.Message{}
+	if err := db.First(&message, obj.RepliedMessageID).Error; err != nil {
+		return nil, nil
+	}
+
+	return &message, nil
+}
+
 // UpdateUser is the resolver for the updateUser field.
 func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UserInput) (*model.User, error) {
 	caller, err := upsertCaller(ctx)
@@ -853,6 +868,21 @@ func (r *mutationResolver) AddMessage(ctx context.Context, input model.MessageIn
 		}
 	}
 
+	if message.RepliedMessageID != nil {
+		repliedMessage := model.Message{}
+		if err := db.Preload("Author").First(&repliedMessage, message.RepliedMessageID).Error; err != nil {
+			return nil, err
+		}
+
+		if repliedMessage.AuthorID != callerInstanceUser.ID {
+			notification, err := createNotificationReplyAdded(&repliedMessage, &message)
+			if err != nil {
+				return nil, err
+			}
+			sendUserNotificationNotice(&r.StreamObservers, notification)
+		}
+	}
+
 	return edge, nil
 }
 
@@ -893,6 +923,10 @@ func (r *mutationResolver) RemoveMessage(ctx context.Context, messageID uuid.UUI
 	}
 
 	if err := db.Delete(&model.Notification{}, "message_id = ?", messageID).Error; err != nil {
+		return nil, err
+	}
+
+	if err := db.Delete(&model.Notification{}, "reply_id = ?", messageID).Error; err != nil {
 		return nil, err
 	}
 
@@ -1790,3 +1824,13 @@ type notificationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *notificationResolver) Reply(ctx context.Context, obj *model.Notification) (*model.Message, error) {
+	panic(fmt.Errorf("not implemented: Reply - reply"))
+}

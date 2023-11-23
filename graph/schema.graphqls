@@ -81,7 +81,7 @@ type Message {
   author: Author!
   createdAt: Time!
   channelId: Uuid!
-  repliedMessageId: Uuid
+  repliedMessage: Message
 }
 
 type Badge {
@@ -108,6 +108,7 @@ type Notification {
   author: Author!
   instance: Instance
   message: Message
+  reply: Message
 }
 
 # ==============================================
@@ -376,6 +377,7 @@ enum NoticeKind {
 enum NotificationKind {
   LIKE_ADDED
   COMMENT_ADDED
+  REPLY_ADDED
 }
 
 # ==============================================

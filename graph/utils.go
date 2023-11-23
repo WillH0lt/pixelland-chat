@@ -555,6 +555,38 @@ func createNotificationCommentAdded(userID uuid.UUID, message *model.Message) (*
 	return &notification, nil
 }
 
+func createNotificationReplyAdded(message *model.Message, reply *model.Message) (*model.Notification, error) {
+	db := interfaces.GetDatabase()
+
+	if message.Author == nil {
+		if err := db.Model(message).Association("Author").Find(&message.Author); err != nil {
+			return nil, err
+		}
+	}
+
+	if reply.Author == nil {
+		if err := db.Model(reply).Association("Author").Find(&reply.Author); err != nil {
+			return nil, err
+		}
+	}
+
+	notification := model.Notification{
+		Kind:       model.NotificationKindReplyAdded.String(),
+		UserID:     message.Author.UserID,
+		AuthorID:   reply.Author.ID,
+		Author:     reply.Author,
+		InstanceID: &reply.Author.InstanceID,
+		MessageID:  &message.ID,
+		ReplyID:    &reply.ID,
+	}
+
+	if err := db.Where(notification).FirstOrCreate(&notification).Error; err != nil {
+		return nil, err
+	}
+
+	return &notification, nil
+}
+
 func createNotificationLikeAdded(userID uuid.UUID, author *model.InstanceUser) (*model.Notification, error) {
 	db := interfaces.GetDatabase()
 

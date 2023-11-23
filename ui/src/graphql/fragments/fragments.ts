@@ -64,7 +64,15 @@ export const MessageFragment = gql`
     text
     createdAt
     channelId
-    repliedMessageId
+    repliedMessage {
+      id
+      author {
+        ...AuthorFragment
+      }
+      text
+      createdAt
+      channelId
+    }
   }
   ${AuthorFragment}
 `
@@ -80,6 +88,9 @@ export const NotificationFragment = gql`
       ...InstanceFragment
     }
     message {
+      ...MessageFragment
+    }
+    reply {
       ...MessageFragment
     }
     createdAt

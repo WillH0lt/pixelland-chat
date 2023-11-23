@@ -6,9 +6,21 @@
       @click="emitter.emit('chat:user:edit')"
     />
     <div class="flex flex-1 flex-col" v-if="appStore.verified && appStore.isLoggedIn">
-      <div class="flex flex-row gap-4 items-center" v-if="messageStore.getReplyingTo(channelId)">
-        <p class="bg-gray-dark text-lg text-gray-medium">Replying to <span class="text-gray-light">{{ messageStore.getReplyingTo(channelId)?.author.name }}</span></p>
-        <button class="text-lg" @click="messageStore.clearReplyingTo(channelId)">x</button>
+      <div
+        class="flex flex-row gap-4 items-center bg-gray-darkest px-2 py-1"
+        v-if="messageStore.getReplyingTo(channelId)"
+      >
+        <p class="text-lg text-gray-medium">
+          Replying to
+          <span class="text-gray-light">{{
+            messageStore.getReplyingTo(channelId)?.author.name
+          }}</span>
+        </p>
+        <img
+          class="ml-auto w-2.5 h-2.5 cursor-pointer hover:scale-110 pixelated transition"
+          src="/img/x.png"
+          @click="messageStore.clearReplyingTo(channelId)"
+        />
       </div>
       <ElementTextArea
         class="flex-1 text-xl pr-8 text-black bg-gray-light placeholder:text-gray-dark"
@@ -79,11 +91,11 @@ import { useMessageStore } from '@/store/message'
 import { getMostPermissiveRole } from '@/utils'
 
 const props = defineProps<{
-  channelId: string,
+  channelId: string
 }>()
 
 const emit = defineEmits<{
-  (event: 'send', message: string, repliedMessageId?: string): void
+  (event: 'send'): void
 }>()
 
 const appStore = useAppStore()
@@ -177,10 +189,10 @@ async function submit() {
     repliedMessageId: messageStore.getReplyingTo(props.channelId)?.id,
   })
   editable.value = true
-  
+
   messageStore.clearReplyingTo(props.channelId)
 
-  emit('send', publishableText, messageStore.getReplyingTo(props.channelId)?.id)
+  emit('send')
 }
 
 function hasUnion(rolesA: Role[], rolesB: Role[]) {

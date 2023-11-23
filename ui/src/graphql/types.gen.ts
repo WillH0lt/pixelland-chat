@@ -223,7 +223,7 @@ export type Message = {
   readonly channelId: Scalars['Uuid'];
   readonly createdAt: Scalars['Time'];
   readonly id: Scalars['Uuid'];
-  readonly repliedMessageId?: Maybe<Scalars['Uuid']>;
+  readonly repliedMessage?: Maybe<Message>;
   readonly text: Scalars['String'];
 };
 
@@ -428,11 +428,13 @@ export type Notification = {
   readonly instance?: Maybe<Instance>;
   readonly kind: NotificationKind;
   readonly message?: Maybe<Message>;
+  readonly reply?: Maybe<Message>;
 };
 
 export const NotificationKind = {
   CommentAdded: 'COMMENT_ADDED',
-  LikeAdded: 'LIKE_ADDED'
+  LikeAdded: 'LIKE_ADDED',
+  ReplyAdded: 'REPLY_ADDED'
 } as const;
 
 export type NotificationKind = typeof NotificationKind[keyof typeof NotificationKind];

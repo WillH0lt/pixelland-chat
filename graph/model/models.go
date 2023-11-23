@@ -114,6 +114,8 @@ type Notification struct {
 	Instance   *Instance     ``
 	MessageID  *uuid.UUID    `json:"messageId" gorm:"type:uuid" copier:"MessageID"`
 	Message    *Message      ``
+	ReplyID    *uuid.UUID    `json:"replyId" gorm:"type:uuid" copier:"ReplyID"`
+	Reply      *Message      ``
 }
 
 type UserBadge struct {
