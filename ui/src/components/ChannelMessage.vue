@@ -42,8 +42,7 @@
     </div>
     <div
       v-if="
-        user.id === authorStore.instanceUser.id ||
-        (authorStore.isModerator && !user.roles.includes(Role.Moderator))
+        user.id === authorStore.instanceUser.id
       "
       class="ml-auto mr-3 flex items-center justify-center md:invisible md:group-hover:visible"
     >
@@ -64,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 import AuthorName from '@/components/AuthorName.vue'
 import ChannelText from '@/components/ChannelText.vue'
@@ -75,6 +74,7 @@ import { useMessageStore } from '@/store/message'
 import { ExtendedAuthor } from '@/types/ExtendedAuthor'
 import { ExtendedMessage } from '@/types/ExtendedMessage'
 import { SIDE } from '@/types/SideEnum'
+import { DropdownItem } from '@/types/DropdownItem'
 
 const props = defineProps<{
   message: ExtendedMessage
@@ -90,18 +90,20 @@ const authorStore = useAuthorStore()
 const dropdownOpen = ref(false)
 const messageStore = useMessageStore()
 
-const dropdownItems = ref([
+const dropdownItems = ref<DropdownItem[]>([
   {
     text: 'delete',
     onClicked: () => {
       messageStore.removeMessage(props.message)
     },
+    active: authorStore.isModerator && !props.user.roles.includes(Role.Moderator)
   },
   {
     text: 'reply',
     onClicked: () => {
       messageStore.setReplyingTo(props.message.channelId, props.message as unknown as Message)
     },
+    active: true
   }
-])
+].filter(item => item.active))
 </script>
