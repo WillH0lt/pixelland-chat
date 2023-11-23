@@ -223,11 +223,13 @@ export type Message = {
   readonly channelId: Scalars['Uuid'];
   readonly createdAt: Scalars['Time'];
   readonly id: Scalars['Uuid'];
+  readonly repliedMessageId?: Maybe<Scalars['Uuid']>;
   readonly text: Scalars['String'];
 };
 
 export type MessageInput = {
   readonly channelId: Scalars['Uuid'];
+  readonly repliedMessageId?: InputMaybe<Scalars['Uuid']>;
   readonly text: Scalars['String'];
 };
 

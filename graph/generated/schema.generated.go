@@ -2532,6 +2532,8 @@ func (ec *executionContext) fieldContext_ChannelMessagesEdge_node(ctx context.Co
 				return ec.fieldContext_Message_createdAt(ctx, field)
 			case "channelId":
 				return ec.fieldContext_Message_channelId(ctx, field)
+			case "repliedMessageId":
+				return ec.fieldContext_Message_repliedMessageId(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Message", field.Name)
 		},
@@ -4607,6 +4609,47 @@ func (ec *executionContext) _Message_channelId(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) fieldContext_Message_channelId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Message",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Uuid does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Message_repliedMessageId(ctx context.Context, field graphql.CollectedField, obj *model.Message) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Message_repliedMessageId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RepliedMessageID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*uuid.UUID)
+	fc.Result = res
+	return ec.marshalOUuid2ᚖgithubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Message_repliedMessageId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Message",
 		Field:      field,
@@ -7578,6 +7621,8 @@ func (ec *executionContext) fieldContext_Notification_message(ctx context.Contex
 				return ec.fieldContext_Message_createdAt(ctx, field)
 			case "channelId":
 				return ec.fieldContext_Message_channelId(ctx, field)
+			case "repliedMessageId":
+				return ec.fieldContext_Message_repliedMessageId(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Message", field.Name)
 		},
@@ -10437,7 +10482,7 @@ func (ec *executionContext) unmarshalInputMessageInput(ctx context.Context, obj 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"text", "channelId"}
+	fieldsInOrder := [...]string{"text", "channelId", "repliedMessageId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -10483,6 +10528,15 @@ func (ec *executionContext) unmarshalInputMessageInput(ctx context.Context, obj 
 				return it, err
 			}
 			it.ChannelID = data
+		case "repliedMessageId":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("repliedMessageId"))
+			data, err := ec.unmarshalOUuid2ᚖgithubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.RepliedMessageID = data
 		}
 	}
 
@@ -11775,6 +11829,8 @@ func (ec *executionContext) _Message(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "repliedMessageId":
+			out.Values[i] = ec._Message_repliedMessageId(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

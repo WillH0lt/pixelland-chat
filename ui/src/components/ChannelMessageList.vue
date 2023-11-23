@@ -8,6 +8,7 @@
       :key="message.id"
       :id="message.id"
       :message="message"
+      :replied-message="message.repliedMessageId ? (messages.find((messageToFind) => message.repliedMessageId === messageToFind.id) || { author: { name: 'Unknown' }, text: 'Message not loaded...' }) as unknown as Message : undefined /* I'm not sure if this is the best way to do this but it removes the error :) */"
       :user="authorStore.getUser(message.authorId)"
       @show-profile="showProfile"
     />
@@ -33,6 +34,7 @@ import ElementLoadingIcon from '@/components/ElementLoadingIcon.vue'
 import { useAuthorStore } from '@/store/author'
 import { useMessageStore } from '@/store/message'
 import { ExtendedMessage } from '@/types/ExtendedMessage'
+import { Message } from '@/graphql/types.gen'
 
 const props = defineProps<{
   channelId: string

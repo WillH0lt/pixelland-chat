@@ -117,8 +117,9 @@ type InviteInput struct {
 }
 
 type MessageInput struct {
-	Text      string    `json:"text"`
-	ChannelID uuid.UUID `json:"channelId"`
+	Text             string     `json:"text"`
+	ChannelID        uuid.UUID  `json:"channelId"`
+	RepliedMessageID *uuid.UUID `json:"repliedMessageId,omitempty"`
 }
 
 type Notice struct {

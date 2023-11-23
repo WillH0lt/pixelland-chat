@@ -68,11 +68,12 @@ type Channel struct {
 
 type Message struct {
 	Base
-	Text      string        `json:"text"`
-	AuthorID  uuid.UUID     `json:"authorId" gorm:"type:uuid" copier:"AuthorId"`
-	Author    *InstanceUser ``
-	ChannelID uuid.UUID     `json:"channelId" gorm:"type:uuid" copier:"ChannelId"`
-	Channel   *Channel      ``
+	Text             string        `json:"text"`
+	AuthorID         uuid.UUID     `json:"authorId" gorm:"type:uuid" copier:"AuthorId"`
+	Author           *InstanceUser ``
+	ChannelID        uuid.UUID     `json:"channelId" gorm:"type:uuid" copier:"ChannelId"`
+	Channel          *Channel      ``
+	RepliedMessageID *uuid.UUID    `json:"repliedMessageId" gorm:"type:uuid" copier:"RepliedMessageId"`
 }
 
 type InstanceUser struct {

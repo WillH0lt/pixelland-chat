@@ -166,11 +166,12 @@ type ComplexityRoot struct {
 	}
 
 	Message struct {
-		Author    func(childComplexity int) int
-		ChannelID func(childComplexity int) int
-		CreatedAt func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Text      func(childComplexity int) int
+		Author           func(childComplexity int) int
+		ChannelID        func(childComplexity int) int
+		CreatedAt        func(childComplexity int) int
+		ID               func(childComplexity int) int
+		RepliedMessageID func(childComplexity int) int
+		Text             func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -838,6 +839,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Message.ID(childComplexity), true
+
+	case "Message.repliedMessageId":
+		if e.complexity.Message.RepliedMessageID == nil {
+			break
+		}
+
+		return e.complexity.Message.RepliedMessageID(childComplexity), true
 
 	case "Message.text":
 		if e.complexity.Message.Text == nil {
@@ -1762,6 +1770,7 @@ type Message {
   author: Author!
   createdAt: Time!
   channelId: Uuid!
+  repliedMessageId: Uuid
 }
 
 type Badge {
@@ -2003,6 +2012,7 @@ input ChannelReorderInput {
 input MessageInput {
   text: String! @constraint(min: 1, max: 1024)
   channelId: Uuid!
+  repliedMessageId: Uuid
 }
 
 input UserInput {

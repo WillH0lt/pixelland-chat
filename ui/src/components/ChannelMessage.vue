@@ -7,14 +7,24 @@
   >
     <div class="flex-shrink-0 w-16">
       <img
-        v-if="!message.compact"
+        v-if="!message.compact || repliedMessage"
         class="h-12 mx-2 my-1 bg-accent cursor-pointer"
+        :class="{ 'mt-8': repliedMessage }"
         @click="$emit('showProfile', message)"
         :src="user.avatar"
       />
     </div>
     <div class="ml-2 flex-1 w-0">
-      <div v-if="!message.compact" class="flex items-end">
+      <div v-if="repliedMessage" class="h-6 flex flex-row gap-2 items-center">
+        <div class="border-gray-medium w-16 h-3 border-l-2 border-t-2 self-end"></div>
+        <AuthorName
+          :name="repliedMessage.author.name"
+          :roles="[]"
+          :inReply="true"
+        />
+        <p class="text-ellipsis w-full text-lg text-gray-light">{{ repliedMessage.text }}</p>
+      </div>
+      <div v-if="!message.compact || repliedMessage" class="flex items-end">
         <AuthorName :name="user.name" :roles="user.roles" @click="$emit('showProfile', message)" />
         <div class="text-gray-light ml-1 min-w-fit">{{ message.timeSince }}</div>
       </div>
@@ -59,7 +69,7 @@ import { ref } from 'vue'
 import AuthorName from '@/components/AuthorName.vue'
 import ChannelText from '@/components/ChannelText.vue'
 import ElementDropdown from '@/components/ElementDropdown.vue'
-import { Role } from '@/graphql/types.gen'
+import { Role, Message } from '@/graphql/types.gen'
 import { useAuthorStore } from '@/store/author'
 import { useMessageStore } from '@/store/message'
 import { ExtendedAuthor } from '@/types/ExtendedAuthor'
@@ -68,6 +78,7 @@ import { SIDE } from '@/types/SideEnum'
 
 const props = defineProps<{
   message: ExtendedMessage
+  repliedMessage?: Message
   user: ExtendedAuthor
 }>()
 

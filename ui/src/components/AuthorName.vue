@@ -1,10 +1,13 @@
 <template>
   <div class="flex items-center">
     <a
-      class="text-xl cursor-pointer hover:underline break-words overflow-x-hidden whitespace-nowrap text-ellipsis"
+      class="break-words overflow-x-hidden whitespace-nowrap text-ellipsis"
       :class="{
-        'text-accent': roles.includes(Role.Moderator),
-        'text-error': roles.includes(Role.Banned),
+        '!text-accent': roles.includes(Role.Moderator),
+        '!text-error': roles.includes(Role.Banned),
+        'text-white hover:text-white': inReply,
+        'cursor-pointer text-xl hover:underline': !inReply,
+        'text-lg': inReply,
       }"
     >
       {{ name + (roles.includes(Role.Banned) ? ' (banned)' : '') }}
@@ -23,5 +26,6 @@ import { SIDE } from '@/types/SideEnum'
 defineProps<{
   name: string
   roles: readonly Role[]
+  inReply?: boolean
 }>()
 </script>

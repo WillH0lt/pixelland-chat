@@ -81,6 +81,7 @@ type Message {
   author: Author!
   createdAt: Time!
   channelId: Uuid!
+  repliedMessageId: Uuid
 }
 
 type Badge {
@@ -322,6 +323,7 @@ input ChannelReorderInput {
 input MessageInput {
   text: String! @constraint(min: 1, max: 1024)
   channelId: Uuid!
+  repliedMessageId: Uuid
 }
 
 input UserInput {

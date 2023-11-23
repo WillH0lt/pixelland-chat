@@ -37,6 +37,7 @@ fragment MessageFragment on Message {
   text
   createdAt
   channelId
+  repliedMessageId
 }
 
 fragment NotificationFragment on Notification {

@@ -28,6 +28,7 @@ export const useMessageStore = defineStore('message', () => {
   const allHasPreviousPage = reactive<{ [channelId: string]: boolean }>({})
   const allLoading = reactive<{ [channelId: string]: boolean }>({})
   const allComposeText = reactive<{ [channelId: string]: string }>({})
+  const allReplyingTo = reactive<{ [channelId: string]: string | undefined }>({})
 
   // =========================================
   // getters
@@ -49,10 +50,22 @@ export const useMessageStore = defineStore('message', () => {
     return allComposeText[channelId] || ''
   }
 
+  function getReplyingTo(channelId: string): string | undefined {
+    return allReplyingTo[channelId]
+  }
+
   // =========================================
   // setters
   function setComposeText(channelId: string, text: string) {
     allComposeText[channelId] = text
+  }
+
+  function setReplyingTo(channelId: string, messageId: string | undefined) {
+    allReplyingTo[channelId] = messageId
+  }
+
+  function clearReplyingTo(channelId: string) {
+    allReplyingTo[channelId] = undefined
   }
 
   // =========================================
@@ -147,9 +160,11 @@ export const useMessageStore = defineStore('message', () => {
     getMessages,
     getHasPreviousPage,
     getComposeText,
+    getReplyingTo,
 
     // setters
     setComposeText,
+    setReplyingTo,
 
     // actions
     fetchMessages,

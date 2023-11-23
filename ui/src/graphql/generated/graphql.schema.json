@@ -2031,6 +2031,18 @@
             "deprecationReason": null
           },
           {
+            "name": "repliedMessageId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Uuid",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "text",
             "description": null,
             "args": [],
@@ -2069,6 +2081,18 @@
                 "name": "Uuid",
                 "ofType": null
               }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "repliedMessageId",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Uuid",
+              "ofType": null
             },
             "defaultValue": null,
             "isDeprecated": false,
