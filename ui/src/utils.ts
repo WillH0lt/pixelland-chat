@@ -31,7 +31,7 @@ export function handleLinkClicks(
 
     event.preventDefault()
     const url = new URL(href)
-    if (window.origin === url.origin) {
+    if (document.referrer === `${url.origin}/`) {
       window.open(url.href, '_blank')
       return true
     }

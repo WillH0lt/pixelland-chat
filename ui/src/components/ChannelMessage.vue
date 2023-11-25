@@ -43,7 +43,7 @@
       </div>
     </div>
     <div
-      v-if="user.id === authorStore.instanceUser.id"
+      v-if="appStore.isLoggedIn"
       class="ml-auto mr-3 flex items-center justify-center md:invisible md:group-hover:visible"
     >
       <ElementDropdown
@@ -69,12 +69,15 @@ import AuthorName from '@/components/AuthorName.vue'
 import ChannelText from '@/components/ChannelText.vue'
 import ElementDropdown from '@/components/ElementDropdown.vue'
 import { Maybe, Message, Role } from '@/graphql/types.gen'
+import { useAppStore } from '@/store/app'
 import { useAuthorStore } from '@/store/author'
 import { useMessageStore } from '@/store/message'
 import { DropdownItem } from '@/types/DropdownItem'
 import { ExtendedAuthor } from '@/types/ExtendedAuthor'
 import { ExtendedMessage } from '@/types/ExtendedMessage'
 import { SIDE } from '@/types/SideEnum'
+
+const appStore = useAppStore()
 
 const props = defineProps<{
   message: ExtendedMessage

@@ -1,10 +1,5 @@
 <template>
   <div class="flex items-end mt-2" ref="composeRef">
-    <img
-      class="bg-accent h-12 w-12 mx-2 hover:cursor-pointer hover:brightness-110 transition pixelated"
-      :src="authorStore.instanceUser?.avatar"
-      @click="emitter.emit('chat:user:edit')"
-    />
     <div class="flex flex-1 flex-col" v-if="appStore.verified && appStore.isLoggedIn">
       <div
         class="flex flex-row gap-4 items-center bg-gray-darkest px-2 py-1"
@@ -22,16 +17,23 @@
           @click="messageStore.clearReplyingTo(channelId)"
         />
       </div>
-      <ElementTextArea
-        class="flex-1 text-xl pr-8 text-black bg-gray-light placeholder:text-gray-dark"
-        :placeholder="messagePlaceholder"
-        placeholder-color="error"
-        v-model:text="text"
-        :editable="editable && canPublish"
-        maxlength="1024"
-        @keydown.stop
-        @keydown.enter.exact.prevent="onEnterDown"
-      />
+      <div class="flex items-center">
+        <img
+          class="bg-accent h-12 w-12 mx-2 hover:cursor-pointer hover:brightness-110 transition pixelated"
+          :src="authorStore.instanceUser?.avatar"
+          @click="emitter.emit('chat:user:edit')"
+        />
+        <ElementTextArea
+          class="text-xl pr-8 text-black bg-gray-light placeholder:text-gray-dark"
+          :placeholder="messagePlaceholder"
+          placeholder-color="error"
+          v-model:text="text"
+          :editable="editable && canPublish"
+          maxlength="1024"
+          @keydown.stop
+          @keydown.enter.exact.prevent="onEnterDown"
+        />
+      </div>
     </div>
     <div v-else class="flex-1 text-xl h-full text-black bg-gray-light flex items-center pl-2">
       <div v-if="!appStore.isLoggedIn">

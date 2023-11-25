@@ -1757,7 +1757,7 @@ func (r *userResolver) NotificationsConnection(ctx context.Context, obj *model.U
 		tx = tx.Where("created_at < ?", createdAt)
 	}
 
-	tx.Preload("Author").Preload("Instance").Preload("Message").Find(&notifications)
+	tx.Preload("Author").Preload("Instance").Preload("Message").Preload("Reply").Find(&notifications)
 
 	hasPreviousPage := (len(notifications) == last+1)
 	if len(notifications) > 0 && hasPreviousPage {
