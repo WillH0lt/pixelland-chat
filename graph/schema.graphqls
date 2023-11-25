@@ -81,6 +81,7 @@ type Message {
   author: Author!
   createdAt: Time!
   channelId: Uuid!
+  repliedMessage: Message
 }
 
 type Badge {
@@ -107,6 +108,7 @@ type Notification {
   author: Author!
   instance: Instance
   message: Message
+  reply: Message
 }
 
 # ==============================================
@@ -322,6 +324,7 @@ input ChannelReorderInput {
 input MessageInput {
   text: String! @constraint(min: 1, max: 1024)
   channelId: Uuid!
+  repliedMessageId: Uuid
 }
 
 input UserInput {
@@ -374,6 +377,7 @@ enum NoticeKind {
 enum NotificationKind {
   LIKE_ADDED
   COMMENT_ADDED
+  REPLY_ADDED
 }
 
 # ==============================================

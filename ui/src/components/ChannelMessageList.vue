@@ -8,6 +8,7 @@
       :key="message.id"
       :id="message.id"
       :message="message"
+      :replied-message="message.repliedMessage"
       :user="authorStore.getUser(message.authorId)"
       @show-profile="showProfile"
     />
@@ -30,6 +31,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import ChannelMessage from '@/components/ChannelMessage.vue'
 import ChannelProfile from '@/components/ChannelProfile.vue'
 import ElementLoadingIcon from '@/components/ElementLoadingIcon.vue'
+import { Message } from '@/graphql/types.gen'
 import { useAuthorStore } from '@/store/author'
 import { useMessageStore } from '@/store/message'
 import { ExtendedMessage } from '@/types/ExtendedMessage'

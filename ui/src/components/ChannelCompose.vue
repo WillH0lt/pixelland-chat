@@ -1,21 +1,40 @@
 <template>
-  <div class="flex items-center mt-2" ref="composeRef">
-    <img
-      class="bg-accent h-12 w-12 mx-2 hover:cursor-pointer hover:brightness-110 transition pixelated"
-      :src="authorStore.instanceUser?.avatar"
-      @click="emitter.emit('chat:user:edit')"
-    />
-    <ElementTextArea
-      v-if="appStore.verified && appStore.isLoggedIn"
-      class="flex-1 text-xl pr-8 text-black bg-gray-light placeholder:text-gray-dark"
-      :placeholder="messagePlaceholder"
-      placeholder-color="error"
-      v-model:text="text"
-      :editable="editable && canPublish"
-      maxlength="1024"
-      @keydown.stop
-      @keydown.enter.exact.prevent="onEnterDown"
-    />
+  <div class="flex items-end mt-2" ref="composeRef">
+    <div class="flex flex-1 flex-col" v-if="appStore.verified && appStore.isLoggedIn">
+      <div
+        class="flex flex-row gap-4 items-center bg-gray-darkest px-2 py-1"
+        v-if="messageStore.getReplyingTo(channelId)"
+      >
+        <p class="text-lg text-gray-medium">
+          Replying to
+          <span class="text-gray-light">{{
+            messageStore.getReplyingTo(channelId)?.author.name
+          }}</span>
+        </p>
+        <img
+          class="ml-auto w-2.5 h-2.5 cursor-pointer hover:scale-110 pixelated transition"
+          src="/img/x.png"
+          @click="messageStore.clearReplyingTo(channelId)"
+        />
+      </div>
+      <div class="flex items-center">
+        <img
+          class="bg-accent h-12 w-12 mx-2 hover:cursor-pointer hover:brightness-110 transition pixelated"
+          :src="authorStore.instanceUser?.avatar"
+          @click="emitter.emit('chat:user:edit')"
+        />
+        <ElementTextArea
+          class="text-xl pr-8 text-black bg-gray-light placeholder:text-gray-dark"
+          :placeholder="messagePlaceholder"
+          placeholder-color="error"
+          v-model:text="text"
+          :editable="editable && canPublish"
+          maxlength="1024"
+          @keydown.stop
+          @keydown.enter.exact.prevent="onEnterDown"
+        />
+      </div>
+    </div>
     <div v-else class="flex-1 text-xl h-full text-black bg-gray-light flex items-center pl-2">
       <div v-if="!appStore.isLoggedIn">
         👋
@@ -34,7 +53,7 @@
     </div>
     <img
       v-if="canPublish"
-      class="h-6 pixelated -mr-6 -translate-x-8 opacity-80 grayscale hover:scale-105 cursor-pointer hover:grayscale-0 transition"
+      class="h-6 pixelated -mr-6 mb-2 -translate-x-8 opacity-80 grayscale hover:scale-105 cursor-pointer hover:grayscale-0 transition"
       @click="emojiPickerVisible = !emojiPickerVisible"
       src="/img/emoji.svg"
     />
@@ -78,7 +97,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (event: 'send', message: string): void
+  (event: 'send'): void
 }>()
 
 const appStore = useAppStore()
@@ -169,10 +188,13 @@ async function submit() {
   await messageStore.addMessage({
     text: publishableText,
     channelId: props.channelId,
+    repliedMessageId: messageStore.getReplyingTo(props.channelId)?.id,
   })
   editable.value = true
 
-  emit('send', publishableText)
+  messageStore.clearReplyingTo(props.channelId)
+
+  emit('send')
 }
 
 function hasUnion(rolesA: Role[], rolesB: Role[]) {

@@ -117,8 +117,9 @@ type InviteInput struct {
 }
 
 type MessageInput struct {
-	Text      string    `json:"text"`
-	ChannelID uuid.UUID `json:"channelId"`
+	Text             string     `json:"text"`
+	ChannelID        uuid.UUID  `json:"channelId"`
+	RepliedMessageID *uuid.UUID `json:"repliedMessageId,omitempty"`
 }
 
 type Notice struct {
@@ -288,16 +289,18 @@ type NotificationKind string
 const (
 	NotificationKindLikeAdded    NotificationKind = "LIKE_ADDED"
 	NotificationKindCommentAdded NotificationKind = "COMMENT_ADDED"
+	NotificationKindReplyAdded   NotificationKind = "REPLY_ADDED"
 )
 
 var AllNotificationKind = []NotificationKind{
 	NotificationKindLikeAdded,
 	NotificationKindCommentAdded,
+	NotificationKindReplyAdded,
 }
 
 func (e NotificationKind) IsValid() bool {
 	switch e {
-	case NotificationKindLikeAdded, NotificationKindCommentAdded:
+	case NotificationKindLikeAdded, NotificationKindCommentAdded, NotificationKindReplyAdded:
 		return true
 	}
 	return false

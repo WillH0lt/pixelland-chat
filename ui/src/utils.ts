@@ -31,7 +31,7 @@ export function handleLinkClicks(
 
     event.preventDefault()
     const url = new URL(href)
-    if (window.origin === url.origin) {
+    if (document.referrer === `${url.origin}/`) {
       window.open(url.href, '_blank')
       return true
     }
@@ -70,7 +70,7 @@ export function getMostPermissiveRole(roles: Role[]) {
 }
 
 export function generateAvatar() {
-  const r = Math.random().toString(16).substring(2, 16)
+  /* const r = Math.random().toString(16).substring(2, 16)
 
   let hash = 0
   for (let i = 0; i < r.length; i++) {
@@ -79,8 +79,9 @@ export function generateAvatar() {
     hash = Math.abs(hash)
   }
 
-  // return `https://api.dicebear.com/6.x/shapes/svg?seed=${hash}`
-  return `https://avatars.dicebear.com/api/human/${hash}.svg`
+  return `https://api.dicebear.com/6.x/shapes/svg?seed=${hash}` */
+
+  return `https://api.dicebear.com/avatar.svg`
 }
 
 export function timeSince(timestamp: Date) {
@@ -98,7 +99,6 @@ export function timeSince(timestamp: Date) {
   if (secondsPast <= 86400) {
     return `${Math.floor(secondsPast / 3600)}h ago`
   }
-
   const months = [
     'Jan',
     'Feb',

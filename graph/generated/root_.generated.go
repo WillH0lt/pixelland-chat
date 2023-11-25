@@ -166,11 +166,12 @@ type ComplexityRoot struct {
 	}
 
 	Message struct {
-		Author    func(childComplexity int) int
-		ChannelID func(childComplexity int) int
-		CreatedAt func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Text      func(childComplexity int) int
+		Author         func(childComplexity int) int
+		ChannelID      func(childComplexity int) int
+		CreatedAt      func(childComplexity int) int
+		ID             func(childComplexity int) int
+		RepliedMessage func(childComplexity int) int
+		Text           func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -219,6 +220,7 @@ type ComplexityRoot struct {
 		Instance  func(childComplexity int) int
 		Kind      func(childComplexity int) int
 		Message   func(childComplexity int) int
+		Reply     func(childComplexity int) int
 	}
 
 	PageInfo struct {
@@ -839,6 +841,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Message.ID(childComplexity), true
 
+	case "Message.repliedMessage":
+		if e.complexity.Message.RepliedMessage == nil {
+			break
+		}
+
+		return e.complexity.Message.RepliedMessage(childComplexity), true
+
 	case "Message.text":
 		if e.complexity.Message.Text == nil {
 			break
@@ -1238,6 +1247,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Notification.Message(childComplexity), true
+
+	case "Notification.reply":
+		if e.complexity.Notification.Reply == nil {
+			break
+		}
+
+		return e.complexity.Notification.Reply(childComplexity), true
 
 	case "PageInfo.hasNextPage":
 		if e.complexity.PageInfo.HasNextPage == nil {
@@ -1762,6 +1778,7 @@ type Message {
   author: Author!
   createdAt: Time!
   channelId: Uuid!
+  repliedMessage: Message
 }
 
 type Badge {
@@ -1788,6 +1805,7 @@ type Notification {
   author: Author!
   instance: Instance
   message: Message
+  reply: Message
 }
 
 # ==============================================
@@ -2003,6 +2021,7 @@ input ChannelReorderInput {
 input MessageInput {
   text: String! @constraint(min: 1, max: 1024)
   channelId: Uuid!
+  repliedMessageId: Uuid
 }
 
 input UserInput {
@@ -2055,6 +2074,7 @@ enum NoticeKind {
 enum NotificationKind {
   LIKE_ADDED
   COMMENT_ADDED
+  REPLY_ADDED
 }
 
 # ==============================================
