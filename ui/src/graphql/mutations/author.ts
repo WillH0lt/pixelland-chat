@@ -3,8 +3,8 @@ import gql from 'graphql-tag'
 import { AuthorFragment } from '@/graphql/fragments/fragments'
 
 export const addRole = gql`
-  mutation addRole($authorId: Uuid!, $role: Role!) {
-    addRole(authorId: $authorId, role: $role) {
+  mutation addRole($authorId: Uuid!, $role: Role!, $banReason: String) {
+    addRole(authorId: $authorId, role: $role, banReason: $banReason) {
       ...AuthorFragment
     }
   }

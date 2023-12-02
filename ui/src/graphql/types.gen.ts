@@ -35,6 +35,7 @@ export type AppBadgesEdge = {
 export type Author = {
   readonly __typename?: 'Author';
   readonly avatar: Scalars['String'];
+  readonly banReason?: Maybe<Scalars['String']>;
   readonly bio: Scalars['String'];
   readonly createdAt: Scalars['Time'];
   readonly id: Scalars['Uuid'];
@@ -294,6 +295,7 @@ export type MutationAddMessageArgs = {
 
 export type MutationAddRoleArgs = {
   authorId: Scalars['Uuid'];
+  banReason?: InputMaybe<Scalars['String']>;
   role: Role;
 };
 
@@ -516,6 +518,7 @@ export type SubscriptionStreamArgs = {
 export type User = {
   readonly __typename?: 'User';
   readonly avatar: Scalars['String'];
+  readonly banReason?: Maybe<Scalars['String']>;
   readonly bio: Scalars['String'];
   readonly id: Scalars['Uuid'];
   readonly instancesConnection: UserInstancesConnection;

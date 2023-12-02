@@ -61,6 +61,9 @@
 
       <ChannelProfileBadges :userId="author.userId" />
     </div>
+    <div class="text-sm px-2 absolute bottom-0 w-full" v-if="author.roles.includes(Role.Banned)">
+      <span class="text-error">Banned for: {{ author.banReason }}</span>
+    </div>
   </div>
 </template>
 
@@ -136,6 +139,7 @@ interface ActionButton {
   hoverText: string
   dialogTitle: string
   dialogText: string
+  showGivenReason?: boolean
   dialogFnc: Function
 }
 
@@ -205,7 +209,8 @@ watchEffect(() => {
       hoverText: 'Ban',
       dialogTitle: 'Wait a second',
       dialogText: `Are you sure you want to ban <span class="underline">${props.author.name}</span>?`,
-      dialogFnc: () => authorStore.addRole(props.author.id, Role.Banned),
+      showGivenReason: true,
+      dialogFnc: () => authorStore.addRole(props.author.id, Role.Banned, dialogStore.options.givenReason),
     })
   }
   // unban
@@ -214,7 +219,7 @@ watchEffect(() => {
       icon: antiSkullImg,
       hoverText: 'Unban',
       dialogTitle: 'Wait a second',
-      dialogText: `Are you sure you want to unban <span class="underline">${props.author.name}</span>?`,
+      dialogText: `Are you sure you want to unban <span class="underline">${props.author.name}</span>?<br/><span class="text-2xl text-error">They were banned for <span class="underline">${props.author.banReason}</span>.</span>`,
       dialogFnc: () => authorStore.removeRole(props.author.id, Role.Banned),
     })
   }
@@ -224,6 +229,7 @@ function showConfirmationDialog(button: ActionButton) {
   dialogStore.showDialog({
     title: button.dialogTitle,
     text: button.dialogText,
+    showGiveReason: button.showGivenReason,
     buttons: [
       {
         text: 'cancel',

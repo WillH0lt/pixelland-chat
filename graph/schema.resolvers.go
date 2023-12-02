@@ -937,7 +937,7 @@ func (r *mutationResolver) RemoveMessage(ctx context.Context, messageID uuid.UUI
 }
 
 // AddRole is the resolver for the AddRole field.
-func (r *mutationResolver) AddRole(ctx context.Context, authorID uuid.UUID, role model.Role) (*model.Author, error) {
+func (r *mutationResolver) AddRole(ctx context.Context, authorID uuid.UUID, role model.Role, banReason *string) (*model.Author, error) {
 	db := interfaces.GetDatabase()
 	instanceUser := model.InstanceUser{}
 	if err := db.Find(&instanceUser, authorID).Error; err != nil {
@@ -992,6 +992,16 @@ func (r *mutationResolver) AddRole(ctx context.Context, authorID uuid.UUID, role
 	}
 
 	instanceUser.Roles = append(instanceUser.Roles, role.String())
+
+	if role == model.RoleBanned {
+		if banReason == nil {
+			reason := "Default reason"
+			// TODO: Handle the reason variable
+			banReason = &reason
+		}
+
+		instanceUser.BanReason = banReason
+	}
 
 	// if adding moderator, make sure they are also a member
 	if role == model.RoleModerator && !contains(instanceUser.Roles, model.RoleMember.String()) {
@@ -1786,6 +1796,11 @@ func (r *userResolver) NotificationsConnection(ctx context.Context, obj *model.U
 		},
 		HasUnread: hasUnread,
 	}, nil
+}
+
+// BanReason is the resolver for the banReason field.
+func (r *userResolver) BanReason(ctx context.Context, obj *model.User) (*string, error) {
+	panic(fmt.Errorf("not implemented: BanReason - banReason"))
 }
 
 // Channel returns generated.ChannelResolver implementation.

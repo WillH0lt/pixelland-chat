@@ -53,11 +53,12 @@ export const useAuthorStore = defineStore('author', () => {
 
   // =========================================
   // actions
-  async function addRole(authorId: string, role: Role) {
+  async function addRole(authorId: string, role: Role, banReason?: string) {
     const { mutate } = useAddRoleMutation({
       variables: {
         authorId,
         role,
+        banReason
       },
     })
 

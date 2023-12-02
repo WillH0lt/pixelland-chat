@@ -37,6 +37,7 @@ export const AuthorFragment = gql`
     bio
     roles
     createdAt
+    banReason
   }
 `
 

@@ -30,6 +30,7 @@ type Author struct {
 	Avatar     string    `json:"avatar"`
 	Bio        string    `json:"bio"`
 	CreatedAt  time.Time `json:"createdAt"`
+	BanReason  *string   `json:"banReason,omitempty"`
 }
 
 type BadgeInput struct {

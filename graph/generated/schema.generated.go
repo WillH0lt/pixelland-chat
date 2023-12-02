@@ -56,7 +56,7 @@ type MutationResolver interface {
 	RemoveChannel(ctx context.Context, channelID uuid.UUID) (*model.InstanceChannelsEdge, error)
 	AddMessage(ctx context.Context, input model.MessageInput) (*model.ChannelMessagesEdge, error)
 	RemoveMessage(ctx context.Context, messageID uuid.UUID) (*model.ChannelMessagesEdge, error)
-	AddRole(ctx context.Context, authorID uuid.UUID, role model.Role) (*model.Author, error)
+	AddRole(ctx context.Context, authorID uuid.UUID, role model.Role, banReason *string) (*model.Author, error)
 	RemoveRole(ctx context.Context, authorID uuid.UUID, role model.Role) (*model.Author, error)
 	AddInvite(ctx context.Context, input model.InviteInput) (*model.Invite, error)
 	RemoveInvite(ctx context.Context, inviteID uuid.UUID) (*model.Invite, error)
@@ -89,6 +89,7 @@ type SubscriptionResolver interface {
 type UserResolver interface {
 	InstancesConnection(ctx context.Context, obj *model.User, first int, after string) (*model.UserInstancesConnection, error)
 	NotificationsConnection(ctx context.Context, obj *model.User, last int, before string) (*model.UserNotificationsConnection, error)
+	BanReason(ctx context.Context, obj *model.User) (*string, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -434,6 +435,15 @@ func (ec *executionContext) field_Mutation_addRole_args(ctx context.Context, raw
 		}
 	}
 	args["role"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["banReason"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("banReason"))
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["banReason"] = arg2
 	return args, nil
 }
 
@@ -1623,6 +1633,47 @@ func (ec *executionContext) fieldContext_Author_createdAt(ctx context.Context, f
 	return fc, nil
 }
 
+func (ec *executionContext) _Author_banReason(ctx context.Context, field graphql.CollectedField, obj *model.Author) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Author_banReason(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BanReason, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Author_banReason(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Author",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Badge_id(ctx context.Context, field graphql.CollectedField, obj *model.Badge) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Badge_id(ctx, field)
 	if err != nil {
@@ -2686,6 +2737,8 @@ func (ec *executionContext) fieldContext_Instance_author(ctx context.Context, fi
 				return ec.fieldContext_Author_bio(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Author_createdAt(ctx, field)
+			case "banReason":
+				return ec.fieldContext_Author_banReason(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
 		},
@@ -3515,6 +3568,8 @@ func (ec *executionContext) fieldContext_InstanceAuthorsEdge_node(ctx context.Co
 				return ec.fieldContext_Author_bio(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Author_createdAt(ctx, field)
+			case "banReason":
+				return ec.fieldContext_Author_banReason(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
 		},
@@ -3983,6 +4038,8 @@ func (ec *executionContext) fieldContext_InstanceLikesEdge_node(ctx context.Cont
 				return ec.fieldContext_Author_bio(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Author_createdAt(ctx, field)
+			case "banReason":
+				return ec.fieldContext_Author_banReason(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
 		},
@@ -4208,6 +4265,8 @@ func (ec *executionContext) fieldContext_Invite_author(ctx context.Context, fiel
 				return ec.fieldContext_Author_bio(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Author_createdAt(ctx, field)
+			case "banReason":
+				return ec.fieldContext_Author_banReason(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
 		},
@@ -4528,6 +4587,8 @@ func (ec *executionContext) fieldContext_Message_author(ctx context.Context, fie
 				return ec.fieldContext_Author_bio(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Author_createdAt(ctx, field)
+			case "banReason":
+				return ec.fieldContext_Author_banReason(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
 		},
@@ -4755,6 +4816,8 @@ func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context
 				return ec.fieldContext_User_instancesConnection(ctx, field)
 			case "notificationsConnection":
 				return ec.fieldContext_User_notificationsConnection(ctx, field)
+			case "banReason":
+				return ec.fieldContext_User_banReason(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -5763,7 +5826,7 @@ func (ec *executionContext) _Mutation_addRole(ctx context.Context, field graphql
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().AddRole(rctx, fc.Args["authorId"].(uuid.UUID), fc.Args["role"].(model.Role))
+			return ec.resolvers.Mutation().AddRole(rctx, fc.Args["authorId"].(uuid.UUID), fc.Args["role"].(model.Role), fc.Args["banReason"].(*string))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			accessLevel, err := ec.unmarshalNString2string(ctx, "user")
@@ -5827,6 +5890,8 @@ func (ec *executionContext) fieldContext_Mutation_addRole(ctx context.Context, f
 				return ec.fieldContext_Author_bio(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Author_createdAt(ctx, field)
+			case "banReason":
+				return ec.fieldContext_Author_banReason(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
 		},
@@ -5924,6 +5989,8 @@ func (ec *executionContext) fieldContext_Mutation_removeRole(ctx context.Context
 				return ec.fieldContext_Author_bio(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Author_createdAt(ctx, field)
+			case "banReason":
+				return ec.fieldContext_Author_banReason(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
 		},
@@ -7256,6 +7323,8 @@ func (ec *executionContext) fieldContext_Notice_user(ctx context.Context, field 
 				return ec.fieldContext_User_instancesConnection(ctx, field)
 			case "notificationsConnection":
 				return ec.fieldContext_User_notificationsConnection(ctx, field)
+			case "banReason":
+				return ec.fieldContext_User_banReason(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -7315,6 +7384,8 @@ func (ec *executionContext) fieldContext_Notice_author(ctx context.Context, fiel
 				return ec.fieldContext_Author_bio(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Author_createdAt(ctx, field)
+			case "banReason":
+				return ec.fieldContext_Author_banReason(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
 		},
@@ -7509,6 +7580,8 @@ func (ec *executionContext) fieldContext_Notification_author(ctx context.Context
 				return ec.fieldContext_Author_bio(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Author_createdAt(ctx, field)
+			case "banReason":
+				return ec.fieldContext_Author_banReason(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
 		},
@@ -7866,6 +7939,8 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_instancesConnection(ctx, field)
 			case "notificationsConnection":
 				return ec.fieldContext_User_notificationsConnection(ctx, field)
+			case "banReason":
+				return ec.fieldContext_User_banReason(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -8346,6 +8421,8 @@ func (ec *executionContext) fieldContext_Query_author(ctx context.Context, field
 				return ec.fieldContext_Author_bio(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Author_createdAt(ctx, field)
+			case "banReason":
+				return ec.fieldContext_Author_banReason(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
 		},
@@ -9120,6 +9197,47 @@ func (ec *executionContext) fieldContext_User_notificationsConnection(ctx contex
 	return fc, nil
 }
 
+func (ec *executionContext) _User_banReason(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_banReason(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.User().BanReason(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_banReason(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _UserBadgesConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *model.UserBadgesConnection) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UserBadgesConnection_pageInfo(ctx, field)
 	if err != nil {
@@ -9693,6 +9811,8 @@ func (ec *executionContext) fieldContext_UserInstancesEdge_instanceUser(ctx cont
 				return ec.fieldContext_Author_bio(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Author_createdAt(ctx, field)
+			case "banReason":
+				return ec.fieldContext_Author_banReason(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
 		},
@@ -10852,6 +10972,8 @@ func (ec *executionContext) _Author(ctx context.Context, sel ast.SelectionSet, o
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "banReason":
+			out.Values[i] = ec._Author_banReason(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -12720,6 +12842,39 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "banReason":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_banReason(ctx, field, obj)
 				return res
 			}
 

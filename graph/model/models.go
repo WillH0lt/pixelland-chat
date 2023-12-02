@@ -90,6 +90,7 @@ type InstanceUser struct {
 	Pinned     bool           `json:"pinned"`
 	LikedByMe  bool           `json:"likedByMe"`
 	LikedAt    *time.Time     `json:"likedAt"`
+	BanReason  *string        `json:"banReason"`
 }
 
 type Invite struct {

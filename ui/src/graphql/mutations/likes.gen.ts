@@ -9,14 +9,14 @@ export type AddLikeMutationVariables = Types.Exact<{
 }>;
 
 
-export type AddLikeMutation = { __typename?: 'Mutation', addLike: { __typename?: 'InstanceLikesEdge', cursor: string, likedAt: any, node: { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role>, createdAt: any } } };
+export type AddLikeMutation = { __typename?: 'Mutation', addLike: { __typename?: 'InstanceLikesEdge', cursor: string, likedAt: any, node: { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role>, createdAt: any, banReason?: string | null } } };
 
 export type RemoveLikeMutationVariables = Types.Exact<{
   instanceId: Types.Scalars['Uuid'];
 }>;
 
 
-export type RemoveLikeMutation = { __typename?: 'Mutation', removeLike: { __typename?: 'InstanceLikesEdge', cursor: string, likedAt: any, node: { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role>, createdAt: any } } };
+export type RemoveLikeMutation = { __typename?: 'Mutation', removeLike: { __typename?: 'InstanceLikesEdge', cursor: string, likedAt: any, node: { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role>, createdAt: any, banReason?: string | null } } };
 
 export declare const addLike: import("graphql").DocumentNode;
 export declare const removeLike: import("graphql").DocumentNode;

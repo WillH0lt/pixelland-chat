@@ -13,6 +13,14 @@
       <div class="text-5xl" v-html="props.options.title" />
       <div class="text-3xl mt-3" v-html="props.options.text" />
       <div class="text-xl mt-3" v-html="props.options.subtext" />
+      <div v-if="props.options.showGiveReason">
+        <textarea
+          class="w-[50dvw] text-2xl resize-none mt-3 border border-gray-medium focus:border-white placeholder:text-gray-medium text-white outline-none bg-transparent transition-colors duration-300 px-2 p-1"
+          v-model="props.options.givenReason"
+          placeholder="Give a reason... (recommended)"
+          rows="4"
+        />
+      </div>
       <div class="flex w-full justify-center mt-7">
         <ElementButton
           v-for="button in props.options.buttons"

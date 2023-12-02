@@ -7,10 +7,11 @@ export type ReactiveFunction<TParam> = () => TParam;
 export type AddRoleMutationVariables = Types.Exact<{
   authorId: Types.Scalars['Uuid'];
   role: Types.Role;
+  banReason?: Types.InputMaybe<Types.Scalars['String']>;
 }>;
 
 
-export type AddRoleMutation = { __typename?: 'Mutation', addRole: { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role>, createdAt: any } };
+export type AddRoleMutation = { __typename?: 'Mutation', addRole: { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role>, createdAt: any, banReason?: string | null } };
 
 export type RemoveRoleMutationVariables = Types.Exact<{
   authorId: Types.Scalars['Uuid'];
@@ -18,7 +19,7 @@ export type RemoveRoleMutationVariables = Types.Exact<{
 }>;
 
 
-export type RemoveRoleMutation = { __typename?: 'Mutation', removeRole: { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role>, createdAt: any } };
+export type RemoveRoleMutation = { __typename?: 'Mutation', removeRole: { __typename?: 'Author', id: any, userId: any, instanceId: any, name: string, avatar: string, bio: string, roles: Array<Types.Role>, createdAt: any, banReason?: string | null } };
 
 export declare const addRole: import("graphql").DocumentNode;
 export declare const removeRole: import("graphql").DocumentNode;
