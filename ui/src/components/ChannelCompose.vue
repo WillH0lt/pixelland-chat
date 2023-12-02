@@ -2,7 +2,7 @@
   <div class="flex items-end mt-2" ref="composeRef">
     <div class="flex flex-1 flex-col" v-if="appStore.verified && appStore.isLoggedIn">
       <div
-        class="flex flex-row gap-4 items-center bg-gray-darkest px-2 py-1"
+        class="flex flex-row gap-4 items-center bg-gray-darkest px-2 py-1 ml-16"
         v-if="messageStore.getReplyingTo(channelId)"
       >
         <p class="text-lg text-gray-medium">
