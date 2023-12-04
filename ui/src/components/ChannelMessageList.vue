@@ -156,10 +156,16 @@ function showProfile(message: ExtendedMessage) {
   if (!messageElement) return
   const rect = messageElement.getBoundingClientRect()
   const scrollerRect = scrollerRef.value.getBoundingClientRect()
-  profileTop.value = Math.min(
-    rect.top,
-    scrollerRect.top + scrollerRef.value.clientHeight - profileHeight.value
-  )
+
+  if (scrollerRef.value.clientHeight < profileHeight.value) {
+    profileTop.value = rect.top
+  } else {
+    profileTop.value = Math.min(
+      rect.top,
+      scrollerRect.top + scrollerRef.value.clientHeight - profileHeight.value
+    )
+  }
+
   profileMessage.value = message
 }
 </script>

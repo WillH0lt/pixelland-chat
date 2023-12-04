@@ -14,6 +14,7 @@ type User {
     last: Int! = 0 @constraint(max: 50)
     before: String! = ""
   ): UserNotificationsConnection!
+  banReason: String
 }
 
 type Instance {
@@ -99,6 +100,7 @@ type Author {
   avatar: String!
   bio: String!
   createdAt: Time!
+  banReason: String
 }
 
 type Notification {
@@ -266,7 +268,7 @@ type Mutation {
   addMessage(input: MessageInput!): ChannelMessagesEdge! @auth(accessLevel: "user")
   removeMessage(messageId: Uuid!): ChannelMessagesEdge! @auth(accessLevel: "user")
   # author
-  addRole(authorId: Uuid!, role: Role!): Author! @auth(accessLevel: "user")
+  addRole(authorId: Uuid!, role: Role!, banReason: String): Author! @auth(accessLevel: "user")
   removeRole(authorId: Uuid!, role: Role!): Author! @auth(accessLevel: "user")
   # invite
   addInvite(input: InviteInput!): Invite! @auth(accessLevel: "user")

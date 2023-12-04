@@ -27,9 +27,11 @@
       </div>
     </div>
     <div class="text-2xl mx-2 mt-4" v-if="tab === TAB.BIO">
-      <div class="flex items-center">
-        <div>{{ author.name }}&#8203;</div>
-        <div class="text-gray-medium ml-2">#{{ getSlug(author.userId) }}</div>
+      <div class="flex items-end">
+        <div>
+          {{ author.name }}&#8203;
+          <span class="text-gray-medium ml-1">#{{ getSlug(author.userId) }}</span>
+        </div>
 
         <div class="flex-1"></div>
         <div
@@ -60,6 +62,9 @@
       <div class="w-full border border-gray-medium my-1" />
 
       <ChannelProfileBadges :userId="author.userId" />
+    </div>
+    <div class="text-sm px-2 absolute bottom-0 w-full" v-if="author.roles.includes(Role.Banned)">
+      <span class="text-error">Banned for: {{ author.banReason }}</span>
     </div>
   </div>
 </template>
@@ -136,6 +141,8 @@ interface ActionButton {
   hoverText: string
   dialogTitle: string
   dialogText: string
+  dialogShowTextInput?: boolean
+  dialogInputPlaceholder?: string
   dialogFnc: Function
 }
 
@@ -205,7 +212,10 @@ watchEffect(() => {
       hoverText: 'Ban',
       dialogTitle: 'Wait a second',
       dialogText: `Are you sure you want to ban <span class="underline">${props.author.name}</span>?`,
-      dialogFnc: () => authorStore.addRole(props.author.id, Role.Banned),
+      dialogShowTextInput: true,
+      dialogInputPlaceholder: 'Reason for ban (this will be visible on their profile).',
+      dialogFnc: () =>
+        authorStore.addRole(props.author.id, Role.Banned, dialogStore.options.inputText),
     })
   }
   // unban
@@ -214,7 +224,7 @@ watchEffect(() => {
       icon: antiSkullImg,
       hoverText: 'Unban',
       dialogTitle: 'Wait a second',
-      dialogText: `Are you sure you want to unban <span class="underline">${props.author.name}</span>?`,
+      dialogText: `Are you sure you want to unban <span class="underline">${props.author.name}</span>?<br/><span class="text-2xl text-error">They were banned for <span class="underline">${props.author.banReason}</span>.</span>`,
       dialogFnc: () => authorStore.removeRole(props.author.id, Role.Banned),
     })
   }
@@ -224,6 +234,8 @@ function showConfirmationDialog(button: ActionButton) {
   dialogStore.showDialog({
     title: button.dialogTitle,
     text: button.dialogText,
+    showTextInput: button.dialogShowTextInput,
+    inputPlaceholder: button.dialogInputPlaceholder,
     buttons: [
       {
         text: 'cancel',

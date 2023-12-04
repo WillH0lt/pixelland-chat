@@ -63,6 +63,7 @@ type ComplexityRoot struct {
 
 	Author struct {
 		Avatar     func(childComplexity int) int
+		BanReason  func(childComplexity int) int
 		Bio        func(childComplexity int) int
 		CreatedAt  func(childComplexity int) int
 		ID         func(childComplexity int) int
@@ -181,7 +182,7 @@ type ComplexityRoot struct {
 		AddInvite       func(childComplexity int, input model.InviteInput) int
 		AddLike         func(childComplexity int, instanceID uuid.UUID) int
 		AddMessage      func(childComplexity int, input model.MessageInput) int
-		AddRole         func(childComplexity int, authorID uuid.UUID, role model.Role) int
+		AddRole         func(childComplexity int, authorID uuid.UUID, role model.Role, banReason *string) int
 		AssignBadge     func(childComplexity int, userID uuid.UUID, badgeID uuid.UUID) int
 		PinInstance     func(childComplexity int, instanceID uuid.UUID, input model.InstancePinInput) int
 		RedeemInvite    func(childComplexity int, code string) int
@@ -245,6 +246,7 @@ type ComplexityRoot struct {
 
 	User struct {
 		Avatar                  func(childComplexity int) int
+		BanReason               func(childComplexity int) int
 		Bio                     func(childComplexity int) int
 		ID                      func(childComplexity int) int
 		InstancesConnection     func(childComplexity int, first int, after string) int
@@ -344,6 +346,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Author.Avatar(childComplexity), true
+
+	case "Author.banReason":
+		if e.complexity.Author.BanReason == nil {
+			break
+		}
+
+		return e.complexity.Author.BanReason(childComplexity), true
 
 	case "Author.bio":
 		if e.complexity.Author.Bio == nil {
@@ -937,7 +946,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddRole(childComplexity, args["authorId"].(uuid.UUID), args["role"].(model.Role)), true
+		return e.complexity.Mutation.AddRole(childComplexity, args["authorId"].(uuid.UUID), args["role"].(model.Role), args["banReason"].(*string)), true
 
 	case "Mutation.assignBadge":
 		if e.complexity.Mutation.AssignBadge == nil {
@@ -1379,6 +1388,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Avatar(childComplexity), true
 
+	case "User.banReason":
+		if e.complexity.User.BanReason == nil {
+			break
+		}
+
+		return e.complexity.User.BanReason(childComplexity), true
+
 	case "User.bio":
 		if e.complexity.User.Bio == nil {
 			break
@@ -1711,6 +1727,7 @@ type User {
     last: Int! = 0 @constraint(max: 50)
     before: String! = ""
   ): UserNotificationsConnection!
+  banReason: String
 }
 
 type Instance {
@@ -1796,6 +1813,7 @@ type Author {
   avatar: String!
   bio: String!
   createdAt: Time!
+  banReason: String
 }
 
 type Notification {
@@ -1963,7 +1981,7 @@ type Mutation {
   addMessage(input: MessageInput!): ChannelMessagesEdge! @auth(accessLevel: "user")
   removeMessage(messageId: Uuid!): ChannelMessagesEdge! @auth(accessLevel: "user")
   # author
-  addRole(authorId: Uuid!, role: Role!): Author! @auth(accessLevel: "user")
+  addRole(authorId: Uuid!, role: Role!, banReason: String): Author! @auth(accessLevel: "user")
   removeRole(authorId: Uuid!, role: Role!): Author! @auth(accessLevel: "user")
   # invite
   addInvite(input: InviteInput!): Invite! @auth(accessLevel: "user")
