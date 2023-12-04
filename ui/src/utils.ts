@@ -156,8 +156,11 @@ export function extendAuthor(author: Author): ExtendedAuthor {
     createdAtTimeSince = 'before time'
   }
 
+  const banReason = author.banReason ?? 'Default reason'
+
   return {
     ...author,
+    banReason,
     avatar: author.avatar || generateAvatar(),
     createdAtDate,
     createdAtTimeSince,

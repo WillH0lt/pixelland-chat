@@ -993,13 +993,7 @@ func (r *mutationResolver) AddRole(ctx context.Context, authorID uuid.UUID, role
 
 	instanceUser.Roles = append(instanceUser.Roles, role.String())
 
-	if role == model.RoleBanned {
-		if banReason == nil {
-			reason := "Default reason"
-			// TODO: Handle the reason variable
-			banReason = &reason
-		}
-
+	if banReason != nil {
 		instanceUser.BanReason = banReason
 	}
 

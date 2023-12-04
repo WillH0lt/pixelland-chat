@@ -23,8 +23,9 @@ export interface DialogOptions {
   subtext: string
   buttons: DialogButton[]
   animateText: boolean
-  showGiveReason?: boolean
-  givenReason?: string
+  showTextInput?: boolean
+  inputText?: string
+  inputPlaceholder?: string
 }
 
 export function initDialogOptions(options?: Partial<DialogOptions>): DialogOptions {
@@ -38,7 +39,7 @@ export function initDialogOptions(options?: Partial<DialogOptions>): DialogOptio
     subtext: '',
     buttons: [],
     animateText: false,
-    showGiveReason: false,
+    showTextInput: false,
   }
 
   return {
