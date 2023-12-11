@@ -396,6 +396,7 @@ export type MutationUpdateUserArgs = {
 export type Notice = {
   readonly __typename?: 'Notice';
   readonly author?: Maybe<Author>;
+  readonly badge?: Maybe<Badge>;
   readonly channelMessagesEdge?: Maybe<ChannelMessagesEdge>;
   readonly instance?: Maybe<Instance>;
   readonly instanceChannelsEdge?: Maybe<InstanceChannelsEdge>;
@@ -408,6 +409,7 @@ export type Notice = {
 
 export const NoticeKind = {
   AuthorUpdated: 'AUTHOR_UPDATED',
+  BadgeAdded: 'BADGE_ADDED',
   ChannelAdded: 'CHANNEL_ADDED',
   ChannelRemoved: 'CHANNEL_REMOVED',
   ChannelUpdated: 'CHANNEL_UPDATED',
@@ -424,7 +426,8 @@ export const NoticeKind = {
 export type NoticeKind = typeof NoticeKind[keyof typeof NoticeKind];
 export type Notification = {
   readonly __typename?: 'Notification';
-  readonly author: Author;
+  readonly author?: Maybe<Author>;
+  readonly badge?: Maybe<Badge>;
   readonly createdAt: Scalars['Time'];
   readonly id: Scalars['Uuid'];
   readonly instance?: Maybe<Instance>;
@@ -434,6 +437,7 @@ export type Notification = {
 };
 
 export const NotificationKind = {
+  BadgeAdded: 'BADGE_ADDED',
   CommentAdded: 'COMMENT_ADDED',
   LikeAdded: 'LIKE_ADDED',
   ReplyAdded: 'REPLY_ADDED'
@@ -518,7 +522,6 @@ export type SubscriptionStreamArgs = {
 export type User = {
   readonly __typename?: 'User';
   readonly avatar: Scalars['String'];
-  readonly banReason?: Maybe<Scalars['String']>;
   readonly bio: Scalars['String'];
   readonly id: Scalars['Uuid'];
   readonly instancesConnection: UserInstancesConnection;

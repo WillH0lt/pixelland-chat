@@ -109,7 +109,7 @@ type Notification struct {
 	Kind       string    `json:"kind"`
 	UserID     uuid.UUID `json:"userId" gorm:"type:uuid" copier:"UserID"`
 	User       *User
-	AuthorID   uuid.UUID     `json:"authorId" gorm:"type:uuid" copier:"AuthorId"`
+	AuthorID   *uuid.UUID    `json:"authorId" gorm:"type:uuid" copier:"AuthorId"`
 	Author     *InstanceUser ``
 	InstanceID *uuid.UUID    `json:"instanceId" gorm:"type:uuid" copier:"InstanceID"`
 	Instance   *Instance     ``
@@ -117,6 +117,8 @@ type Notification struct {
 	Message    *Message      ``
 	ReplyID    *uuid.UUID    `json:"replyId" gorm:"type:uuid" copier:"ReplyID"`
 	Reply      *Message      ``
+	BadgeID    *uuid.UUID    `json:"userBadgeId" gorm:"type:uuid" copier:"UserBadgeID"`
+	Badge      *Badge        ``
 }
 
 type UserBadge struct {

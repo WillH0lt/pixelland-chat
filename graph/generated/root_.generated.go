@@ -204,6 +204,7 @@ type ComplexityRoot struct {
 
 	Notice struct {
 		Author                func(childComplexity int) int
+		Badge                 func(childComplexity int) int
 		ChannelMessagesEdge   func(childComplexity int) int
 		Instance              func(childComplexity int) int
 		InstanceChannelsEdge  func(childComplexity int) int
@@ -216,6 +217,7 @@ type ComplexityRoot struct {
 
 	Notification struct {
 		Author    func(childComplexity int) int
+		Badge     func(childComplexity int) int
 		CreatedAt func(childComplexity int) int
 		ID        func(childComplexity int) int
 		Instance  func(childComplexity int) int
@@ -246,7 +248,6 @@ type ComplexityRoot struct {
 
 	User struct {
 		Avatar                  func(childComplexity int) int
-		BanReason               func(childComplexity int) int
 		Bio                     func(childComplexity int) int
 		ID                      func(childComplexity int) int
 		InstancesConnection     func(childComplexity int, first int, after string) int
@@ -1159,6 +1160,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Notice.Author(childComplexity), true
 
+	case "Notice.badge":
+		if e.complexity.Notice.Badge == nil {
+			break
+		}
+
+		return e.complexity.Notice.Badge(childComplexity), true
+
 	case "Notice.channelMessagesEdge":
 		if e.complexity.Notice.ChannelMessagesEdge == nil {
 			break
@@ -1221,6 +1229,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Notification.Author(childComplexity), true
+
+	case "Notification.badge":
+		if e.complexity.Notification.Badge == nil {
+			break
+		}
+
+		return e.complexity.Notification.Badge(childComplexity), true
 
 	case "Notification.createdAt":
 		if e.complexity.Notification.CreatedAt == nil {
@@ -1387,13 +1402,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.Avatar(childComplexity), true
-
-	case "User.banReason":
-		if e.complexity.User.BanReason == nil {
-			break
-		}
-
-		return e.complexity.User.BanReason(childComplexity), true
 
 	case "User.bio":
 		if e.complexity.User.Bio == nil {
@@ -1727,7 +1735,6 @@ type User {
     last: Int! = 0 @constraint(max: 50)
     before: String! = ""
   ): UserNotificationsConnection!
-  banReason: String
 }
 
 type Instance {
@@ -1820,10 +1827,11 @@ type Notification {
   id: Uuid!
   createdAt: Time!
   kind: NotificationKind!
-  author: Author!
+  author: Author
   instance: Instance
   message: Message
   reply: Message
+  badge: Badge
 }
 
 # ==============================================
@@ -1931,6 +1939,7 @@ type Notice {
   instance: Instance
   user: User
   author: Author
+  badge: Badge
 }
 
 # ==============================================
@@ -2087,12 +2096,14 @@ enum NoticeKind {
   LIKE_ADDED
   LIKE_REMOVED
   NOTIFICATION_ADDED
+  BADGE_ADDED
 }
 
 enum NotificationKind {
   LIKE_ADDED
   COMMENT_ADDED
   REPLY_ADDED
+  BADGE_ADDED
 }
 
 # ==============================================

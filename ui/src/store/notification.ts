@@ -44,7 +44,10 @@ export const useNotificationStore = defineStore('notifications', () => {
       notifications.value[edge.node.id] = notification
     }
 
-    authorStore.handleAuthorsAdded(edges.map(edge => edge.node.author))
+    const authors = edges
+      .map(edge => edge.node.author)
+      .filter(author => author !== null) as Author[]
+    authorStore.handleAuthorsAdded(authors)
   }
 
   async function fetchNotifications() {

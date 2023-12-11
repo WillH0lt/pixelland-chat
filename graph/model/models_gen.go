@@ -133,6 +133,7 @@ type Notice struct {
 	Instance              *Instance              `json:"instance,omitempty"`
 	User                  *User                  `json:"user,omitempty"`
 	Author                *Author                `json:"author,omitempty"`
+	Badge                 *Badge                 `json:"badge,omitempty"`
 }
 
 type PageInfo struct {
@@ -239,6 +240,7 @@ const (
 	NoticeKindLikeAdded         NoticeKind = "LIKE_ADDED"
 	NoticeKindLikeRemoved       NoticeKind = "LIKE_REMOVED"
 	NoticeKindNotificationAdded NoticeKind = "NOTIFICATION_ADDED"
+	NoticeKindBadgeAdded        NoticeKind = "BADGE_ADDED"
 )
 
 var AllNoticeKind = []NoticeKind{
@@ -254,11 +256,12 @@ var AllNoticeKind = []NoticeKind{
 	NoticeKindLikeAdded,
 	NoticeKindLikeRemoved,
 	NoticeKindNotificationAdded,
+	NoticeKindBadgeAdded,
 }
 
 func (e NoticeKind) IsValid() bool {
 	switch e {
-	case NoticeKindMessageAdded, NoticeKindMessageRemoved, NoticeKindChannelAdded, NoticeKindChannelUpdated, NoticeKindChannelRemoved, NoticeKindAuthorUpdated, NoticeKindUserUpdated, NoticeKindInstanceUpdated, NoticeKindInstanceRemoved, NoticeKindLikeAdded, NoticeKindLikeRemoved, NoticeKindNotificationAdded:
+	case NoticeKindMessageAdded, NoticeKindMessageRemoved, NoticeKindChannelAdded, NoticeKindChannelUpdated, NoticeKindChannelRemoved, NoticeKindAuthorUpdated, NoticeKindUserUpdated, NoticeKindInstanceUpdated, NoticeKindInstanceRemoved, NoticeKindLikeAdded, NoticeKindLikeRemoved, NoticeKindNotificationAdded, NoticeKindBadgeAdded:
 		return true
 	}
 	return false
@@ -291,17 +294,19 @@ const (
 	NotificationKindLikeAdded    NotificationKind = "LIKE_ADDED"
 	NotificationKindCommentAdded NotificationKind = "COMMENT_ADDED"
 	NotificationKindReplyAdded   NotificationKind = "REPLY_ADDED"
+	NotificationKindBadgeAdded   NotificationKind = "BADGE_ADDED"
 )
 
 var AllNotificationKind = []NotificationKind{
 	NotificationKindLikeAdded,
 	NotificationKindCommentAdded,
 	NotificationKindReplyAdded,
+	NotificationKindBadgeAdded,
 }
 
 func (e NotificationKind) IsValid() bool {
 	switch e {
-	case NotificationKindLikeAdded, NotificationKindCommentAdded, NotificationKindReplyAdded:
+	case NotificationKindLikeAdded, NotificationKindCommentAdded, NotificationKindReplyAdded, NotificationKindBadgeAdded:
 		return true
 	}
 	return false

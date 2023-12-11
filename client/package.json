@@ -1,6 +1,6 @@
 {
   "name": "pixelland-chat",
-  "version": "0.0.8",
+  "version": "0.0.10",
   "description": "Discord-style embedded chat used in PixelLand",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
