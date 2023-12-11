@@ -50,6 +50,9 @@ export const stream = gql`
       userNotificationsEdge {
         ...UserNotificationsEdgeFragment
       }
+      badge {
+        ...BadgeFragment
+      }
     }
   }
   ${ChannelMessagesEdgeFragment}

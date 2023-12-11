@@ -14,7 +14,6 @@ type User {
     last: Int! = 0 @constraint(max: 50)
     before: String! = ""
   ): UserNotificationsConnection!
-  banReason: String
 }
 
 type Instance {
@@ -107,10 +106,11 @@ type Notification {
   id: Uuid!
   createdAt: Time!
   kind: NotificationKind!
-  author: Author!
+  author: Author
   instance: Instance
   message: Message
   reply: Message
+  badge: Badge
 }
 
 # ==============================================
@@ -218,6 +218,7 @@ type Notice {
   instance: Instance
   user: User
   author: Author
+  badge: Badge
 }
 
 # ==============================================
@@ -374,12 +375,14 @@ enum NoticeKind {
   LIKE_ADDED
   LIKE_REMOVED
   NOTIFICATION_ADDED
+  BADGE_ADDED
 }
 
 enum NotificationKind {
   LIKE_ADDED
   COMMENT_ADDED
   REPLY_ADDED
+  BADGE_ADDED
 }
 
 # ==============================================

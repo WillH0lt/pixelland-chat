@@ -1321,6 +1321,12 @@ func (r *mutationResolver) AssignBadge(ctx context.Context, userID uuid.UUID, ba
 		}
 	}
 
+	notification, err := createNotificationBadgeAdded(userID, &badge)
+	if err != nil {
+		return nil, err
+	}
+	sendUserNotificationNotice(&r.StreamObservers, notification)
+
 	return &badge, nil
 }
 
@@ -1401,6 +1407,10 @@ func (r *notificationResolver) Kind(ctx context.Context, obj *model.Notification
 // Author is the resolver for the author field.
 func (r *notificationResolver) Author(ctx context.Context, obj *model.Notification) (*model.Author, error) {
 	instanceUser := model.InstanceUser{}
+	if obj.AuthorID == nil {
+		return nil, nil
+	}
+
 	if obj.Author == nil {
 		db := interfaces.GetDatabase()
 		if err := db.First(&instanceUser, obj.AuthorID).Error; err != nil {
@@ -1761,7 +1771,7 @@ func (r *userResolver) NotificationsConnection(ctx context.Context, obj *model.U
 		tx = tx.Where("created_at < ?", createdAt)
 	}
 
-	tx.Preload("Author").Preload("Instance").Preload("Message").Preload("Reply").Find(&notifications)
+	tx.Preload("Author").Preload("Instance").Preload("Message").Preload("Reply").Preload("Badge").Find(&notifications)
 
 	hasPreviousPage := (len(notifications) == last+1)
 	if len(notifications) > 0 && hasPreviousPage {
@@ -1790,11 +1800,6 @@ func (r *userResolver) NotificationsConnection(ctx context.Context, obj *model.U
 		},
 		HasUnread: hasUnread,
 	}, nil
-}
-
-// BanReason is the resolver for the banReason field.
-func (r *userResolver) BanReason(ctx context.Context, obj *model.User) (*string, error) {
-	panic(fmt.Errorf("not implemented: BanReason - banReason"))
 }
 
 // Channel returns generated.ChannelResolver implementation.
@@ -1833,13 +1838,3 @@ type notificationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type subscriptionResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//     it when you're done.
-//   - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *notificationResolver) Reply(ctx context.Context, obj *model.Notification) (*model.Message, error) {
-	panic(fmt.Errorf("not implemented: Reply - reply"))
-}

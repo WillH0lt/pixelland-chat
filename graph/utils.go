@@ -542,7 +542,7 @@ func createNotificationCommentAdded(userID uuid.UUID, message *model.Message) (*
 	notification := model.Notification{
 		Kind:       model.NotificationKindCommentAdded.String(),
 		UserID:     userID,
-		AuthorID:   message.Author.ID,
+		AuthorID:   &message.Author.ID,
 		Author:     message.Author,
 		InstanceID: &message.Author.InstanceID,
 		MessageID:  &message.ID,
@@ -573,7 +573,7 @@ func createNotificationReplyAdded(message *model.Message, reply *model.Message) 
 	notification := model.Notification{
 		Kind:       model.NotificationKindReplyAdded.String(),
 		UserID:     message.Author.UserID,
-		AuthorID:   reply.Author.ID,
+		AuthorID:   &reply.Author.ID,
 		Author:     reply.Author,
 		InstanceID: &reply.Author.InstanceID,
 		MessageID:  &message.ID,
@@ -593,9 +593,26 @@ func createNotificationLikeAdded(userID uuid.UUID, author *model.InstanceUser) (
 	notification := model.Notification{
 		Kind:       model.NotificationKindLikeAdded.String(),
 		UserID:     userID,
-		AuthorID:   author.ID,
+		AuthorID:   &author.ID,
 		Author:     author,
 		InstanceID: &author.InstanceID,
+	}
+
+	if err := db.Where(notification).FirstOrCreate(&notification).Error; err != nil {
+		return nil, err
+	}
+
+	return &notification, nil
+}
+
+func createNotificationBadgeAdded(userID uuid.UUID, badge *model.Badge) (*model.Notification, error) {
+	db := interfaces.GetDatabase()
+
+	notification := model.Notification{
+		Kind:    model.NotificationKindBadgeAdded.String(),
+		UserID:  userID,
+		BadgeID: &badge.ID,
+		Badge:   badge,
 	}
 
 	if err := db.Where(notification).FirstOrCreate(&notification).Error; err != nil {

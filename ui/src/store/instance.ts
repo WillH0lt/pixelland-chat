@@ -125,6 +125,7 @@ export const useInstanceStore = defineStore('instance', () => {
         author,
         user,
         instance,
+        badge,
         userNotificationsEdge,
       } = result.data.stream
 

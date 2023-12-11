@@ -78,27 +78,6 @@ export const MessageFragment = gql`
   ${AuthorFragment}
 `
 
-export const NotificationFragment = gql`
-  fragment NotificationFragment on Notification {
-    id
-    kind
-    author {
-      ...AuthorFragment
-    }
-    instance {
-      ...InstanceFragment
-    }
-    message {
-      ...MessageFragment
-    }
-    reply {
-      ...MessageFragment
-    }
-    createdAt
-  }
-  ${AuthorFragment}
-`
-
 export const ChannelMessagesEdgeFragment = gql`
   fragment ChannelMessagesEdgeFragment on ChannelMessagesEdge {
     cursor
@@ -167,16 +146,6 @@ export const InstanceAuthorsEdgeFragment = gql`
   ${AuthorFragment}
 `
 
-export const UserNotificationsEdgeFragment = gql`
-  fragment UserNotificationsEdgeFragment on UserNotificationsEdge {
-    cursor
-    node {
-      ...NotificationFragment
-    }
-  }
-  ${NotificationFragment}
-`
-
 export const InstanceFragment = gql`
   fragment InstanceFragment on Instance {
     id
@@ -225,6 +194,43 @@ export const InstanceFragment = gql`
   ${InstanceChannelsEdgeFragment}
   ${InstanceAuthorsEdgeFragment}
   ${PageInfoFragment}
+`
+
+export const NotificationFragment = gql`
+  fragment NotificationFragment on Notification {
+    id
+    kind
+    author {
+      ...AuthorFragment
+    }
+    instance {
+      ...InstanceFragment
+    }
+    message {
+      ...MessageFragment
+    }
+    reply {
+      ...MessageFragment
+    }
+    badge {
+      ...BadgeFragment
+    }
+    createdAt
+  }
+  ${AuthorFragment}
+  ${InstanceFragment}
+  ${MessageFragment}
+  ${BadgeFragment}
+`
+
+export const UserNotificationsEdgeFragment = gql`
+  fragment UserNotificationsEdgeFragment on UserNotificationsEdge {
+    cursor
+    node {
+      ...NotificationFragment
+    }
+  }
+  ${NotificationFragment}
 `
 
 export const UserInstancesEdgeFragment = gql`
