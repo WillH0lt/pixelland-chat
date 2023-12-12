@@ -965,6 +965,16 @@ func (v *ChannelMessagesEdgeFragmentNodeMessage) GetChannelId() uuid.UUID {
 	return v.MessageFragment.ChannelId
 }
 
+// GetRepliedMessage returns ChannelMessagesEdgeFragmentNodeMessage.RepliedMessage, and is useful for accessing the field via an interface.
+func (v *ChannelMessagesEdgeFragmentNodeMessage) GetRepliedMessage() *MessageFragmentRepliedMessage {
+	return v.MessageFragment.RepliedMessage
+}
+
+// GetImageUrls returns ChannelMessagesEdgeFragmentNodeMessage.ImageUrls, and is useful for accessing the field via an interface.
+func (v *ChannelMessagesEdgeFragmentNodeMessage) GetImageUrls() []string {
+	return v.MessageFragment.ImageUrls
+}
+
 func (v *ChannelMessagesEdgeFragmentNodeMessage) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
@@ -1000,6 +1010,10 @@ type __premarshalChannelMessagesEdgeFragmentNodeMessage struct {
 	CreatedAt time.Time `json:"createdAt"`
 
 	ChannelId uuid.UUID `json:"channelId"`
+
+	RepliedMessage *MessageFragmentRepliedMessage `json:"repliedMessage"`
+
+	ImageUrls []string `json:"imageUrls"`
 }
 
 func (v *ChannelMessagesEdgeFragmentNodeMessage) MarshalJSON() ([]byte, error) {
@@ -1018,6 +1032,8 @@ func (v *ChannelMessagesEdgeFragmentNodeMessage) __premarshalJSON() (*__premarsh
 	retval.Text = v.MessageFragment.Text
 	retval.CreatedAt = v.MessageFragment.CreatedAt
 	retval.ChannelId = v.MessageFragment.ChannelId
+	retval.RepliedMessage = v.MessageFragment.RepliedMessage
+	retval.ImageUrls = v.MessageFragment.ImageUrls
 	return &retval, nil
 }
 
@@ -2667,11 +2683,13 @@ func (v *InviteResponse) GetInvite() InviteInvite { return v.Invite }
 
 // MessageFragment includes the GraphQL fields of Message requested by the fragment MessageFragment.
 type MessageFragment struct {
-	Id        uuid.UUID             `json:"id"`
-	Author    MessageFragmentAuthor `json:"author"`
-	Text      string                `json:"text"`
-	CreatedAt time.Time             `json:"createdAt"`
-	ChannelId uuid.UUID             `json:"channelId"`
+	Id             uuid.UUID                      `json:"id"`
+	Author         MessageFragmentAuthor          `json:"author"`
+	Text           string                         `json:"text"`
+	CreatedAt      time.Time                      `json:"createdAt"`
+	ChannelId      uuid.UUID                      `json:"channelId"`
+	RepliedMessage *MessageFragmentRepliedMessage `json:"repliedMessage"`
+	ImageUrls      []string                       `json:"imageUrls"`
 }
 
 // GetId returns MessageFragment.Id, and is useful for accessing the field via an interface.
@@ -2688,6 +2706,12 @@ func (v *MessageFragment) GetCreatedAt() time.Time { return v.CreatedAt }
 
 // GetChannelId returns MessageFragment.ChannelId, and is useful for accessing the field via an interface.
 func (v *MessageFragment) GetChannelId() uuid.UUID { return v.ChannelId }
+
+// GetRepliedMessage returns MessageFragment.RepliedMessage, and is useful for accessing the field via an interface.
+func (v *MessageFragment) GetRepliedMessage() *MessageFragmentRepliedMessage { return v.RepliedMessage }
+
+// GetImageUrls returns MessageFragment.ImageUrls, and is useful for accessing the field via an interface.
+func (v *MessageFragment) GetImageUrls() []string { return v.ImageUrls }
 
 // MessageFragmentAuthor includes the requested fields of the GraphQL type Author.
 type MessageFragmentAuthor struct {
@@ -2783,9 +2807,35 @@ func (v *MessageFragmentAuthor) __premarshalJSON() (*__premarshalMessageFragment
 	return &retval, nil
 }
 
-type MessageInput struct {
+// MessageFragmentRepliedMessage includes the requested fields of the GraphQL type Message.
+type MessageFragmentRepliedMessage struct {
+	Id        uuid.UUID `json:"id"`
 	Text      string    `json:"text"`
+	CreatedAt time.Time `json:"createdAt"`
 	ChannelId uuid.UUID `json:"channelId"`
+	ImageUrls []string  `json:"imageUrls"`
+}
+
+// GetId returns MessageFragmentRepliedMessage.Id, and is useful for accessing the field via an interface.
+func (v *MessageFragmentRepliedMessage) GetId() uuid.UUID { return v.Id }
+
+// GetText returns MessageFragmentRepliedMessage.Text, and is useful for accessing the field via an interface.
+func (v *MessageFragmentRepliedMessage) GetText() string { return v.Text }
+
+// GetCreatedAt returns MessageFragmentRepliedMessage.CreatedAt, and is useful for accessing the field via an interface.
+func (v *MessageFragmentRepliedMessage) GetCreatedAt() time.Time { return v.CreatedAt }
+
+// GetChannelId returns MessageFragmentRepliedMessage.ChannelId, and is useful for accessing the field via an interface.
+func (v *MessageFragmentRepliedMessage) GetChannelId() uuid.UUID { return v.ChannelId }
+
+// GetImageUrls returns MessageFragmentRepliedMessage.ImageUrls, and is useful for accessing the field via an interface.
+func (v *MessageFragmentRepliedMessage) GetImageUrls() []string { return v.ImageUrls }
+
+type MessageInput struct {
+	Text             string     `json:"text"`
+	ChannelId        uuid.UUID  `json:"channelId"`
+	RepliedMessageId *uuid.UUID `json:"repliedMessageId"`
+	ImageUrls        []string   `json:"imageUrls"`
 }
 
 // GetText returns MessageInput.Text, and is useful for accessing the field via an interface.
@@ -2794,11 +2844,17 @@ func (v *MessageInput) GetText() string { return v.Text }
 // GetChannelId returns MessageInput.ChannelId, and is useful for accessing the field via an interface.
 func (v *MessageInput) GetChannelId() uuid.UUID { return v.ChannelId }
 
+// GetRepliedMessageId returns MessageInput.RepliedMessageId, and is useful for accessing the field via an interface.
+func (v *MessageInput) GetRepliedMessageId() *uuid.UUID { return v.RepliedMessageId }
+
+// GetImageUrls returns MessageInput.ImageUrls, and is useful for accessing the field via an interface.
+func (v *MessageInput) GetImageUrls() []string { return v.ImageUrls }
+
 // NotificationFragment includes the GraphQL fields of Notification requested by the fragment NotificationFragment.
 type NotificationFragment struct {
 	Id        uuid.UUID                     `json:"id"`
 	Kind      NotificationKind              `json:"kind"`
-	Author    NotificationFragmentAuthor    `json:"author"`
+	Author    *NotificationFragmentAuthor   `json:"author"`
 	Instance  *NotificationFragmentInstance `json:"instance"`
 	Message   *NotificationFragmentMessage  `json:"message"`
 	CreatedAt time.Time                     `json:"createdAt"`
@@ -2811,7 +2867,7 @@ func (v *NotificationFragment) GetId() uuid.UUID { return v.Id }
 func (v *NotificationFragment) GetKind() NotificationKind { return v.Kind }
 
 // GetAuthor returns NotificationFragment.Author, and is useful for accessing the field via an interface.
-func (v *NotificationFragment) GetAuthor() NotificationFragmentAuthor { return v.Author }
+func (v *NotificationFragment) GetAuthor() *NotificationFragmentAuthor { return v.Author }
 
 // GetInstance returns NotificationFragment.Instance, and is useful for accessing the field via an interface.
 func (v *NotificationFragment) GetInstance() *NotificationFragmentInstance { return v.Instance }
@@ -3090,6 +3146,14 @@ func (v *NotificationFragmentMessage) GetCreatedAt() time.Time { return v.Messag
 // GetChannelId returns NotificationFragmentMessage.ChannelId, and is useful for accessing the field via an interface.
 func (v *NotificationFragmentMessage) GetChannelId() uuid.UUID { return v.MessageFragment.ChannelId }
 
+// GetRepliedMessage returns NotificationFragmentMessage.RepliedMessage, and is useful for accessing the field via an interface.
+func (v *NotificationFragmentMessage) GetRepliedMessage() *MessageFragmentRepliedMessage {
+	return v.MessageFragment.RepliedMessage
+}
+
+// GetImageUrls returns NotificationFragmentMessage.ImageUrls, and is useful for accessing the field via an interface.
+func (v *NotificationFragmentMessage) GetImageUrls() []string { return v.MessageFragment.ImageUrls }
+
 func (v *NotificationFragmentMessage) UnmarshalJSON(b []byte) error {
 
 	if string(b) == "null" {
@@ -3125,6 +3189,10 @@ type __premarshalNotificationFragmentMessage struct {
 	CreatedAt time.Time `json:"createdAt"`
 
 	ChannelId uuid.UUID `json:"channelId"`
+
+	RepliedMessage *MessageFragmentRepliedMessage `json:"repliedMessage"`
+
+	ImageUrls []string `json:"imageUrls"`
 }
 
 func (v *NotificationFragmentMessage) MarshalJSON() ([]byte, error) {
@@ -3143,6 +3211,8 @@ func (v *NotificationFragmentMessage) __premarshalJSON() (*__premarshalNotificat
 	retval.Text = v.MessageFragment.Text
 	retval.CreatedAt = v.MessageFragment.CreatedAt
 	retval.ChannelId = v.MessageFragment.ChannelId
+	retval.RepliedMessage = v.MessageFragment.RepliedMessage
+	retval.ImageUrls = v.MessageFragment.ImageUrls
 	return &retval, nil
 }
 
@@ -3151,6 +3221,8 @@ type NotificationKind string
 const (
 	NotificationKindLikeAdded    NotificationKind = "LIKE_ADDED"
 	NotificationKindCommentAdded NotificationKind = "COMMENT_ADDED"
+	NotificationKindReplyAdded   NotificationKind = "REPLY_ADDED"
+	NotificationKindBadgeAdded   NotificationKind = "BADGE_ADDED"
 )
 
 // PageInfoFragment includes the GraphQL fields of PageInfo requested by the fragment PageInfoFragment.
@@ -3980,333 +4052,6 @@ const (
 	RoleBanned    Role = "BANNED"
 	RoleAllUsers  Role = "ALL_USERS"
 )
-
-type TagInput struct {
-	Tag TagKind `json:"tag"`
-}
-
-// GetTag returns TagInput.Tag, and is useful for accessing the field via an interface.
-func (v *TagInput) GetTag() TagKind { return v.Tag }
-
-// TagInstanceResponse is returned by TagInstance on success.
-type TagInstanceResponse struct {
-	TagInstance TagInstanceTagInstance `json:"tagInstance"`
-}
-
-// GetTagInstance returns TagInstanceResponse.TagInstance, and is useful for accessing the field via an interface.
-func (v *TagInstanceResponse) GetTagInstance() TagInstanceTagInstance { return v.TagInstance }
-
-// TagInstanceTagInstance includes the requested fields of the GraphQL type Instance.
-type TagInstanceTagInstance struct {
-	InstanceFragment `json:"-"`
-}
-
-// GetId returns TagInstanceTagInstance.Id, and is useful for accessing the field via an interface.
-func (v *TagInstanceTagInstance) GetId() uuid.UUID { return v.InstanceFragment.Id }
-
-// GetName returns TagInstanceTagInstance.Name, and is useful for accessing the field via an interface.
-func (v *TagInstanceTagInstance) GetName() string { return v.InstanceFragment.Name }
-
-// GetAuthor returns TagInstanceTagInstance.Author, and is useful for accessing the field via an interface.
-func (v *TagInstanceTagInstance) GetAuthor() InstanceFragmentAuthor { return v.InstanceFragment.Author }
-
-// GetReadAccess returns TagInstanceTagInstance.ReadAccess, and is useful for accessing the field via an interface.
-func (v *TagInstanceTagInstance) GetReadAccess() Access { return v.InstanceFragment.ReadAccess }
-
-// GetIcon returns TagInstanceTagInstance.Icon, and is useful for accessing the field via an interface.
-func (v *TagInstanceTagInstance) GetIcon() string { return v.InstanceFragment.Icon }
-
-// GetCreatedAt returns TagInstanceTagInstance.CreatedAt, and is useful for accessing the field via an interface.
-func (v *TagInstanceTagInstance) GetCreatedAt() time.Time { return v.InstanceFragment.CreatedAt }
-
-// GetDescription returns TagInstanceTagInstance.Description, and is useful for accessing the field via an interface.
-func (v *TagInstanceTagInstance) GetDescription() string { return v.InstanceFragment.Description }
-
-// GetShowAuthor returns TagInstanceTagInstance.ShowAuthor, and is useful for accessing the field via an interface.
-func (v *TagInstanceTagInstance) GetShowAuthor() bool { return v.InstanceFragment.ShowAuthor }
-
-// GetShowChat returns TagInstanceTagInstance.ShowChat, and is useful for accessing the field via an interface.
-func (v *TagInstanceTagInstance) GetShowChat() bool { return v.InstanceFragment.ShowChat }
-
-// GetShowLikes returns TagInstanceTagInstance.ShowLikes, and is useful for accessing the field via an interface.
-func (v *TagInstanceTagInstance) GetShowLikes() bool { return v.InstanceFragment.ShowLikes }
-
-// GetShowComments returns TagInstanceTagInstance.ShowComments, and is useful for accessing the field via an interface.
-func (v *TagInstanceTagInstance) GetShowComments() bool { return v.InstanceFragment.ShowComments }
-
-// GetLikesCount returns TagInstanceTagInstance.LikesCount, and is useful for accessing the field via an interface.
-func (v *TagInstanceTagInstance) GetLikesCount() int { return v.InstanceFragment.LikesCount }
-
-// GetCommentsCount returns TagInstanceTagInstance.CommentsCount, and is useful for accessing the field via an interface.
-func (v *TagInstanceTagInstance) GetCommentsCount() int { return v.InstanceFragment.CommentsCount }
-
-// GetLikesConnection returns TagInstanceTagInstance.LikesConnection, and is useful for accessing the field via an interface.
-func (v *TagInstanceTagInstance) GetLikesConnection() InstanceFragmentLikesConnectionInstanceLikesConnection {
-	return v.InstanceFragment.LikesConnection
-}
-
-// GetChannelsConnection returns TagInstanceTagInstance.ChannelsConnection, and is useful for accessing the field via an interface.
-func (v *TagInstanceTagInstance) GetChannelsConnection() InstanceFragmentChannelsConnectionInstanceChannelsConnection {
-	return v.InstanceFragment.ChannelsConnection
-}
-
-// GetAuthorsConnection returns TagInstanceTagInstance.AuthorsConnection, and is useful for accessing the field via an interface.
-func (v *TagInstanceTagInstance) GetAuthorsConnection() InstanceFragmentAuthorsConnectionInstanceAuthorsConnection {
-	return v.InstanceFragment.AuthorsConnection
-}
-
-func (v *TagInstanceTagInstance) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*TagInstanceTagInstance
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.TagInstanceTagInstance = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.InstanceFragment)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalTagInstanceTagInstance struct {
-	Id uuid.UUID `json:"id"`
-
-	Name string `json:"name"`
-
-	Author InstanceFragmentAuthor `json:"author"`
-
-	ReadAccess Access `json:"readAccess"`
-
-	Icon string `json:"icon"`
-
-	CreatedAt time.Time `json:"createdAt"`
-
-	Description string `json:"description"`
-
-	ShowAuthor bool `json:"showAuthor"`
-
-	ShowChat bool `json:"showChat"`
-
-	ShowLikes bool `json:"showLikes"`
-
-	ShowComments bool `json:"showComments"`
-
-	LikesCount int `json:"likesCount"`
-
-	CommentsCount int `json:"commentsCount"`
-
-	LikesConnection InstanceFragmentLikesConnectionInstanceLikesConnection `json:"likesConnection"`
-
-	ChannelsConnection InstanceFragmentChannelsConnectionInstanceChannelsConnection `json:"channelsConnection"`
-
-	AuthorsConnection InstanceFragmentAuthorsConnectionInstanceAuthorsConnection `json:"authorsConnection"`
-}
-
-func (v *TagInstanceTagInstance) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *TagInstanceTagInstance) __premarshalJSON() (*__premarshalTagInstanceTagInstance, error) {
-	var retval __premarshalTagInstanceTagInstance
-
-	retval.Id = v.InstanceFragment.Id
-	retval.Name = v.InstanceFragment.Name
-	retval.Author = v.InstanceFragment.Author
-	retval.ReadAccess = v.InstanceFragment.ReadAccess
-	retval.Icon = v.InstanceFragment.Icon
-	retval.CreatedAt = v.InstanceFragment.CreatedAt
-	retval.Description = v.InstanceFragment.Description
-	retval.ShowAuthor = v.InstanceFragment.ShowAuthor
-	retval.ShowChat = v.InstanceFragment.ShowChat
-	retval.ShowLikes = v.InstanceFragment.ShowLikes
-	retval.ShowComments = v.InstanceFragment.ShowComments
-	retval.LikesCount = v.InstanceFragment.LikesCount
-	retval.CommentsCount = v.InstanceFragment.CommentsCount
-	retval.LikesConnection = v.InstanceFragment.LikesConnection
-	retval.ChannelsConnection = v.InstanceFragment.ChannelsConnection
-	retval.AuthorsConnection = v.InstanceFragment.AuthorsConnection
-	return &retval, nil
-}
-
-type TagKind string
-
-const (
-	TagKindFeatured TagKind = "FEATURED"
-)
-
-// UntagInstanceResponse is returned by UntagInstance on success.
-type UntagInstanceResponse struct {
-	UntagInstance UntagInstanceUntagInstance `json:"untagInstance"`
-}
-
-// GetUntagInstance returns UntagInstanceResponse.UntagInstance, and is useful for accessing the field via an interface.
-func (v *UntagInstanceResponse) GetUntagInstance() UntagInstanceUntagInstance { return v.UntagInstance }
-
-// UntagInstanceUntagInstance includes the requested fields of the GraphQL type Instance.
-type UntagInstanceUntagInstance struct {
-	InstanceFragment `json:"-"`
-}
-
-// GetId returns UntagInstanceUntagInstance.Id, and is useful for accessing the field via an interface.
-func (v *UntagInstanceUntagInstance) GetId() uuid.UUID { return v.InstanceFragment.Id }
-
-// GetName returns UntagInstanceUntagInstance.Name, and is useful for accessing the field via an interface.
-func (v *UntagInstanceUntagInstance) GetName() string { return v.InstanceFragment.Name }
-
-// GetAuthor returns UntagInstanceUntagInstance.Author, and is useful for accessing the field via an interface.
-func (v *UntagInstanceUntagInstance) GetAuthor() InstanceFragmentAuthor {
-	return v.InstanceFragment.Author
-}
-
-// GetReadAccess returns UntagInstanceUntagInstance.ReadAccess, and is useful for accessing the field via an interface.
-func (v *UntagInstanceUntagInstance) GetReadAccess() Access { return v.InstanceFragment.ReadAccess }
-
-// GetIcon returns UntagInstanceUntagInstance.Icon, and is useful for accessing the field via an interface.
-func (v *UntagInstanceUntagInstance) GetIcon() string { return v.InstanceFragment.Icon }
-
-// GetCreatedAt returns UntagInstanceUntagInstance.CreatedAt, and is useful for accessing the field via an interface.
-func (v *UntagInstanceUntagInstance) GetCreatedAt() time.Time { return v.InstanceFragment.CreatedAt }
-
-// GetDescription returns UntagInstanceUntagInstance.Description, and is useful for accessing the field via an interface.
-func (v *UntagInstanceUntagInstance) GetDescription() string { return v.InstanceFragment.Description }
-
-// GetShowAuthor returns UntagInstanceUntagInstance.ShowAuthor, and is useful for accessing the field via an interface.
-func (v *UntagInstanceUntagInstance) GetShowAuthor() bool { return v.InstanceFragment.ShowAuthor }
-
-// GetShowChat returns UntagInstanceUntagInstance.ShowChat, and is useful for accessing the field via an interface.
-func (v *UntagInstanceUntagInstance) GetShowChat() bool { return v.InstanceFragment.ShowChat }
-
-// GetShowLikes returns UntagInstanceUntagInstance.ShowLikes, and is useful for accessing the field via an interface.
-func (v *UntagInstanceUntagInstance) GetShowLikes() bool { return v.InstanceFragment.ShowLikes }
-
-// GetShowComments returns UntagInstanceUntagInstance.ShowComments, and is useful for accessing the field via an interface.
-func (v *UntagInstanceUntagInstance) GetShowComments() bool { return v.InstanceFragment.ShowComments }
-
-// GetLikesCount returns UntagInstanceUntagInstance.LikesCount, and is useful for accessing the field via an interface.
-func (v *UntagInstanceUntagInstance) GetLikesCount() int { return v.InstanceFragment.LikesCount }
-
-// GetCommentsCount returns UntagInstanceUntagInstance.CommentsCount, and is useful for accessing the field via an interface.
-func (v *UntagInstanceUntagInstance) GetCommentsCount() int { return v.InstanceFragment.CommentsCount }
-
-// GetLikesConnection returns UntagInstanceUntagInstance.LikesConnection, and is useful for accessing the field via an interface.
-func (v *UntagInstanceUntagInstance) GetLikesConnection() InstanceFragmentLikesConnectionInstanceLikesConnection {
-	return v.InstanceFragment.LikesConnection
-}
-
-// GetChannelsConnection returns UntagInstanceUntagInstance.ChannelsConnection, and is useful for accessing the field via an interface.
-func (v *UntagInstanceUntagInstance) GetChannelsConnection() InstanceFragmentChannelsConnectionInstanceChannelsConnection {
-	return v.InstanceFragment.ChannelsConnection
-}
-
-// GetAuthorsConnection returns UntagInstanceUntagInstance.AuthorsConnection, and is useful for accessing the field via an interface.
-func (v *UntagInstanceUntagInstance) GetAuthorsConnection() InstanceFragmentAuthorsConnectionInstanceAuthorsConnection {
-	return v.InstanceFragment.AuthorsConnection
-}
-
-func (v *UntagInstanceUntagInstance) UnmarshalJSON(b []byte) error {
-
-	if string(b) == "null" {
-		return nil
-	}
-
-	var firstPass struct {
-		*UntagInstanceUntagInstance
-		graphql.NoUnmarshalJSON
-	}
-	firstPass.UntagInstanceUntagInstance = v
-
-	err := json.Unmarshal(b, &firstPass)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(
-		b, &v.InstanceFragment)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type __premarshalUntagInstanceUntagInstance struct {
-	Id uuid.UUID `json:"id"`
-
-	Name string `json:"name"`
-
-	Author InstanceFragmentAuthor `json:"author"`
-
-	ReadAccess Access `json:"readAccess"`
-
-	Icon string `json:"icon"`
-
-	CreatedAt time.Time `json:"createdAt"`
-
-	Description string `json:"description"`
-
-	ShowAuthor bool `json:"showAuthor"`
-
-	ShowChat bool `json:"showChat"`
-
-	ShowLikes bool `json:"showLikes"`
-
-	ShowComments bool `json:"showComments"`
-
-	LikesCount int `json:"likesCount"`
-
-	CommentsCount int `json:"commentsCount"`
-
-	LikesConnection InstanceFragmentLikesConnectionInstanceLikesConnection `json:"likesConnection"`
-
-	ChannelsConnection InstanceFragmentChannelsConnectionInstanceChannelsConnection `json:"channelsConnection"`
-
-	AuthorsConnection InstanceFragmentAuthorsConnectionInstanceAuthorsConnection `json:"authorsConnection"`
-}
-
-func (v *UntagInstanceUntagInstance) MarshalJSON() ([]byte, error) {
-	premarshaled, err := v.__premarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(premarshaled)
-}
-
-func (v *UntagInstanceUntagInstance) __premarshalJSON() (*__premarshalUntagInstanceUntagInstance, error) {
-	var retval __premarshalUntagInstanceUntagInstance
-
-	retval.Id = v.InstanceFragment.Id
-	retval.Name = v.InstanceFragment.Name
-	retval.Author = v.InstanceFragment.Author
-	retval.ReadAccess = v.InstanceFragment.ReadAccess
-	retval.Icon = v.InstanceFragment.Icon
-	retval.CreatedAt = v.InstanceFragment.CreatedAt
-	retval.Description = v.InstanceFragment.Description
-	retval.ShowAuthor = v.InstanceFragment.ShowAuthor
-	retval.ShowChat = v.InstanceFragment.ShowChat
-	retval.ShowLikes = v.InstanceFragment.ShowLikes
-	retval.ShowComments = v.InstanceFragment.ShowComments
-	retval.LikesCount = v.InstanceFragment.LikesCount
-	retval.CommentsCount = v.InstanceFragment.CommentsCount
-	retval.LikesConnection = v.InstanceFragment.LikesConnection
-	retval.ChannelsConnection = v.InstanceFragment.ChannelsConnection
-	retval.AuthorsConnection = v.InstanceFragment.AuthorsConnection
-	return &retval, nil
-}
 
 // UpdateChannelResponse is returned by UpdateChannel on success.
 type UpdateChannelResponse struct {
@@ -5285,7 +5030,7 @@ func (v *UserNotificationsEdgeFragmentNodeNotification) GetKind() NotificationKi
 }
 
 // GetAuthor returns UserNotificationsEdgeFragmentNodeNotification.Author, and is useful for accessing the field via an interface.
-func (v *UserNotificationsEdgeFragmentNodeNotification) GetAuthor() NotificationFragmentAuthor {
+func (v *UserNotificationsEdgeFragmentNodeNotification) GetAuthor() *NotificationFragmentAuthor {
 	return v.NotificationFragment.Author
 }
 
@@ -5334,7 +5079,7 @@ type __premarshalUserNotificationsEdgeFragmentNodeNotification struct {
 
 	Kind NotificationKind `json:"kind"`
 
-	Author NotificationFragmentAuthor `json:"author"`
+	Author *NotificationFragmentAuthor `json:"author"`
 
 	Instance *NotificationFragmentInstance `json:"instance"`
 
@@ -5883,102 +5628,6 @@ func (v *__ReorderInstanceInput) GetMessagesLast() int { return v.MessagesLast }
 // GetMessagesBefore returns __ReorderInstanceInput.MessagesBefore, and is useful for accessing the field via an interface.
 func (v *__ReorderInstanceInput) GetMessagesBefore() string { return v.MessagesBefore }
 
-// __TagInstanceInput is used internally by genqlient
-type __TagInstanceInput struct {
-	InstanceId     uuid.UUID `json:"instanceId"`
-	Input          TagInput  `json:"input"`
-	ChannelsFirst  int       `json:"channelsFirst"`
-	ChannelsAfter  string    `json:"channelsAfter"`
-	LikesFirst     int       `json:"likesFirst"`
-	LikesAfter     string    `json:"likesAfter"`
-	AuthorsFirst   int       `json:"authorsFirst"`
-	AuthorsAfter   string    `json:"authorsAfter"`
-	AuthorsRoles   []Role    `json:"authorsRoles"`
-	MessagesLast   int       `json:"messagesLast"`
-	MessagesBefore string    `json:"messagesBefore"`
-}
-
-// GetInstanceId returns __TagInstanceInput.InstanceId, and is useful for accessing the field via an interface.
-func (v *__TagInstanceInput) GetInstanceId() uuid.UUID { return v.InstanceId }
-
-// GetInput returns __TagInstanceInput.Input, and is useful for accessing the field via an interface.
-func (v *__TagInstanceInput) GetInput() TagInput { return v.Input }
-
-// GetChannelsFirst returns __TagInstanceInput.ChannelsFirst, and is useful for accessing the field via an interface.
-func (v *__TagInstanceInput) GetChannelsFirst() int { return v.ChannelsFirst }
-
-// GetChannelsAfter returns __TagInstanceInput.ChannelsAfter, and is useful for accessing the field via an interface.
-func (v *__TagInstanceInput) GetChannelsAfter() string { return v.ChannelsAfter }
-
-// GetLikesFirst returns __TagInstanceInput.LikesFirst, and is useful for accessing the field via an interface.
-func (v *__TagInstanceInput) GetLikesFirst() int { return v.LikesFirst }
-
-// GetLikesAfter returns __TagInstanceInput.LikesAfter, and is useful for accessing the field via an interface.
-func (v *__TagInstanceInput) GetLikesAfter() string { return v.LikesAfter }
-
-// GetAuthorsFirst returns __TagInstanceInput.AuthorsFirst, and is useful for accessing the field via an interface.
-func (v *__TagInstanceInput) GetAuthorsFirst() int { return v.AuthorsFirst }
-
-// GetAuthorsAfter returns __TagInstanceInput.AuthorsAfter, and is useful for accessing the field via an interface.
-func (v *__TagInstanceInput) GetAuthorsAfter() string { return v.AuthorsAfter }
-
-// GetAuthorsRoles returns __TagInstanceInput.AuthorsRoles, and is useful for accessing the field via an interface.
-func (v *__TagInstanceInput) GetAuthorsRoles() []Role { return v.AuthorsRoles }
-
-// GetMessagesLast returns __TagInstanceInput.MessagesLast, and is useful for accessing the field via an interface.
-func (v *__TagInstanceInput) GetMessagesLast() int { return v.MessagesLast }
-
-// GetMessagesBefore returns __TagInstanceInput.MessagesBefore, and is useful for accessing the field via an interface.
-func (v *__TagInstanceInput) GetMessagesBefore() string { return v.MessagesBefore }
-
-// __UntagInstanceInput is used internally by genqlient
-type __UntagInstanceInput struct {
-	InstanceId     uuid.UUID `json:"instanceId"`
-	Input          TagInput  `json:"input"`
-	ChannelsFirst  int       `json:"channelsFirst"`
-	ChannelsAfter  string    `json:"channelsAfter"`
-	LikesFirst     int       `json:"likesFirst"`
-	LikesAfter     string    `json:"likesAfter"`
-	AuthorsFirst   int       `json:"authorsFirst"`
-	AuthorsAfter   string    `json:"authorsAfter"`
-	AuthorsRoles   []Role    `json:"authorsRoles"`
-	MessagesLast   int       `json:"messagesLast"`
-	MessagesBefore string    `json:"messagesBefore"`
-}
-
-// GetInstanceId returns __UntagInstanceInput.InstanceId, and is useful for accessing the field via an interface.
-func (v *__UntagInstanceInput) GetInstanceId() uuid.UUID { return v.InstanceId }
-
-// GetInput returns __UntagInstanceInput.Input, and is useful for accessing the field via an interface.
-func (v *__UntagInstanceInput) GetInput() TagInput { return v.Input }
-
-// GetChannelsFirst returns __UntagInstanceInput.ChannelsFirst, and is useful for accessing the field via an interface.
-func (v *__UntagInstanceInput) GetChannelsFirst() int { return v.ChannelsFirst }
-
-// GetChannelsAfter returns __UntagInstanceInput.ChannelsAfter, and is useful for accessing the field via an interface.
-func (v *__UntagInstanceInput) GetChannelsAfter() string { return v.ChannelsAfter }
-
-// GetLikesFirst returns __UntagInstanceInput.LikesFirst, and is useful for accessing the field via an interface.
-func (v *__UntagInstanceInput) GetLikesFirst() int { return v.LikesFirst }
-
-// GetLikesAfter returns __UntagInstanceInput.LikesAfter, and is useful for accessing the field via an interface.
-func (v *__UntagInstanceInput) GetLikesAfter() string { return v.LikesAfter }
-
-// GetAuthorsFirst returns __UntagInstanceInput.AuthorsFirst, and is useful for accessing the field via an interface.
-func (v *__UntagInstanceInput) GetAuthorsFirst() int { return v.AuthorsFirst }
-
-// GetAuthorsAfter returns __UntagInstanceInput.AuthorsAfter, and is useful for accessing the field via an interface.
-func (v *__UntagInstanceInput) GetAuthorsAfter() string { return v.AuthorsAfter }
-
-// GetAuthorsRoles returns __UntagInstanceInput.AuthorsRoles, and is useful for accessing the field via an interface.
-func (v *__UntagInstanceInput) GetAuthorsRoles() []Role { return v.AuthorsRoles }
-
-// GetMessagesLast returns __UntagInstanceInput.MessagesLast, and is useful for accessing the field via an interface.
-func (v *__UntagInstanceInput) GetMessagesLast() int { return v.MessagesLast }
-
-// GetMessagesBefore returns __UntagInstanceInput.MessagesBefore, and is useful for accessing the field via an interface.
-func (v *__UntagInstanceInput) GetMessagesBefore() string { return v.MessagesBefore }
-
 // __UpdateChannelInput is used internally by genqlient
 type __UpdateChannelInput struct {
 	Input          ChannelInput `json:"input"`
@@ -6224,6 +5873,14 @@ fragment MessageFragment on Message {
 	text
 	createdAt
 	channelId
+	repliedMessage {
+		id
+		text
+		createdAt
+		channelId
+		imageUrls
+	}
+	imageUrls
 }
 fragment AuthorFragment on Author {
 	id
@@ -6400,6 +6057,14 @@ fragment MessageFragment on Message {
 	text
 	createdAt
 	channelId
+	repliedMessage {
+		id
+		text
+		createdAt
+		channelId
+		imageUrls
+	}
+	imageUrls
 }
 `,
 		Variables: &__AddInstanceInput{
@@ -6558,6 +6223,14 @@ fragment MessageFragment on Message {
 	text
 	createdAt
 	channelId
+	repliedMessage {
+		id
+		text
+		createdAt
+		channelId
+		imageUrls
+	}
+	imageUrls
 }
 fragment AuthorFragment on Author {
 	id
@@ -6687,6 +6360,14 @@ fragment MessageFragment on Message {
 	text
 	createdAt
 	channelId
+	repliedMessage {
+		id
+		text
+		createdAt
+		channelId
+		imageUrls
+	}
+	imageUrls
 }
 fragment AuthorFragment on Author {
 	id
@@ -6865,6 +6546,14 @@ fragment MessageFragment on Message {
 	text
 	createdAt
 	channelId
+	repliedMessage {
+		id
+		text
+		createdAt
+		channelId
+		imageUrls
+	}
+	imageUrls
 }
 `,
 		Variables: &__CheckInviteInput{
@@ -7038,6 +6727,14 @@ fragment MessageFragment on Message {
 	text
 	createdAt
 	channelId
+	repliedMessage {
+		id
+		text
+		createdAt
+		channelId
+		imageUrls
+	}
+	imageUrls
 }
 `,
 		Variables: &__InstanceInput{
@@ -7265,6 +6962,14 @@ fragment MessageFragment on Message {
 	text
 	createdAt
 	channelId
+	repliedMessage {
+		id
+		text
+		createdAt
+		channelId
+		imageUrls
+	}
+	imageUrls
 }
 `,
 		Variables: &__PinInstanceInput{
@@ -7409,6 +7114,14 @@ fragment MessageFragment on Message {
 	text
 	createdAt
 	channelId
+	repliedMessage {
+		id
+		text
+		createdAt
+		channelId
+		imageUrls
+	}
+	imageUrls
 }
 fragment AuthorFragment on Author {
 	id
@@ -7585,6 +7298,14 @@ fragment MessageFragment on Message {
 	text
 	createdAt
 	channelId
+	repliedMessage {
+		id
+		text
+		createdAt
+		channelId
+		imageUrls
+	}
+	imageUrls
 }
 `,
 		Variables: &__RemoveInstanceInput{
@@ -7690,6 +7411,14 @@ fragment MessageFragment on Message {
 	text
 	createdAt
 	channelId
+	repliedMessage {
+		id
+		text
+		createdAt
+		channelId
+		imageUrls
+	}
+	imageUrls
 }
 fragment AuthorFragment on Author {
 	id
@@ -7826,6 +7555,14 @@ fragment MessageFragment on Message {
 	text
 	createdAt
 	channelId
+	repliedMessage {
+		id
+		text
+		createdAt
+		channelId
+		imageUrls
+	}
+	imageUrls
 }
 fragment AuthorFragment on Author {
 	id
@@ -8004,6 +7741,14 @@ fragment MessageFragment on Message {
 	text
 	createdAt
 	channelId
+	repliedMessage {
+		id
+		text
+		createdAt
+		channelId
+		imageUrls
+	}
+	imageUrls
 }
 `,
 		Variables: &__ReorderInstanceInput{
@@ -8023,332 +7768,6 @@ fragment MessageFragment on Message {
 	var err error
 
 	var data ReorderInstanceResponse
-	resp := &graphql.Response{Data: &data}
-
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
-	)
-
-	return &data, err
-}
-
-func TagInstance(
-	ctx context.Context,
-	client graphql.Client,
-	instanceId uuid.UUID,
-	input TagInput,
-	channelsFirst int,
-	channelsAfter string,
-	likesFirst int,
-	likesAfter string,
-	authorsFirst int,
-	authorsAfter string,
-	authorsRoles []Role,
-	messagesLast int,
-	messagesBefore string,
-) (*TagInstanceResponse, error) {
-	req := &graphql.Request{
-		OpName: "TagInstance",
-		Query: `
-mutation TagInstance ($instanceId: Uuid!, $input: TagInput!, $channelsFirst: Int!, $channelsAfter: String!, $likesFirst: Int!, $likesAfter: String!, $authorsFirst: Int!, $authorsAfter: String!, $authorsRoles: [Role!] = [], $messagesLast: Int!, $messagesBefore: String!) {
-	tagInstance(instanceId: $instanceId, input: $input) {
-		... InstanceFragment
-	}
-}
-fragment InstanceFragment on Instance {
-	id
-	name
-	author {
-		... AuthorFragment
-	}
-	readAccess
-	icon
-	createdAt
-	description
-	showAuthor
-	showChat
-	showLikes
-	showComments
-	likesCount
-	commentsCount
-	likesConnection(first: $likesFirst, after: $likesAfter) {
-		edges {
-			... InstanceLikesEdgeFragment
-		}
-		pageInfo {
-			... PageInfoFragment
-		}
-	}
-	channelsConnection(first: $channelsFirst, after: $channelsAfter) {
-		edges {
-			... InstanceChannelsEdgeFragment
-		}
-		pageInfo {
-			... PageInfoFragment
-		}
-	}
-	authorsConnection(first: $authorsFirst, after: $authorsAfter, roles: $authorsRoles) {
-		edges {
-			... InstanceAuthorsEdgeFragment
-		}
-		pageInfo {
-			... PageInfoFragment
-		}
-	}
-}
-fragment AuthorFragment on Author {
-	id
-	userId
-	instanceId
-	name
-	avatar
-	bio
-	roles
-	createdAt
-}
-fragment InstanceLikesEdgeFragment on InstanceLikesEdge {
-	cursor
-	likedAt
-	node {
-		... AuthorFragment
-	}
-}
-fragment PageInfoFragment on PageInfo {
-	hasNextPage
-	hasPreviousPage
-}
-fragment InstanceChannelsEdgeFragment on InstanceChannelsEdge {
-	cursor
-	node {
-		... ChannelFragment
-	}
-}
-fragment InstanceAuthorsEdgeFragment on InstanceAuthorsEdge {
-	cursor
-	node {
-		... AuthorFragment
-	}
-}
-fragment ChannelFragment on Channel {
-	id
-	name
-	rank
-	instanceId
-	readers
-	publishers
-	createdAt
-	updatedAt
-	lastMessageAddedAt
-	messageCount
-	isCategory
-	isComments
-	messagesConnection(last: $messagesLast, before: $messagesBefore) {
-		edges {
-			... ChannelMessagesEdgeFragment
-		}
-		pageInfo {
-			... PageInfoFragment
-		}
-	}
-}
-fragment ChannelMessagesEdgeFragment on ChannelMessagesEdge {
-	cursor
-	node {
-		... MessageFragment
-	}
-}
-fragment MessageFragment on Message {
-	id
-	author {
-		... AuthorFragment
-	}
-	text
-	createdAt
-	channelId
-}
-`,
-		Variables: &__TagInstanceInput{
-			InstanceId:     instanceId,
-			Input:          input,
-			ChannelsFirst:  channelsFirst,
-			ChannelsAfter:  channelsAfter,
-			LikesFirst:     likesFirst,
-			LikesAfter:     likesAfter,
-			AuthorsFirst:   authorsFirst,
-			AuthorsAfter:   authorsAfter,
-			AuthorsRoles:   authorsRoles,
-			MessagesLast:   messagesLast,
-			MessagesBefore: messagesBefore,
-		},
-	}
-	var err error
-
-	var data TagInstanceResponse
-	resp := &graphql.Response{Data: &data}
-
-	err = client.MakeRequest(
-		ctx,
-		req,
-		resp,
-	)
-
-	return &data, err
-}
-
-func UntagInstance(
-	ctx context.Context,
-	client graphql.Client,
-	instanceId uuid.UUID,
-	input TagInput,
-	channelsFirst int,
-	channelsAfter string,
-	likesFirst int,
-	likesAfter string,
-	authorsFirst int,
-	authorsAfter string,
-	authorsRoles []Role,
-	messagesLast int,
-	messagesBefore string,
-) (*UntagInstanceResponse, error) {
-	req := &graphql.Request{
-		OpName: "UntagInstance",
-		Query: `
-mutation UntagInstance ($instanceId: Uuid!, $input: TagInput!, $channelsFirst: Int!, $channelsAfter: String!, $likesFirst: Int!, $likesAfter: String!, $authorsFirst: Int!, $authorsAfter: String!, $authorsRoles: [Role!] = [], $messagesLast: Int!, $messagesBefore: String!) {
-	untagInstance(instanceId: $instanceId, input: $input) {
-		... InstanceFragment
-	}
-}
-fragment InstanceFragment on Instance {
-	id
-	name
-	author {
-		... AuthorFragment
-	}
-	readAccess
-	icon
-	createdAt
-	description
-	showAuthor
-	showChat
-	showLikes
-	showComments
-	likesCount
-	commentsCount
-	likesConnection(first: $likesFirst, after: $likesAfter) {
-		edges {
-			... InstanceLikesEdgeFragment
-		}
-		pageInfo {
-			... PageInfoFragment
-		}
-	}
-	channelsConnection(first: $channelsFirst, after: $channelsAfter) {
-		edges {
-			... InstanceChannelsEdgeFragment
-		}
-		pageInfo {
-			... PageInfoFragment
-		}
-	}
-	authorsConnection(first: $authorsFirst, after: $authorsAfter, roles: $authorsRoles) {
-		edges {
-			... InstanceAuthorsEdgeFragment
-		}
-		pageInfo {
-			... PageInfoFragment
-		}
-	}
-}
-fragment AuthorFragment on Author {
-	id
-	userId
-	instanceId
-	name
-	avatar
-	bio
-	roles
-	createdAt
-}
-fragment InstanceLikesEdgeFragment on InstanceLikesEdge {
-	cursor
-	likedAt
-	node {
-		... AuthorFragment
-	}
-}
-fragment PageInfoFragment on PageInfo {
-	hasNextPage
-	hasPreviousPage
-}
-fragment InstanceChannelsEdgeFragment on InstanceChannelsEdge {
-	cursor
-	node {
-		... ChannelFragment
-	}
-}
-fragment InstanceAuthorsEdgeFragment on InstanceAuthorsEdge {
-	cursor
-	node {
-		... AuthorFragment
-	}
-}
-fragment ChannelFragment on Channel {
-	id
-	name
-	rank
-	instanceId
-	readers
-	publishers
-	createdAt
-	updatedAt
-	lastMessageAddedAt
-	messageCount
-	isCategory
-	isComments
-	messagesConnection(last: $messagesLast, before: $messagesBefore) {
-		edges {
-			... ChannelMessagesEdgeFragment
-		}
-		pageInfo {
-			... PageInfoFragment
-		}
-	}
-}
-fragment ChannelMessagesEdgeFragment on ChannelMessagesEdge {
-	cursor
-	node {
-		... MessageFragment
-	}
-}
-fragment MessageFragment on Message {
-	id
-	author {
-		... AuthorFragment
-	}
-	text
-	createdAt
-	channelId
-}
-`,
-		Variables: &__UntagInstanceInput{
-			InstanceId:     instanceId,
-			Input:          input,
-			ChannelsFirst:  channelsFirst,
-			ChannelsAfter:  channelsAfter,
-			LikesFirst:     likesFirst,
-			LikesAfter:     likesAfter,
-			AuthorsFirst:   authorsFirst,
-			AuthorsAfter:   authorsAfter,
-			AuthorsRoles:   authorsRoles,
-			MessagesLast:   messagesLast,
-			MessagesBefore: messagesBefore,
-		},
-	}
-	var err error
-
-	var data UntagInstanceResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(
@@ -8422,6 +7841,14 @@ fragment MessageFragment on Message {
 	text
 	createdAt
 	channelId
+	repliedMessage {
+		id
+		text
+		createdAt
+		channelId
+		imageUrls
+	}
+	imageUrls
 }
 fragment AuthorFragment on Author {
 	id
@@ -8600,6 +8027,14 @@ fragment MessageFragment on Message {
 	text
 	createdAt
 	channelId
+	repliedMessage {
+		id
+		text
+		createdAt
+		channelId
+		imageUrls
+	}
+	imageUrls
 }
 `,
 		Variables: &__UpdateInstanceInput{
@@ -8794,6 +8229,14 @@ fragment MessageFragment on Message {
 	text
 	createdAt
 	channelId
+	repliedMessage {
+		id
+		text
+		createdAt
+		channelId
+		imageUrls
+	}
+	imageUrls
 }
 fragment ChannelFragment on Channel {
 	id
@@ -9018,6 +8461,14 @@ fragment MessageFragment on Message {
 	text
 	createdAt
 	channelId
+	repliedMessage {
+		id
+		text
+		createdAt
+		channelId
+		imageUrls
+	}
+	imageUrls
 }
 fragment ChannelFragment on Channel {
 	id

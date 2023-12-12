@@ -319,6 +319,11 @@ func (r *messageResolver) RepliedMessage(ctx context.Context, obj *model.Message
 	return &message, nil
 }
 
+// ImageUrls is the resolver for the imageUrls field.
+func (r *messageResolver) ImageUrls(ctx context.Context, obj *model.Message) ([]string, error) {
+	return obj.ImageUrls, nil
+}
+
 // UpdateUser is the resolver for the updateUser field.
 func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UserInput) (*model.User, error) {
 	caller, err := upsertCaller(ctx)
@@ -826,8 +831,9 @@ func (r *mutationResolver) AddMessage(ctx context.Context, input model.MessageIn
 	}
 
 	message := model.Message{}
-	message.Text = input.Text
-	message.RepliedMessageID = input.RepliedMessageID
+	copier.Copy(&message, input)
+	// message.Text = input.Text
+	// message.RepliedMessageID = input.RepliedMessageID
 	message.AuthorID = callerInstanceUser.ID
 	message.Author = callerInstanceUser
 

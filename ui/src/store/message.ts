@@ -3,12 +3,7 @@ import { nextTick, reactive } from 'vue'
 
 import { useAddMessageMutation, useRemoveMessageMutation } from '@/graphql/mutations/message.gen'
 import { useChannelQuery } from '@/graphql/queries/channel.gen'
-import {
-  Author,
-  ChannelMessagesEdge,
-  Message,
-  MessageInput,
-} from '@/graphql/types.gen'
+import { Author, ChannelMessagesEdge, Message, MessageInput } from '@/graphql/types.gen'
 import { useAuthorStore } from '@/store/author'
 import { useChannelStore } from '@/store/channel'
 import { useUserStore } from '@/store/user'
@@ -28,6 +23,7 @@ export const useMessageStore = defineStore('message', () => {
   const allLoading = reactive<{ [channelId: string]: boolean }>({})
   const allComposeText = reactive<{ [channelId: string]: string }>({})
   const allReplyingTo = reactive<{ [channelId: string]: Message | undefined }>({})
+  const allComposeImage = reactive<{ [channelId: string]: string | undefined }>({})
 
   // =========================================
   // getters
@@ -53,6 +49,10 @@ export const useMessageStore = defineStore('message', () => {
     return allReplyingTo[channelId]
   }
 
+  function getComposeImage(channelId: string): string | undefined {
+    return allComposeImage[channelId]
+  }
+
   // =========================================
   // setters
   function setComposeText(channelId: string, text: string) {
@@ -65,6 +65,14 @@ export const useMessageStore = defineStore('message', () => {
 
   function clearReplyingTo(channelId: string) {
     allReplyingTo[channelId] = undefined
+  }
+
+  function setComposeImage(channelId: string, imageUrl: string) {
+    allComposeImage[channelId] = imageUrl
+  }
+
+  function clearComposeImage(channelId: string) {
+    allComposeImage[channelId] = undefined
   }
 
   // =========================================
@@ -160,11 +168,14 @@ export const useMessageStore = defineStore('message', () => {
     getHasPreviousPage,
     getComposeText,
     getReplyingTo,
+    getComposeImage,
 
     // setters
     setComposeText,
     setReplyingTo,
     clearReplyingTo,
+    setComposeImage,
+    clearComposeImage,
 
     // actions
     fetchMessages,

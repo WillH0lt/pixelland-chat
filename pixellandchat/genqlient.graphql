@@ -37,7 +37,14 @@ fragment MessageFragment on Message {
   text
   createdAt
   channelId
-  repliedMessageId
+  repliedMessage {
+    id
+    text
+    createdAt
+    channelId
+    imageUrls
+  }
+  imageUrls
 }
 
 fragment NotificationFragment on Notification {

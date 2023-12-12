@@ -42,6 +42,7 @@ type MessageResolver interface {
 	Author(ctx context.Context, obj *model.Message) (*model.Author, error)
 
 	RepliedMessage(ctx context.Context, obj *model.Message) (*model.Message, error)
+	ImageUrls(ctx context.Context, obj *model.Message) ([]string, error)
 }
 type MutationResolver interface {
 	UpdateUser(ctx context.Context, input model.UserInput) (*model.User, error)
@@ -131,6 +132,15 @@ func (ec *executionContext) dir_constraint_args(ctx context.Context, rawArgs map
 		}
 	}
 	args["max"] = arg1
+	var arg2 float64
+	if tmp, ok := rawArgs["listMax"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("listMax"))
+		arg2, err = ec.unmarshalNFloat2float64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["listMax"] = arg2
 	return args, nil
 }
 
@@ -150,10 +160,14 @@ func (ec *executionContext) field_Channel_messagesConnection_args(ctx context.Co
 			if err != nil {
 				return nil, err
 			}
+			listMax, err := ec.unmarshalNFloat2float64(ctx, 50)
+			if err != nil {
+				return nil, err
+			}
 			if ec.directives.Constraint == nil {
 				return nil, errors.New("directive constraint is not implemented")
 			}
-			return ec.directives.Constraint(ctx, rawArgs, directive0, min, max)
+			return ec.directives.Constraint(ctx, rawArgs, directive0, min, max, listMax)
 		}
 
 		tmp, err = directive1(ctx)
@@ -204,10 +218,14 @@ func (ec *executionContext) field_Instance_authorsConnection_args(ctx context.Co
 			if err != nil {
 				return nil, err
 			}
+			listMax, err := ec.unmarshalNFloat2float64(ctx, 50)
+			if err != nil {
+				return nil, err
+			}
 			if ec.directives.Constraint == nil {
 				return nil, errors.New("directive constraint is not implemented")
 			}
-			return ec.directives.Constraint(ctx, rawArgs, directive0, min, max)
+			return ec.directives.Constraint(ctx, rawArgs, directive0, min, max, listMax)
 		}
 
 		tmp, err = directive1(ctx)
@@ -249,10 +267,14 @@ func (ec *executionContext) field_Instance_channelsConnection_args(ctx context.C
 			if err != nil {
 				return nil, err
 			}
+			listMax, err := ec.unmarshalNFloat2float64(ctx, 50)
+			if err != nil {
+				return nil, err
+			}
 			if ec.directives.Constraint == nil {
 				return nil, errors.New("directive constraint is not implemented")
 			}
-			return ec.directives.Constraint(ctx, rawArgs, directive0, min, max)
+			return ec.directives.Constraint(ctx, rawArgs, directive0, min, max, listMax)
 		}
 
 		tmp, err = directive1(ctx)
@@ -294,10 +316,14 @@ func (ec *executionContext) field_Instance_likesConnection_args(ctx context.Cont
 			if err != nil {
 				return nil, err
 			}
+			listMax, err := ec.unmarshalNFloat2float64(ctx, 50)
+			if err != nil {
+				return nil, err
+			}
 			if ec.directives.Constraint == nil {
 				return nil, errors.New("directive constraint is not implemented")
 			}
-			return ec.directives.Constraint(ctx, rawArgs, directive0, min, max)
+			return ec.directives.Constraint(ctx, rawArgs, directive0, min, max, listMax)
 		}
 
 		tmp, err = directive1(ctx)
@@ -828,10 +854,14 @@ func (ec *executionContext) field_Query_badges_args(ctx context.Context, rawArgs
 			if err != nil {
 				return nil, err
 			}
+			listMax, err := ec.unmarshalNFloat2float64(ctx, 50)
+			if err != nil {
+				return nil, err
+			}
 			if ec.directives.Constraint == nil {
 				return nil, errors.New("directive constraint is not implemented")
 			}
-			return ec.directives.Constraint(ctx, rawArgs, directive0, min, max)
+			return ec.directives.Constraint(ctx, rawArgs, directive0, min, max, listMax)
 		}
 
 		tmp, err = directive1(ctx)
@@ -942,10 +972,14 @@ func (ec *executionContext) field_Query_userBadges_args(ctx context.Context, raw
 			if err != nil {
 				return nil, err
 			}
+			listMax, err := ec.unmarshalNFloat2float64(ctx, 50)
+			if err != nil {
+				return nil, err
+			}
 			if ec.directives.Constraint == nil {
 				return nil, errors.New("directive constraint is not implemented")
 			}
-			return ec.directives.Constraint(ctx, rawArgs, directive0, min, max)
+			return ec.directives.Constraint(ctx, rawArgs, directive0, min, max, listMax)
 		}
 
 		tmp, err = directive1(ctx)
@@ -1002,10 +1036,14 @@ func (ec *executionContext) field_User_instancesConnection_args(ctx context.Cont
 			if err != nil {
 				return nil, err
 			}
+			listMax, err := ec.unmarshalNFloat2float64(ctx, 50)
+			if err != nil {
+				return nil, err
+			}
 			if ec.directives.Constraint == nil {
 				return nil, errors.New("directive constraint is not implemented")
 			}
-			return ec.directives.Constraint(ctx, rawArgs, directive0, min, max)
+			return ec.directives.Constraint(ctx, rawArgs, directive0, min, max, listMax)
 		}
 
 		tmp, err = directive1(ctx)
@@ -1047,10 +1085,14 @@ func (ec *executionContext) field_User_notificationsConnection_args(ctx context.
 			if err != nil {
 				return nil, err
 			}
+			listMax, err := ec.unmarshalNFloat2float64(ctx, 50)
+			if err != nil {
+				return nil, err
+			}
 			if ec.directives.Constraint == nil {
 				return nil, errors.New("directive constraint is not implemented")
 			}
-			return ec.directives.Constraint(ctx, rawArgs, directive0, min, max)
+			return ec.directives.Constraint(ctx, rawArgs, directive0, min, max, listMax)
 		}
 
 		tmp, err = directive1(ctx)
@@ -2586,6 +2628,8 @@ func (ec *executionContext) fieldContext_ChannelMessagesEdge_node(ctx context.Co
 				return ec.fieldContext_Message_channelId(ctx, field)
 			case "repliedMessage":
 				return ec.fieldContext_Message_repliedMessage(ctx, field)
+			case "imageUrls":
+				return ec.fieldContext_Message_imageUrls(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Message", field.Name)
 		},
@@ -4731,8 +4775,51 @@ func (ec *executionContext) fieldContext_Message_repliedMessage(ctx context.Cont
 				return ec.fieldContext_Message_channelId(ctx, field)
 			case "repliedMessage":
 				return ec.fieldContext_Message_repliedMessage(ctx, field)
+			case "imageUrls":
+				return ec.fieldContext_Message_imageUrls(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Message", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Message_imageUrls(ctx context.Context, field graphql.CollectedField, obj *model.Message) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Message_imageUrls(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Message().ImageUrls(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Message_imageUrls(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Message",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -7753,6 +7840,8 @@ func (ec *executionContext) fieldContext_Notification_message(ctx context.Contex
 				return ec.fieldContext_Message_channelId(ctx, field)
 			case "repliedMessage":
 				return ec.fieldContext_Message_repliedMessage(ctx, field)
+			case "imageUrls":
+				return ec.fieldContext_Message_imageUrls(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Message", field.Name)
 		},
@@ -7808,6 +7897,8 @@ func (ec *executionContext) fieldContext_Notification_reply(ctx context.Context,
 				return ec.fieldContext_Message_channelId(ctx, field)
 			case "repliedMessage":
 				return ec.fieldContext_Message_repliedMessage(ctx, field)
+			case "imageUrls":
+				return ec.fieldContext_Message_imageUrls(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Message", field.Name)
 		},
@@ -10283,10 +10374,14 @@ func (ec *executionContext) unmarshalInputBadgeInput(ctx context.Context, obj in
 				if err != nil {
 					return nil, err
 				}
+				listMax, err := ec.unmarshalNFloat2float64(ctx, 50)
+				if err != nil {
+					return nil, err
+				}
 				if ec.directives.Constraint == nil {
 					return nil, errors.New("directive constraint is not implemented")
 				}
-				return ec.directives.Constraint(ctx, obj, directive0, min, max)
+				return ec.directives.Constraint(ctx, obj, directive0, min, max, listMax)
 			}
 
 			tmp, err := directive1(ctx)
@@ -10313,10 +10408,14 @@ func (ec *executionContext) unmarshalInputBadgeInput(ctx context.Context, obj in
 				if err != nil {
 					return nil, err
 				}
+				listMax, err := ec.unmarshalNFloat2float64(ctx, 50)
+				if err != nil {
+					return nil, err
+				}
 				if ec.directives.Constraint == nil {
 					return nil, errors.New("directive constraint is not implemented")
 				}
-				return ec.directives.Constraint(ctx, obj, directive0, min, max)
+				return ec.directives.Constraint(ctx, obj, directive0, min, max, listMax)
 			}
 
 			tmp, err := directive1(ctx)
@@ -10363,10 +10462,14 @@ func (ec *executionContext) unmarshalInputChannelInput(ctx context.Context, obj 
 				if err != nil {
 					return nil, err
 				}
+				listMax, err := ec.unmarshalNFloat2float64(ctx, 50)
+				if err != nil {
+					return nil, err
+				}
 				if ec.directives.Constraint == nil {
 					return nil, errors.New("directive constraint is not implemented")
 				}
-				return ec.directives.Constraint(ctx, obj, directive0, min, max)
+				return ec.directives.Constraint(ctx, obj, directive0, min, max, listMax)
 			}
 
 			tmp, err := directive1(ctx)
@@ -10487,10 +10590,14 @@ func (ec *executionContext) unmarshalInputInstanceInput(ctx context.Context, obj
 				if err != nil {
 					return nil, err
 				}
+				listMax, err := ec.unmarshalNFloat2float64(ctx, 50)
+				if err != nil {
+					return nil, err
+				}
 				if ec.directives.Constraint == nil {
 					return nil, errors.New("directive constraint is not implemented")
 				}
-				return ec.directives.Constraint(ctx, obj, directive0, min, max)
+				return ec.directives.Constraint(ctx, obj, directive0, min, max, listMax)
 			}
 
 			tmp, err := directive1(ctx)
@@ -10526,10 +10633,14 @@ func (ec *executionContext) unmarshalInputInstanceInput(ctx context.Context, obj
 				if err != nil {
 					return nil, err
 				}
+				listMax, err := ec.unmarshalNFloat2float64(ctx, 50)
+				if err != nil {
+					return nil, err
+				}
 				if ec.directives.Constraint == nil {
 					return nil, errors.New("directive constraint is not implemented")
 				}
-				return ec.directives.Constraint(ctx, obj, directive0, min, max)
+				return ec.directives.Constraint(ctx, obj, directive0, min, max, listMax)
 			}
 
 			tmp, err := directive1(ctx)
@@ -10556,10 +10667,14 @@ func (ec *executionContext) unmarshalInputInstanceInput(ctx context.Context, obj
 				if err != nil {
 					return nil, err
 				}
+				listMax, err := ec.unmarshalNFloat2float64(ctx, 50)
+				if err != nil {
+					return nil, err
+				}
 				if ec.directives.Constraint == nil {
 					return nil, errors.New("directive constraint is not implemented")
 				}
-				return ec.directives.Constraint(ctx, obj, directive0, min, max)
+				return ec.directives.Constraint(ctx, obj, directive0, min, max, listMax)
 			}
 
 			tmp, err := directive1(ctx)
@@ -10726,7 +10841,7 @@ func (ec *executionContext) unmarshalInputMessageInput(ctx context.Context, obj 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"text", "channelId", "repliedMessageId"}
+	fieldsInOrder := [...]string{"text", "channelId", "repliedMessageId", "imageUrls"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -10739,7 +10854,7 @@ func (ec *executionContext) unmarshalInputMessageInput(ctx context.Context, obj 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("text"))
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
-				min, err := ec.unmarshalNFloat2float64(ctx, 1)
+				min, err := ec.unmarshalNFloat2float64(ctx, 0)
 				if err != nil {
 					return nil, err
 				}
@@ -10747,10 +10862,14 @@ func (ec *executionContext) unmarshalInputMessageInput(ctx context.Context, obj 
 				if err != nil {
 					return nil, err
 				}
+				listMax, err := ec.unmarshalNFloat2float64(ctx, 50)
+				if err != nil {
+					return nil, err
+				}
 				if ec.directives.Constraint == nil {
 					return nil, errors.New("directive constraint is not implemented")
 				}
-				return ec.directives.Constraint(ctx, obj, directive0, min, max)
+				return ec.directives.Constraint(ctx, obj, directive0, min, max, listMax)
 			}
 
 			tmp, err := directive1(ctx)
@@ -10781,6 +10900,42 @@ func (ec *executionContext) unmarshalInputMessageInput(ctx context.Context, obj 
 				return it, err
 			}
 			it.RepliedMessageID = data
+		case "imageUrls":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("imageUrls"))
+			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOString2ᚕstringᚄ(ctx, v) }
+			directive1 := func(ctx context.Context) (interface{}, error) {
+				min, err := ec.unmarshalNFloat2float64(ctx, 0)
+				if err != nil {
+					return nil, err
+				}
+				max, err := ec.unmarshalNFloat2float64(ctx, 1024)
+				if err != nil {
+					return nil, err
+				}
+				listMax, err := ec.unmarshalNFloat2float64(ctx, 4)
+				if err != nil {
+					return nil, err
+				}
+				if ec.directives.Constraint == nil {
+					return nil, errors.New("directive constraint is not implemented")
+				}
+				return ec.directives.Constraint(ctx, obj, directive0, min, max, listMax)
+			}
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.([]string); ok {
+				it.ImageUrls = data
+			} else if tmp == nil {
+				it.ImageUrls = nil
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be []string`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
 		}
 	}
 
@@ -10815,10 +10970,14 @@ func (ec *executionContext) unmarshalInputUserInput(ctx context.Context, obj int
 				if err != nil {
 					return nil, err
 				}
+				listMax, err := ec.unmarshalNFloat2float64(ctx, 50)
+				if err != nil {
+					return nil, err
+				}
 				if ec.directives.Constraint == nil {
 					return nil, errors.New("directive constraint is not implemented")
 				}
-				return ec.directives.Constraint(ctx, obj, directive0, min, max)
+				return ec.directives.Constraint(ctx, obj, directive0, min, max, listMax)
 			}
 
 			tmp, err := directive1(ctx)
@@ -10854,10 +11013,14 @@ func (ec *executionContext) unmarshalInputUserInput(ctx context.Context, obj int
 				if err != nil {
 					return nil, err
 				}
+				listMax, err := ec.unmarshalNFloat2float64(ctx, 50)
+				if err != nil {
+					return nil, err
+				}
 				if ec.directives.Constraint == nil {
 					return nil, errors.New("directive constraint is not implemented")
 				}
-				return ec.directives.Constraint(ctx, obj, directive0, min, max)
+				return ec.directives.Constraint(ctx, obj, directive0, min, max, listMax)
 			}
 
 			tmp, err := directive1(ctx)
@@ -12085,6 +12248,39 @@ func (ec *executionContext) _Message(ctx context.Context, sel ast.SelectionSet, 
 					}
 				}()
 				res = ec._Message_repliedMessage(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "imageUrls":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Message_imageUrls(ctx, field, obj)
 				return res
 			}
 

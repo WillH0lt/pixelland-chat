@@ -2,6 +2,17 @@
   <div class="flex items-end mt-2" ref="composeRef">
     <div class="flex flex-1 flex-col" v-if="appStore.verified && appStore.isLoggedIn">
       <div
+        class="flex flex-row gap-4 bg-gray-darkest p-2 ml-16"
+        v-if="messageStore.getComposeImage(channelId)"
+      >
+        <img class="w-20 h-20" :src="messageStore.getComposeImage(channelId)" />
+        <img
+          class="ml-auto w-2.5 h-2.5 cursor-pointer hover:scale-110 pixelated transition"
+          src="/img/x.png"
+          @click="messageStore.clearComposeImage(channelId)"
+        />
+      </div>
+      <div
         class="flex flex-row gap-4 items-center bg-gray-darkest px-2 py-1 ml-16"
         v-if="messageStore.getReplyingTo(channelId)"
       >
@@ -24,7 +35,7 @@
           @click="emitter.emit('chat:user:edit')"
         />
         <ElementTextArea
-          class="text-xl pr-8 text-black bg-gray-light placeholder:text-gray-dark"
+          class="text-xl pr-16 text-black bg-gray-light placeholder:text-gray-dark"
           :placeholder="messagePlaceholder"
           placeholder-color="error"
           v-model:text="text"
@@ -51,6 +62,12 @@
         to join chat.
       </div>
     </div>
+    <img
+      class="h-6 pixelated -mr-6 mb-2 -translate-x-16 opacity-40 grayscale hover:scale-105 hover:opacity-80 cursor-pointer hover:grayscale-0 transition"
+      v-if="canPublish"
+      @click="emitter.emit('chat:image:request')"
+      src="/img/camera.png"
+    />
     <img
       v-if="canPublish"
       class="h-6 pixelated -mr-6 mb-2 -translate-x-8 opacity-80 grayscale hover:scale-105 cursor-pointer hover:grayscale-0 transition"
@@ -168,7 +185,8 @@ async function submit() {
   }
 
   // don't allow publishing just spaces
-  if (!text.value.replace(' ', '').length) {
+  const imageUrl = messageStore.getComposeImage(props.channelId)
+  if (!text.value.replace(' ', '').length && !imageUrl) {
     return
   }
 
@@ -189,10 +207,12 @@ async function submit() {
     text: publishableText,
     channelId: props.channelId,
     repliedMessageId: messageStore.getReplyingTo(props.channelId)?.id,
+    imageUrls: imageUrl ? [imageUrl] : [],
   })
   editable.value = true
 
   messageStore.clearReplyingTo(props.channelId)
+  messageStore.clearComposeImage(props.channelId)
 
   emit('send')
 }

@@ -9,13 +9,25 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
-func ConstraintDirective(ctx context.Context, obj interface{}, next graphql.Resolver, min float64, max float64) (interface{}, error) {
+func ConstraintDirective(ctx context.Context, obj interface{}, next graphql.Resolver, min float64, max float64, listMax float64) (interface{}, error) {
 
 	args := obj.(map[string]interface{})
 	fieldName := *graphql.GetPathContext(ctx).Field
 	val := args[fieldName]
 
 	switch val.(type) {
+	case []interface{}:
+		l := val.([]interface{})
+		if len(l) > int(listMax) {
+			return nil, fmt.Errorf("list length out of range")
+		}
+		for _, v := range l {
+			s := v.(string)
+			count := utf8.RuneCountInString(s)
+			if count < int(min) || count > int(max) {
+				return nil, fmt.Errorf("text length out of range")
+			}
+		}
 	case int64, int32, int16, int8, int:
 		i := val.(int64)
 		if i < int64(min) || i > int64(max) {

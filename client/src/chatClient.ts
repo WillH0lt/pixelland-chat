@@ -64,4 +64,8 @@ export class ChatClient {
   setToken(setTokenRequest: SetTokenRequest) {
     this.send('chat:token:set', setTokenRequest)
   }
+
+  addImage(url: string) {
+    this.send('chat:image:add', { url })
+  }
 }

@@ -47,7 +47,7 @@ type ResolverRoot interface {
 
 type DirectiveRoot struct {
 	Auth       func(ctx context.Context, obj interface{}, next graphql.Resolver, accessLevel string) (res interface{}, err error)
-	Constraint func(ctx context.Context, obj interface{}, next graphql.Resolver, min float64, max float64) (res interface{}, err error)
+	Constraint func(ctx context.Context, obj interface{}, next graphql.Resolver, min float64, max float64, listMax float64) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -171,6 +171,7 @@ type ComplexityRoot struct {
 		ChannelID      func(childComplexity int) int
 		CreatedAt      func(childComplexity int) int
 		ID             func(childComplexity int) int
+		ImageUrls      func(childComplexity int) int
 		RepliedMessage func(childComplexity int) int
 		Text           func(childComplexity int) int
 	}
@@ -850,6 +851,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Message.ID(childComplexity), true
+
+	case "Message.imageUrls":
+		if e.complexity.Message.ImageUrls == nil {
+			break
+		}
+
+		return e.complexity.Message.ImageUrls(childComplexity), true
 
 	case "Message.repliedMessage":
 		if e.complexity.Message.RepliedMessage == nil {
@@ -1803,6 +1811,7 @@ type Message {
   createdAt: Time!
   channelId: Uuid!
   repliedMessage: Message
+  imageUrls: [String!]
 }
 
 type Badge {
@@ -2046,9 +2055,10 @@ input ChannelReorderInput {
 }
 
 input MessageInput {
-  text: String! @constraint(min: 1, max: 1024)
+  text: String! @constraint(min: 0, max: 1024)
   channelId: Uuid!
   repliedMessageId: Uuid
+  imageUrls: [String!] @constraint(min: 0, max: 1024, listMax: 4)
 }
 
 input UserInput {
@@ -2116,6 +2126,7 @@ scalar Uuid
 directive @constraint(
   min: Float! = 0
   max: Float! = 50
+  listMax: Float! = 50
 ) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
 directive @auth(accessLevel: String!) on FIELD_DEFINITION

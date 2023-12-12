@@ -25,14 +25,16 @@
 <script setup lang="ts">
 import { Chatty } from '@looker/chatty'
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import { emitter } from '@/Emitter'
 import ElementDialog from '@/components/ElementDialog.vue'
 import InstanceView from '@/components/InstanceView.vue'
 import { useAppStore } from '@/store/app'
+import { useChannelStore } from '@/store/channel'
 import { useDialogStore } from '@/store/dialog'
 import { useInstanceStore } from '@/store/instance'
+import { useMessageStore } from '@/store/message'
 import { useNotificationStore } from '@/store/notification'
 import { useUnreadStore } from '@/store/unread'
 import { useUserStore } from '@/store/user'
@@ -43,13 +45,15 @@ import {
   SetVisibilityRequest,
   ViewInviteRequest,
 } from '@/types/HostRequestTypes'
+import { MODE } from '@/types/ModeEnum'
 
-import { MODE } from './types/ModeEnum'
-
+const route = useRoute()
 const router = useRouter()
 const appStore = useAppStore()
+const channelStore = useChannelStore()
 const dialogStore = useDialogStore()
 const instanceStore = useInstanceStore()
+const messageStore = useMessageStore()
 const notificationStore = useNotificationStore()
 const unreadStore = useUnreadStore()
 const userStore = useUserStore()
@@ -120,6 +124,19 @@ onMounted(async () => {
           appStore.verified = setTokenRequest.verified
         }
       })
+      .on('chat:image:add', (payload: { url: string }) => {
+        let activeChannelId: string | undefined
+        if (route.params.channelId) {
+          activeChannelId = route.params.channelId as string
+        } else {
+          const instanceId = instanceStore.instance.id
+          const commentsChannel = channelStore.getCommentsChannel(instanceId)
+          activeChannelId = commentsChannel?.id
+        }
+        if (activeChannelId) {
+          messageStore.setComposeImage(activeChannelId, payload.url)
+        }
+      })
       .build()
       .connect()
       .catch(console.error)
@@ -132,6 +149,7 @@ onMounted(async () => {
     emitter.on('chat:login:request', () => host?.send('chat:login:request'))
     emitter.on('chat:verify:request', () => host?.send('chat:verify:request'))
     emitter.on('chat:user:edit', () => host?.send('chat:user:edit'))
+    emitter.on('chat:image:request', () => host?.send('chat:image:request'))
 
     watch(hasUnreadMessages, () => {
       host?.send('chat:messages:unread', { hasUnread: hasUnreadMessages.value })

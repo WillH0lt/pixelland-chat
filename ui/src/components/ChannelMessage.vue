@@ -38,6 +38,15 @@
         }"
         :text="message.text"
       />
+      <div v-if="message.imageUrls">
+        <div class="flex flex-row gap-2 mt-2">
+          <img
+            v-for="imageUrl in message.imageUrls"
+            class="h-28 w-28 mb-2 cursor-pointer"
+            :src="imageUrl"
+          />
+        </div>
+      </div>
       <div v-if="message.error">
         <div class="text-error text-sm">{{ message.error }}</div>
       </div>

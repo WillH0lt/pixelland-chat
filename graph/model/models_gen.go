@@ -121,6 +121,7 @@ type MessageInput struct {
 	Text             string     `json:"text"`
 	ChannelID        uuid.UUID  `json:"channelId"`
 	RepliedMessageID *uuid.UUID `json:"repliedMessageId,omitempty"`
+	ImageUrls        []string   `json:"imageUrls,omitempty"`
 }
 
 type Notice struct {

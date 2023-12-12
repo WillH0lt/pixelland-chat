@@ -82,6 +82,7 @@ type Message {
   createdAt: Time!
   channelId: Uuid!
   repliedMessage: Message
+  imageUrls: [String!]
 }
 
 type Badge {
@@ -325,9 +326,10 @@ input ChannelReorderInput {
 }
 
 input MessageInput {
-  text: String! @constraint(min: 1, max: 1024)
+  text: String! @constraint(min: 0, max: 1024)
   channelId: Uuid!
   repliedMessageId: Uuid
+  imageUrls: [String!] @constraint(min: 0, max: 1024, listMax: 4)
 }
 
 input UserInput {
@@ -395,6 +397,7 @@ scalar Uuid
 directive @constraint(
   min: Float! = 0
   max: Float! = 50
+  listMax: Float! = 50
 ) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
 directive @auth(accessLevel: String!) on FIELD_DEFINITION

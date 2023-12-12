@@ -65,7 +65,6 @@ function onInput(event: Event) {
 async function updateTextareaHeight() {
   await nextTick()
   const contentHeight = calculateContentHeight(textareaRef.value, 28)
-  console.log(contentHeight)
   textareaRef.value.style.height = contentHeight + 'px'
 }
 

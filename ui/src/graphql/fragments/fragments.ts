@@ -74,6 +74,7 @@ export const MessageFragment = gql`
       createdAt
       channelId
     }
+    imageUrls
   }
   ${AuthorFragment}
 `
