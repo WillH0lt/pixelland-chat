@@ -92,6 +92,7 @@ type InstanceUser struct {
 	LikedByMe  bool           `json:"likedByMe"`
 	LikedAt    *time.Time     `json:"likedAt"`
 	BanReason  *string        `json:"banReason"`
+	BannedAt   *time.Time     `json:"bannedAt"`
 }
 
 type Invite struct {

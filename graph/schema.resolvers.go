@@ -832,8 +832,7 @@ func (r *mutationResolver) AddMessage(ctx context.Context, input model.MessageIn
 
 	message := model.Message{}
 	copier.Copy(&message, input)
-	// message.Text = input.Text
-	// message.RepliedMessageID = input.RepliedMessageID
+	message.RepliedMessageID = input.RepliedMessageID
 	message.AuthorID = callerInstanceUser.ID
 	message.Author = callerInstanceUser
 
@@ -1006,6 +1005,12 @@ func (r *mutationResolver) AddRole(ctx context.Context, authorID uuid.UUID, role
 	// if adding moderator, make sure they are also a member
 	if role == model.RoleModerator && !contains(instanceUser.Roles, model.RoleMember.String()) {
 		instanceUser.Roles = append(instanceUser.Roles, model.RoleMember.String())
+	}
+
+	// record the time they were banned
+	if role == model.RoleBanned {
+		now := time.Now()
+		instanceUser.BannedAt = &now
 	}
 
 	if err := db.Save(&instanceUser).Error; err != nil {
