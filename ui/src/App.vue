@@ -160,7 +160,7 @@ onMounted(async () => {
   } else {
     const token = 'JenRxFv73kScEjTx4t0iH6l0ZdB3'
     await connectUser({
-      name: 'SJDKLFJSDF*J lksdj',
+      name: 'Person',
       bio: `just a person`,
       avatar: 'https://avatars.dicebear.com/api/human/123.svg',
       token: token,

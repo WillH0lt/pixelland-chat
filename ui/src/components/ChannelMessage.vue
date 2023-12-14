@@ -42,8 +42,9 @@
         <div class="flex flex-row gap-2 mt-2">
           <img
             v-for="imageUrl in message.imageUrls"
-            class="h-28 w-28 mb-2 cursor-pointer"
+            class="h-28 w-28 mb-2 cursor-pointer hover:scale-105 transition-all"
             :src="imageUrl"
+            @click="showZoomedImage(imageUrl)"
           />
         </div>
       </div>
@@ -85,8 +86,10 @@ import { DropdownItem } from '@/types/DropdownItem'
 import { ExtendedAuthor } from '@/types/ExtendedAuthor'
 import { ExtendedMessage } from '@/types/ExtendedMessage'
 import { SIDE } from '@/types/SideEnum'
+import { useDialogStore } from '@/store/dialog'
 
 const appStore = useAppStore()
+const dialogStore = useDialogStore()
 
 const props = defineProps<{
   message: ExtendedMessage
@@ -101,6 +104,14 @@ defineEmits<{
 const authorStore = useAuthorStore()
 const dropdownOpen = ref(false)
 const messageStore = useMessageStore()
+
+function showZoomedImage(url: string) {
+  dialogStore.showDialog({
+    title: 'Zoomed Image',
+    text: `Taken by <span class="underline">${props.user.name}</span>`,
+    imageUrl: url,
+  })
+}
 
 const dropdownItems = computed(() => {
   const items: DropdownItem[] = [

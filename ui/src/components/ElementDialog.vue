@@ -13,6 +13,7 @@
       <div class="text-5xl" v-html="props.options.title" />
       <div class="text-3xl mt-3" v-html="props.options.text" />
       <div class="text-xl mt-3" v-html="props.options.subtext" />
+      <img class="my-6 w-80 h-80 ring-accent ring-8" v-if="props.options.imageUrl" :src="props.options.imageUrl" alt="Screenshot">
       <div v-if="props.options.showTextInput">
         <textarea
           class="w-[50dvw] text-2xl resize-none mt-3 border border-gray-medium focus:border-white placeholder:text-gray-medium text-white outline-none bg-transparent transition-colors duration-300 px-2 p-1"
