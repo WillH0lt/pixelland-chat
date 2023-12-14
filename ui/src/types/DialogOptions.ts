@@ -21,6 +21,7 @@ export interface DialogOptions {
   title: string
   text: string
   subtext: string
+  imageUrl?: string
   buttons: DialogButton[]
   animateText: boolean
   showTextInput?: boolean

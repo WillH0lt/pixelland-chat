@@ -20,7 +20,7 @@ const props = defineProps<{
 }>()
 
 function rainbowNice(str: string) {
-  const pattern = new RegExp(`\(nice)\(?![\w-])`, 'ig')
+  const pattern = new RegExp(`\(nice)\(?![\\w-])`, 'ig')
   const formatted = str.replace(pattern, v => `<span class="rainbow">${v}</span>`)
 
   return formatted
