@@ -42,7 +42,7 @@
         <div class="flex flex-row gap-2 mt-2">
           <img
             v-for="imageUrl in message.imageUrls"
-            class="h-28 w-28 mb-2 cursor-pointer hover:scale-105 transition-all"
+            class="h-28 w-28 mb-2 cursor-pointer hover:scale-105 transition"
             :src="imageUrl"
             @click="showZoomedImage(imageUrl)"
           />
@@ -81,12 +81,12 @@ import ElementDropdown from '@/components/ElementDropdown.vue'
 import { Maybe, Message, Role } from '@/graphql/types.gen'
 import { useAppStore } from '@/store/app'
 import { useAuthorStore } from '@/store/author'
+import { useDialogStore } from '@/store/dialog'
 import { useMessageStore } from '@/store/message'
 import { DropdownItem } from '@/types/DropdownItem'
 import { ExtendedAuthor } from '@/types/ExtendedAuthor'
 import { ExtendedMessage } from '@/types/ExtendedMessage'
 import { SIDE } from '@/types/SideEnum'
-import { useDialogStore } from '@/store/dialog'
 
 const appStore = useAppStore()
 const dialogStore = useDialogStore()
@@ -107,8 +107,7 @@ const messageStore = useMessageStore()
 
 function showZoomedImage(url: string) {
   dialogStore.showDialog({
-    title: 'Zoomed Image',
-    text: `Taken by <span class="underline">${props.user.name}</span>`,
+    text: props.message.text,
     imageUrl: url,
   })
 }
