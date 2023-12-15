@@ -496,18 +496,22 @@ func (r *mutationResolver) RemoveInstance(ctx context.Context, instanceID uuid.U
 	db := interfaces.GetDatabase()
 
 	instance := model.Instance{}
-	instance.ID = instanceID
+
+	if err := db.Preload("Author").First(&instance, instanceID).Error; err != nil {
+		return nil, err
+	}
+
 	if err := db.Delete(&instance, instance).Error; err != nil {
 		return nil, err
 	}
 
-	// if err := db.Delete(&model.InstanceUser{}, "instance_id = ?", instanceID).Error; err != nil {
-	// 	return nil, err
-	// }
+	if err := db.Delete(&model.InstanceUser{}, "instance_id = ?", instanceID).Error; err != nil {
+		return nil, err
+	}
 
-	// if err := db.Delete(&model.Invite{}, "instance_id = ?", instanceID).Error; err != nil {
-	// 	return nil, err
-	// }
+	if err := db.Delete(&model.Invite{}, "instance_id = ?", instanceID).Error; err != nil {
+		return nil, err
+	}
 
 	if err := db.Delete(&model.Notification{}, "instance_id = ?", instanceID).Error; err != nil {
 		return nil, err
