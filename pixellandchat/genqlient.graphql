@@ -273,6 +273,12 @@ query User(
   }
 }
 
+query InstanceUserListByIds($instanceId: Uuid!, $instanceUserIds: [Uuid!]!) {
+  instanceUserListByIds(instanceId: $instanceId, instanceUserIds: $instanceUserIds) {
+    ...AuthorFragment
+  }
+}
+
 # ====================
 # mutations
 

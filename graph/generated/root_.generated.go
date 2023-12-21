@@ -233,14 +233,15 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Author      func(childComplexity int, id uuid.UUID) int
-		Badges      func(childComplexity int, first int, after string) int
-		Channel     func(childComplexity int, id uuid.UUID) int
-		CheckInvite func(childComplexity int, code string) int
-		Instance    func(childComplexity int, id uuid.UUID) int
-		Invite      func(childComplexity int, instanceID uuid.UUID) int
-		User        func(childComplexity int) int
-		UserBadges  func(childComplexity int, userID uuid.UUID, first int, after string) int
+		Author                func(childComplexity int, id uuid.UUID) int
+		Badges                func(childComplexity int, first int, after string) int
+		Channel               func(childComplexity int, id uuid.UUID) int
+		CheckInvite           func(childComplexity int, code string) int
+		Instance              func(childComplexity int, id uuid.UUID) int
+		InstanceUserListByIds func(childComplexity int, instanceID uuid.UUID, instanceUserIds []uuid.UUID) int
+		Invite                func(childComplexity int, instanceID uuid.UUID) int
+		User                  func(childComplexity int) int
+		UserBadges            func(childComplexity int, userID uuid.UUID, first int, after string) int
 	}
 
 	Subscription struct {
@@ -1361,6 +1362,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Instance(childComplexity, args["id"].(uuid.UUID)), true
 
+	case "Query.instanceUserListByIds":
+		if e.complexity.Query.InstanceUserListByIds == nil {
+			break
+		}
+
+		args, err := ec.field_Query_instanceUserListByIds_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.InstanceUserListByIds(childComplexity, args["instanceId"].(uuid.UUID), args["instanceUserIds"].([]uuid.UUID)), true
+
 	case "Query.invite":
 		if e.complexity.Query.Invite == nil {
 			break
@@ -1974,6 +1987,10 @@ type Query {
   ): UserBadgesConnection! @auth(accessLevel: "guest")
   badges(first: Int! = 0 @constraint(max: 50), after: String! = ""): AppBadgesConnection!
     @auth(accessLevel: "admin")
+  instanceUserListByIds(
+    instanceId: Uuid!
+    instanceUserIds: [Uuid!]! @constraint(listMax: 100)
+  ): [Author!]! @auth(accessLevel: "guest")
 }
 
 type Mutation {

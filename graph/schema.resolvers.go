@@ -1670,6 +1670,23 @@ func (r *queryResolver) Badges(ctx context.Context, first int, after string) (*m
 	}, nil
 }
 
+// InstanceUserListByIds is the resolver for the instanceUserListByIds field.
+func (r *queryResolver) InstanceUserListByIds(ctx context.Context, instanceID uuid.UUID, instanceUserIds []uuid.UUID) ([]*model.Author, error) {
+	db := interfaces.GetDatabase()
+	instanceUsers := []model.InstanceUser{}
+
+	if err := db.Where("instance_id = ? AND id IN (?)", instanceID, instanceUserIds).Find(&instanceUsers).Error; err != nil {
+		return nil, err
+	}
+
+	authors := []*model.Author{}
+	for _, instanceUser := range instanceUsers {
+		authors = append(authors, instanceUserToAuthor(&instanceUser))
+	}
+
+	return authors, nil
+}
+
 // Stream is the resolver for the stream field.
 func (r *subscriptionResolver) Stream(ctx context.Context, instanceID uuid.UUID) (<-chan *model.Notice, error) {
 	callerInstanceUser, err := getCallerInstanceUser(ctx, instanceID)

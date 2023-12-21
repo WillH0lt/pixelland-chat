@@ -2444,6 +2444,126 @@ type InstanceResponse struct {
 // GetInstance returns InstanceResponse.Instance, and is useful for accessing the field via an interface.
 func (v *InstanceResponse) GetInstance() InstanceInstanceUserInstancesEdge { return v.Instance }
 
+// InstanceUserListByIdsInstanceUserListByIdsAuthor includes the requested fields of the GraphQL type Author.
+type InstanceUserListByIdsInstanceUserListByIdsAuthor struct {
+	AuthorFragment `json:"-"`
+}
+
+// GetId returns InstanceUserListByIdsInstanceUserListByIdsAuthor.Id, and is useful for accessing the field via an interface.
+func (v *InstanceUserListByIdsInstanceUserListByIdsAuthor) GetId() uuid.UUID {
+	return v.AuthorFragment.Id
+}
+
+// GetUserId returns InstanceUserListByIdsInstanceUserListByIdsAuthor.UserId, and is useful for accessing the field via an interface.
+func (v *InstanceUserListByIdsInstanceUserListByIdsAuthor) GetUserId() uuid.UUID {
+	return v.AuthorFragment.UserId
+}
+
+// GetInstanceId returns InstanceUserListByIdsInstanceUserListByIdsAuthor.InstanceId, and is useful for accessing the field via an interface.
+func (v *InstanceUserListByIdsInstanceUserListByIdsAuthor) GetInstanceId() uuid.UUID {
+	return v.AuthorFragment.InstanceId
+}
+
+// GetName returns InstanceUserListByIdsInstanceUserListByIdsAuthor.Name, and is useful for accessing the field via an interface.
+func (v *InstanceUserListByIdsInstanceUserListByIdsAuthor) GetName() string {
+	return v.AuthorFragment.Name
+}
+
+// GetAvatar returns InstanceUserListByIdsInstanceUserListByIdsAuthor.Avatar, and is useful for accessing the field via an interface.
+func (v *InstanceUserListByIdsInstanceUserListByIdsAuthor) GetAvatar() string {
+	return v.AuthorFragment.Avatar
+}
+
+// GetBio returns InstanceUserListByIdsInstanceUserListByIdsAuthor.Bio, and is useful for accessing the field via an interface.
+func (v *InstanceUserListByIdsInstanceUserListByIdsAuthor) GetBio() string {
+	return v.AuthorFragment.Bio
+}
+
+// GetRoles returns InstanceUserListByIdsInstanceUserListByIdsAuthor.Roles, and is useful for accessing the field via an interface.
+func (v *InstanceUserListByIdsInstanceUserListByIdsAuthor) GetRoles() []Role {
+	return v.AuthorFragment.Roles
+}
+
+// GetCreatedAt returns InstanceUserListByIdsInstanceUserListByIdsAuthor.CreatedAt, and is useful for accessing the field via an interface.
+func (v *InstanceUserListByIdsInstanceUserListByIdsAuthor) GetCreatedAt() time.Time {
+	return v.AuthorFragment.CreatedAt
+}
+
+func (v *InstanceUserListByIdsInstanceUserListByIdsAuthor) UnmarshalJSON(b []byte) error {
+
+	if string(b) == "null" {
+		return nil
+	}
+
+	var firstPass struct {
+		*InstanceUserListByIdsInstanceUserListByIdsAuthor
+		graphql.NoUnmarshalJSON
+	}
+	firstPass.InstanceUserListByIdsInstanceUserListByIdsAuthor = v
+
+	err := json.Unmarshal(b, &firstPass)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(
+		b, &v.AuthorFragment)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type __premarshalInstanceUserListByIdsInstanceUserListByIdsAuthor struct {
+	Id uuid.UUID `json:"id"`
+
+	UserId uuid.UUID `json:"userId"`
+
+	InstanceId uuid.UUID `json:"instanceId"`
+
+	Name string `json:"name"`
+
+	Avatar string `json:"avatar"`
+
+	Bio string `json:"bio"`
+
+	Roles []Role `json:"roles"`
+
+	CreatedAt time.Time `json:"createdAt"`
+}
+
+func (v *InstanceUserListByIdsInstanceUserListByIdsAuthor) MarshalJSON() ([]byte, error) {
+	premarshaled, err := v.__premarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(premarshaled)
+}
+
+func (v *InstanceUserListByIdsInstanceUserListByIdsAuthor) __premarshalJSON() (*__premarshalInstanceUserListByIdsInstanceUserListByIdsAuthor, error) {
+	var retval __premarshalInstanceUserListByIdsInstanceUserListByIdsAuthor
+
+	retval.Id = v.AuthorFragment.Id
+	retval.UserId = v.AuthorFragment.UserId
+	retval.InstanceId = v.AuthorFragment.InstanceId
+	retval.Name = v.AuthorFragment.Name
+	retval.Avatar = v.AuthorFragment.Avatar
+	retval.Bio = v.AuthorFragment.Bio
+	retval.Roles = v.AuthorFragment.Roles
+	retval.CreatedAt = v.AuthorFragment.CreatedAt
+	return &retval, nil
+}
+
+// InstanceUserListByIdsResponse is returned by InstanceUserListByIds on success.
+type InstanceUserListByIdsResponse struct {
+	InstanceUserListByIds []InstanceUserListByIdsInstanceUserListByIdsAuthor `json:"instanceUserListByIds"`
+}
+
+// GetInstanceUserListByIds returns InstanceUserListByIdsResponse.InstanceUserListByIds, and is useful for accessing the field via an interface.
+func (v *InstanceUserListByIdsResponse) GetInstanceUserListByIds() []InstanceUserListByIdsInstanceUserListByIdsAuthor {
+	return v.InstanceUserListByIds
+}
+
 // InviteFragment includes the GraphQL fields of Invite requested by the fragment InviteFragment.
 type InviteFragment struct {
 	Id          uuid.UUID            `json:"id"`
@@ -5408,6 +5528,18 @@ func (v *__InstanceInput) GetMessagesLast() int { return v.MessagesLast }
 // GetMessagesBefore returns __InstanceInput.MessagesBefore, and is useful for accessing the field via an interface.
 func (v *__InstanceInput) GetMessagesBefore() string { return v.MessagesBefore }
 
+// __InstanceUserListByIdsInput is used internally by genqlient
+type __InstanceUserListByIdsInput struct {
+	InstanceId      uuid.UUID   `json:"instanceId"`
+	InstanceUserIds []uuid.UUID `json:"instanceUserIds"`
+}
+
+// GetInstanceId returns __InstanceUserListByIdsInput.InstanceId, and is useful for accessing the field via an interface.
+func (v *__InstanceUserListByIdsInput) GetInstanceId() uuid.UUID { return v.InstanceId }
+
+// GetInstanceUserIds returns __InstanceUserListByIdsInput.InstanceUserIds, and is useful for accessing the field via an interface.
+func (v *__InstanceUserListByIdsInput) GetInstanceUserIds() []uuid.UUID { return v.InstanceUserIds }
+
 // __InviteInput is used internally by genqlient
 type __InviteInput struct {
 	InstanceId uuid.UUID `json:"instanceId"`
@@ -6753,6 +6885,50 @@ fragment MessageFragment on Message {
 	var err error
 
 	var data InstanceResponse
+	resp := &graphql.Response{Data: &data}
+
+	err = client.MakeRequest(
+		ctx,
+		req,
+		resp,
+	)
+
+	return &data, err
+}
+
+func InstanceUserListByIds(
+	ctx context.Context,
+	client graphql.Client,
+	instanceId uuid.UUID,
+	instanceUserIds []uuid.UUID,
+) (*InstanceUserListByIdsResponse, error) {
+	req := &graphql.Request{
+		OpName: "InstanceUserListByIds",
+		Query: `
+query InstanceUserListByIds ($instanceId: Uuid!, $instanceUserIds: [Uuid!]!) {
+	instanceUserListByIds(instanceId: $instanceId, instanceUserIds: $instanceUserIds) {
+		... AuthorFragment
+	}
+}
+fragment AuthorFragment on Author {
+	id
+	userId
+	instanceId
+	name
+	avatar
+	bio
+	roles
+	createdAt
+}
+`,
+		Variables: &__InstanceUserListByIdsInput{
+			InstanceId:      instanceId,
+			InstanceUserIds: instanceUserIds,
+		},
+	}
+	var err error
+
+	var data InstanceUserListByIdsResponse
 	resp := &graphql.Response{Data: &data}
 
 	err = client.MakeRequest(

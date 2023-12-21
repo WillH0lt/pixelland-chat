@@ -245,6 +245,10 @@ type Query {
   ): UserBadgesConnection! @auth(accessLevel: "guest")
   badges(first: Int! = 0 @constraint(max: 50), after: String! = ""): AppBadgesConnection!
     @auth(accessLevel: "admin")
+  instanceUserListByIds(
+    instanceId: Uuid!
+    instanceUserIds: [Uuid!]! @constraint(listMax: 100)
+  ): [Author!]! @auth(accessLevel: "guest")
 }
 
 type Mutation {
