@@ -180,6 +180,7 @@ func (c *PubsubClient) publishPubsubEvent(ctx context.Context, kind string, inst
 
 	_, err = res.Get(ctx)
 	if err != nil {
+		log.Err(err).Msg("Failed to publish pubsub event")
 		return err
 	}
 
