@@ -14,6 +14,7 @@ import (
 	pixellandchat "github.com/wwwillw/pixelland-chat/pixellandchat"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/compute/v1"
+	"google.golang.org/api/option"
 )
 
 var pubsubClient *PubsubClient
@@ -50,35 +51,42 @@ func InitPubSubClient(ctx context.Context, config PubsubConfig) error {
 		return nil
 	}
 
-	projectId := config.PubsubProjectId
-	if projectId == "" {
-		var credentials *google.Credentials
-		log.Info().Msgf("No project id specified, attempting to use service account file: %s", config.ServiceAccountPath)
-		if _, err := os.Stat(config.ServiceAccountPath); err == nil {
-			log.Info().Msgf("service account file found: " + config.ServiceAccountPath)
-			bytes, err := os.ReadFile(config.ServiceAccountPath)
-			if err != nil {
-				return err
-			}
-
-			credentials, err = google.CredentialsFromJSON(ctx, bytes, compute.ComputeScope)
-			if err != nil {
-				return err
-			}
-		} else if errors.Is(err, os.ErrNotExist) {
-			log.Info().Msg("Couldnt find service account, using default credentials")
-			credentials, err = google.FindDefaultCredentials(ctx, compute.ComputeScope)
-			if err != nil {
-				return err
-			}
-		} else {
+	if config.PubsubProjectId != "" {
+		log.Info().Msgf("Initializing pubsub client for project %s", config.PubsubProjectId)
+		client, err := pubsub.NewClient(ctx, config.PubsubProjectId)
+		if err != nil {
 			return err
 		}
-		projectId = credentials.ProjectID
+		pubsubClient.client = client
+		return nil
 	}
 
-	log.Info().Msgf("Initializing pubsub client for project %s", projectId)
-	client, err := pubsub.NewClient(ctx, projectId)
+	var credentials *google.Credentials
+	log.Info().Msgf("No project id specified, attempting to use service account file: %s", config.ServiceAccountPath)
+	if _, err := os.Stat(config.ServiceAccountPath); err == nil {
+		log.Info().Msgf("service account file found: " + config.ServiceAccountPath)
+		bytes, err := os.ReadFile(config.ServiceAccountPath)
+		if err != nil {
+			return err
+		}
+
+		credentials, err = google.CredentialsFromJSON(ctx, bytes, compute.ComputeScope)
+		if err != nil {
+			return err
+		}
+	} else if errors.Is(err, os.ErrNotExist) {
+		log.Info().Msg("Couldnt find service account, using default credentials")
+		credentials, err = google.FindDefaultCredentials(ctx, compute.ComputeScope)
+		if err != nil {
+			return err
+		}
+	} else {
+		return err
+	}
+
+	log.Info().Msgf("Initializing pubsub client for project %s", credentials.ProjectID)
+
+	client, err := pubsub.NewClient(ctx, credentials.ProjectID, option.WithCredentials(credentials))
 	if err != nil {
 		return err
 	}
