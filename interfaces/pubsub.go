@@ -53,7 +53,9 @@ func InitPubSubClient(ctx context.Context, config PubsubConfig) error {
 	projectId := config.PubsubProjectId
 	if projectId == "" {
 		var credentials *google.Credentials
+		log.Info().Msgf("No project id specified, attempting to use service account file: %s", config.ServiceAccountPath)
 		if _, err := os.Stat(config.ServiceAccountPath); err == nil {
+			log.Info().Msgf("service account file found: " + config.ServiceAccountPath)
 			bytes, err := os.ReadFile(config.ServiceAccountPath)
 			if err != nil {
 				return err
@@ -64,6 +66,7 @@ func InitPubSubClient(ctx context.Context, config PubsubConfig) error {
 				return err
 			}
 		} else if errors.Is(err, os.ErrNotExist) {
+			log.Info().Msg("Couldnt find service account, using default credentials")
 			credentials, err = google.FindDefaultCredentials(ctx, compute.ComputeScope)
 			if err != nil {
 				return err
