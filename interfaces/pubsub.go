@@ -13,7 +13,6 @@ import (
 	"github.com/wwwillw/pixelland-chat/graph/model"
 	pixellandchat "github.com/wwwillw/pixelland-chat/pixellandchat"
 	"golang.org/x/oauth2/google"
-	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/option"
 )
 
@@ -70,13 +69,13 @@ func InitPubSubClient(ctx context.Context, config PubsubConfig) error {
 			return err
 		}
 
-		credentials, err = google.CredentialsFromJSON(ctx, bytes, compute.ComputeScope)
+		credentials, err = google.CredentialsFromJSON(ctx, bytes)
 		if err != nil {
 			return err
 		}
 	} else if errors.Is(err, os.ErrNotExist) {
 		log.Info().Msg("Couldnt find service account, using default credentials")
-		credentials, err = google.FindDefaultCredentials(ctx, compute.ComputeScope)
+		credentials, err = google.FindDefaultCredentials(ctx)
 		if err != nil {
 			return err
 		}
