@@ -476,7 +476,10 @@ func (r *mutationResolver) UpdateInstance(ctx context.Context, instanceID uuid.U
 	client := interfaces.GetPubSubClient()
 	instanceFragment := pixellandchat.InstanceFragment{}
 	copier.Copy(&instanceFragment, instance)
-	client.PublishInstanceEvent(ctx, model.NoticeKindInstanceUpdated, instanceFragment)
+
+	if err := client.PublishInstanceEvent(ctx, model.NoticeKindInstanceUpdated, instanceFragment); err != nil {
+		log.Error().Err(err).Msg("failed to publish instance event")
+	}
 
 	edge := createUserInstancesEdge(callerInstanceUser, &instance)
 	return edge, nil
