@@ -69,7 +69,7 @@ func InitPubSubClient(ctx context.Context, config PubsubConfig) error {
 			return err
 		}
 
-		credentials, err = google.CredentialsFromJSON(ctx, bytes)
+		credentials, err = google.CredentialsFromJSON(ctx, bytes, pubsub.ScopePubSub)
 		if err != nil {
 			return err
 		}
