@@ -203,7 +203,7 @@ func getTopic(ctx context.Context, client *pubsub.Client, name string) (*pubsub.
 
 	ok, err := topic.Exists(ctx)
 	if err != nil {
-		log.Err(err)
+		log.Err(err).Msg("Failed to check if topic exists")
 		return nil, err
 	}
 	if ok {
