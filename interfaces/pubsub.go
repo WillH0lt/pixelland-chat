@@ -149,7 +149,7 @@ func (c *PubsubClient) publishPubsubEvent(ctx context.Context, kind string, inst
 		return errors.New("Invalid mutation type")
 	}
 
-	topic, err := getTopic(ctx, c.client, topicName, !c.config.IsProd)
+	topic, err := getTopic(ctx, c.client, topicName)
 	if err != nil {
 		return err
 	}
@@ -186,23 +186,21 @@ func (c *PubsubClient) publishPubsubEvent(ctx context.Context, kind string, inst
 	return nil
 }
 
-func getTopic(ctx context.Context, client *pubsub.Client, name string, createIfNotExists bool) (*pubsub.Topic, error) {
+func getTopic(ctx context.Context, client *pubsub.Client, name string) (*pubsub.Topic, error) {
 	topic := client.Topic(name)
 
-	if createIfNotExists {
-		ok, err := topic.Exists(ctx)
-		if err != nil {
-			log.Err(err)
-			return nil, err
-		}
-		if ok {
-			return topic, nil
-		}
-		topic, err = client.CreateTopic(ctx, name)
-		if err != nil {
-			log.Err(err).Msg("Failed to create the topic")
-			return nil, err
-		}
+	ok, err := topic.Exists(ctx)
+	if err != nil {
+		log.Err(err)
+		return nil, err
+	}
+	if ok {
+		return topic, nil
+	}
+	topic, err = client.CreateTopic(ctx, name)
+	if err != nil {
+		log.Err(err).Msg("Failed to create the topic")
+		return nil, err
 	}
 	return topic, nil
 }

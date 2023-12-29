@@ -459,6 +459,7 @@ export type Query = {
   readonly channel: Channel;
   readonly checkInvite: Invite;
   readonly instance: UserInstancesEdge;
+  readonly instanceUserListByIds: ReadonlyArray<Author>;
   readonly invite: Invite;
   readonly user: User;
   readonly userBadges: UserBadgesConnection;
@@ -488,6 +489,12 @@ export type QueryCheckInviteArgs = {
 
 export type QueryInstanceArgs = {
   id: Scalars['Uuid'];
+};
+
+
+export type QueryInstanceUserListByIdsArgs = {
+  instanceId: Scalars['Uuid'];
+  instanceUserIds: ReadonlyArray<Scalars['Uuid']>;
 };
 
 
