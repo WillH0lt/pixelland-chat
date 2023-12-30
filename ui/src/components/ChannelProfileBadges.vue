@@ -1,6 +1,6 @@
 <template>
   <div class="text-error" v-if="error">{{ error }}</div>
-  <div class="flex" v-if="!loading">
+  <div class="flex flex-wrap w-full justify-between" v-if="!loading">
     <div v-for="badge in badges">
       <ElementHoverText :text="badge.name">
         <div class="relative w-16 h-16">
